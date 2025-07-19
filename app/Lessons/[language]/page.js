@@ -1,23 +1,8 @@
+"use client"
 import Link from 'next/link';
-import React from 'react';
-
-const problems = [
-  {
-    title: 'Two Sum',
-    description: 'Given an array of integers, return indices of the two numbers such that they add up to a specific target. Solve it in O(n) time.',
-    difficulty: 'Easy',
-  },
-  {
-    title: 'Longest Substring Without Repeating Characters',
-    description: 'Given a string, find the length of the longest substring without repeating characters.',
-    difficulty: 'Medium',
-  },
-  {
-    title: 'Median of Two Sorted Arrays',
-    description: 'Given two sorted arrays, return the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).',
-    difficulty: 'Hard',
-  },
-];
+import React, { useEffect, useState } from 'react';
+import { getLessons } from '@/app/services/getLessons';
+import { useParams } from 'next/navigation';
 
 const difficultyColors = {
   Easy: 'bg-green-600',
@@ -26,6 +11,21 @@ const difficultyColors = {
 };
 
 const Problems = () => {
+  const params = useParams()
+  const { language } = params
+  const [problems, setProblems] = useState([])
+
+  useEffect(() => {
+    const fetchLessons = async () => {
+      const data = await getLessons(language)
+      setProblems(data)
+    }
+
+    fetchLessons()
+  }, [])
+
+  const languages = ["React JavaScript","Python","Java","C++","C","C#","HTML","CSS","PHP","Node Js","Bash",];
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#18181b] via-[#23272f] to-[#101014] text-white font-sans">
       <div className="flex flex-1 w-full h-full min-h-screen">
@@ -49,7 +49,7 @@ const Problems = () => {
         <main className="flex-1 flex flex-col gap-6 w-full p-6">
           {/* Topics */}
           <section className="flex gap-3 p-2 overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-            {["Array", "Graph", "DP", "String", "Sorting", "Recursion", "Math", "Stack", "Queue", "Bitwise"].map((topic, i) => (
+            {languages.map((topic, i) => (
               <span
                 key={i}
                 className="bg-[#23272f] text-sm md:text-base px-5 py-2 rounded-full border border-white/10 hover:bg-[#31343b] transition cursor-pointer shadow font-medium"
@@ -61,17 +61,17 @@ const Problems = () => {
           {/* Problem Cards */}
           <section className="flex flex-col gap-6 w-full">
             {problems.map((problem, i) => (
-              <Link href={`/questions/${problem.title.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
+              <Link href={`/questions/${language}/${problem.title.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
                 <div
                   className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 transition-all shadow-lg flex flex-col min-h-[160px] group w-full"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition">{problem.title}</h2>
-                  <span className={`ml-auto text-xs px-3 py-1 rounded-full font-semibold ${difficultyColors[problem.difficulty]} bg-opacity-80`}>{problem.difficulty}</span>
+                    <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition">{problem.title}</h2>
+                    <span className={`ml-auto text-xs px-3 py-1 rounded-full font-semibold ${difficultyColors[problem.difficulty]} bg-opacity-80`}>{problem.difficulty}</span>
+                  </div>
+                  <p className="text-gray-400 mt-1 text-sm md:text-base leading-relaxed flex-1">{problem.description}</p>
+                  <div className="mt-4 text-sm text-blue-400 cursor-pointer hover:underline font-medium">View Details →</div>
                 </div>
-                <p className="text-gray-400 mt-1 text-sm md:text-base leading-relaxed flex-1">{problem.description}</p>
-                <div className="mt-4 text-sm text-blue-400 cursor-pointer hover:underline font-medium">View Details →</div>
-              </div>
               </Link>
             ))}
           </section>

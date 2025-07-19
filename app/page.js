@@ -2,8 +2,12 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "./utils/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [session, setSession] = useState()
+  const router = useRouter()
   const [time, setTime] = useState(() => {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -17,6 +21,23 @@ export default function Home() {
       day: "numeric",
     });
   });
+
+  useEffect(() => {
+     const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setSession(session)
+     }
+
+     fetchSession();
+  })
+
+  const handleProfileClick = ( () => {
+    if (session) {
+      router.push('/profile')
+    } else {
+      router.push('/signin')
+    }
+  })
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,7 +107,7 @@ export default function Home() {
               <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
                 Leaderboard
               </li>
-              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
+              <li onClick={handleProfileClick} className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
                 Profile
               </li>
             </ul>

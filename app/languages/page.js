@@ -1,8 +1,12 @@
+"use client"
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
 const Languages = () => {
+
+
   const languages = [
     {
       name: "React JavaScript",
@@ -81,6 +85,7 @@ const Languages = () => {
             href={`/Lessons/${lang.name.toLowerCase().replace(/\s+/g, '-')}`}
             key={idx}
             className="bg-[#282A2D] hover:bg-[#323438] transition-all duration-300 p-5 rounded-2xl w-full max-w-xs shadow-lg flex flex-col"
+            
           >
             <div className="flex items-center gap-3 mb-3">
               {lang.icon && (

@@ -16,8 +16,6 @@ const page = () => {
       }
       else{
         const user = session.user;
-        console.log("session", session);
-        console.log("user", user);
        setCurrentUser(user);
       }
     };
@@ -25,7 +23,6 @@ const page = () => {
 
   }, []);
 
-  console.log("currentUser", currentUser);
 
   return (
     <>

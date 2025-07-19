@@ -4,10 +4,25 @@ import { supabase } from "../utils/supabaseClient";
 export async function registerUser({ email, password, username }) {
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
-    password
+    password,
+    options: {
+    emailRedirectTo: 'http://localhost:3000/profile', // or your real frontend route
+    data: { username }, // optional metadata
+  },
   })
 
-  if (signUpError) return { error: signUpError }
+  if (signUpError) {
+    // Handle "User already registered" case
+    if (
+      signUpError.message.includes("User already registered") ||
+      signUpError.message.includes("email") // fallback for other error messages
+    ) {
+      return { error: { message: "User already exists with this email." } };
+    }
+
+    // Return any other errors
+    return { error: signUpError };
+  }
 
   const user = signUpData.user
 

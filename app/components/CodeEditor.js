@@ -1,42 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { EditorView } from "@codemirror/view";
-import { python } from "@codemirror/lang-python"; // Import Python language support
+import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
-import { useRef } from "react";
-import { useEffect } from "react";
+import { getLessons } from "@/app/services/getLessons";
+import { getQuestion } from "@/app/services/getQuestions";
 
 const languageOptions = [
   { id: 63, name: "JavaScript", langExt: javascript },
-  { id: 71, name: "Python", langExt: python }, // Replace with correct lang if needed
-  { id: 54, name: "C++", langExt: cpp }, // Replace with correct lang if needed
-  { id: 62, name: "Java", langExt: java }, // Replace with correct lang if needed
+  { id: 71, name: "Python", langExt: python },
+  { id: 54, name: "C++", langExt: cpp },
+  { id: 62, name: "Java", langExt: java },
 ];
 
-export default function CodeEditor() {
-  const [language, setLanguage] = useState(languageOptions[0]);
+export default function CodeEditor({ initialLanguage }) {
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [editorHeight, setEditorHeight] = useState("60");
+  const [language, setLanguage] = useState(null);
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [lessons, setLessons] = useState([]);
+  const [openLessons, setOpenLessons] = useState({});
+  const [lessonQuestions, setLessonQuestions] = useState({});
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState({});
   const isDragging = useRef(false);
 
   useEffect(() => {
-  window.addEventListener("mousemove", handleMouseMove);
-  window.addEventListener("mouseup", handleMouseUp);
-
-  return () => {
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUp);
-  };
-}, []);
-
+    if (!initialLanguage) return;
+    const formattedLang =
+      initialLanguage.charAt(0).toUpperCase() + initialLanguage.slice(1).toLowerCase();
+    const matchedLang = languageOptions.find((l) => l.name === formattedLang);
+    setLanguage(matchedLang || languageOptions[0]);
+    
+    // Fetch lessons for the current language
+    const fetchLessons = async () => {
+      setIsLoadingLessons(true);
+      try {
+        const data = await getLessons(initialLanguage);
+        setLessons(data);
+      } catch (error) {
+        console.error("Error fetching lessons:", error);
+      } finally {
+        setIsLoadingLessons(false);
+      }
+    };
+    fetchLessons();
+  }, [initialLanguage]);
 
   const runCode = async () => {
+    if (!language) return;
     setLoading(true);
     setOutput("Running...");
     try {
@@ -46,8 +67,7 @@ export default function CodeEditor() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-RapidAPI-Key":
-              "0b1b9f6e3cmsh68207f8396df600p1dfeb2jsn02e4736b395c",
+            "X-RapidAPI-Key": "0b1b9f6e3cmsh68207f8396df600p1dfeb2jsn02e4736b395c",
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
@@ -58,7 +78,24 @@ export default function CodeEditor() {
       );
 
       const result = await res.json();
-      setOutput(result.stdout || result.stderr || "No output");
+      const judgeOutput = result.stdout || result.stderr || "No output";
+
+      const aiRes = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          lesson: {
+            id: "lesson-1",
+            title: "Declare a variable `age` and set it to 25",
+            expectation: "User should declare a variable `age` with the value 25 using correct syntax.",
+          },
+        }),
+      });
+
+      const aiData = await aiRes.json();
+
+      setOutput(`${judgeOutput}\n\n🤖 CodeGoblin says:\n${aiData.response}`);
     } catch (err) {
       setOutput("Error running code.");
     } finally {
@@ -66,104 +103,264 @@ export default function CodeEditor() {
     }
   };
 
-  const handleMouseDown = (e) => {
-    isDragging.current = true;
-  };
-
-  const handleMouseUp = (e) => {
-    isDragging.current = false;
-  };
-
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     const containerHeight = window.innerHeight * 0.9;
     const newEditorHeight = (e.clientY / containerHeight) * 100;
-
     if (newEditorHeight > 30 && newEditorHeight < 90) {
       setEditorHeight(newEditorHeight);
     }
   };
 
-    if (typeof window !== "undefined") {
-    window.onmousemove = handleMouseMove;
-    window.onmouseup = handleMouseUp;
-  }
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", () => (isDragging.current = false));
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", () => (isDragging.current = false));
+    };
+  }, []);
+
+  const toggleLesson = async (lessonId) => {
+    setOpenLessons((prev) => ({
+      ...prev,
+      [lessonId]: !prev[lessonId],
+    }));
+
+    if (!lessonQuestions[lessonId]) {
+      setIsLoadingQuestions(prev => ({ ...prev, [lessonId]: true }));
+      try {
+        const questions = await getQuestion(lessonId);
+        setLessonQuestions((prev) => ({
+          ...prev,
+          [lessonId]: questions,
+        }));
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setIsLoadingQuestions(prev => ({ ...prev, [lessonId]: false }));
+      }
+    }
+  };
+
+  const handleQuestionClick = (question) => {
+    setSelectedQuestion(question);
+    // You can add logic here to load the question content into the editor
+  };
+
+  const filteredLessons = lessons.filter(lesson =>
+    lesson.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col gap-1 w-full h-[90vh]">
-      {/* Editor */}
-      <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700 "
-           style={{ height: `${editorHeight}%` }}>
-        <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center font-semibold text-blue-400 text-base shadow">
-          {"</> Code Editor"}
-        </div>
-
-        <div className="flex-1 p-4 overflow-hidden">
-          <CodeMirror
-            value={code}
-            height="100%"
-            extensions={[language.langExt(), EditorView.lineWrapping]}
-            theme="dark"
-            onChange={(val) => setCode(val)}
-            basicSetup={{
-              lineNumbers: true,
-              foldGutter: false,
-              highlightActiveLine: true,
-            }}
-            style={{
-              height: "100%",
-              fontFamily: "monospace",
-              backgroundColor: "#232526",
-              color: "#eee",
-              fontSize: "14px",
-              borderRadius: "0.5rem",
-              overflow: "hidden",
-            }}
-          />
-        </div>
-
-        <div className="flex items-center justify-end px-4 py-2 border-t border-gray-700 bg-[#232526] rounded-b-2xl">
-          <div className="flex items-end  gap-2">
-            <button
-              onClick={runCode}
-              disabled={loading}
-              className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow"
-            >
-              {loading ? "Running..." : "Run Code"}
-            </button>
-            <select
-              className="p-2 h-[32px] rounded bg-[#2e2e2e] text-white"
-              value={language.id}
-              onChange={(e) =>
-                setLanguage(
-                  languageOptions.find(
-                    (l) => l.id === Number(e.target.value)
-                  ) || languageOptions[0]
-                )
-              }
-            >
-              {languageOptions.map((lang) => (
-                <option key={lang.id} value={lang.id}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
+    <div className="flex w-full h-full gap-4">
+      {/* Sidebar */}
+      <div 
+        className={`bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border border-gray-700 rounded-2xl shadow-xl transition-all duration-300 ${
+          isSidebarCollapsed ? 'w-16' : 'w-80'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="bg-gradient-to-r from-[#2a2a2d] to-[#3a3a3d] p-4 rounded-t-2xl border-b border-gray-700">
+            <div className="flex items-center justify-between">
+              {!isSidebarCollapsed && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <span className="text-white text-sm font-bold">📚</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">Lessons</h3>
+                    <p className="text-gray-400 text-xs">{language?.name || 'All Languages'}</p>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors shadow-sm"
+                title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <span className="text-gray-300 text-sm">
+                  {isSidebarCollapsed ? '→' : '←'}
+                </span>
+              </button>
+            </div>
           </div>
+
+          {/* Search Bar */}
+          {!isSidebarCollapsed && (
+            <div className="p-4 border-b border-gray-700">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search lessons..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-[#2a2a2d] border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+                <div className="absolute right-3 top-2.5">
+                  <span className="text-gray-400">🔍</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Lessons List */}
+          <div className="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            {isLoadingLessons ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-400 text-sm">Loading lessons...</span>
+              </div>
+            ) : filteredLessons.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-gray-400 text-4xl mb-2">📝</div>
+                <p className="text-gray-400 text-sm">
+                  {searchTerm ? 'No lessons found' : 'No lessons available'}
+                </p>
+              </div>
+            ) : (
+              filteredLessons.map((lesson) => (
+                <div key={lesson.id} className="space-y-1">
+                  <button
+                    onClick={() => toggleLesson(lesson.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
+                      openLessons[lesson.id]
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                        : 'bg-[#2a2a2d] hover:bg-[#3a3a3d] text-gray-200 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        openLessons[lesson.id] ? 'bg-white scale-125' : 'bg-gray-400'
+                      }`}></div>
+                      {!isSidebarCollapsed && (
+                        <span className="font-medium text-sm truncate">{lesson.title}</span>
+                      )}
+                    </div>
+                    {!isSidebarCollapsed && (
+                      <span className={`text-xs transition-transform duration-200 ${
+                        openLessons[lesson.id] ? 'rotate-90' : ''
+                      }`}>
+                        ▸
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Questions Dropdown */}
+                  {openLessons[lesson.id] && !isSidebarCollapsed && (
+                    <div className="ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                      {isLoadingQuestions[lesson.id] ? (
+                        <div className="flex items-center justify-center py-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          <span className="ml-2 text-gray-400 text-xs">Loading...</span>
+                        </div>
+                      ) : lessonQuestions[lesson.id]?.length === 0 ? (
+                        <div className="text-center py-2">
+                          <p className="text-gray-500 text-xs">No questions available</p>
+                        </div>
+                      ) : (
+                        lessonQuestions[lesson.id]?.map((question) => (
+                          <button
+                            key={question.id}
+                            onClick={() => handleQuestionClick(question)}
+                            className={`w-full text-left p-2 rounded-md transition-all duration-200 text-sm ${
+                              selectedQuestion?.id === question.id
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-400 hover:text-white hover:bg-[#3a3a3d]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs">•</span>
+                              <span className="truncate">{question.question_text}</span>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Sidebar Footer */}
+          {!isSidebarCollapsed && (
+            <div className="p-4 border-t border-gray-700">
+              <div className="bg-gradient-to-r from-[#2a2a2d] to-[#3a3a3d] rounded-lg p-3 shadow-sm">
+                <div className="flex items-center justify-between text-gray-400 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span>📊</span>
+                    <span>Progress</span>
+                  </div>
+                  <span className="font-medium">
+                    {lessons.length > 0 ? `0/${lessons.length}` : '0/0'}
+                  </span>
+                </div>
+                <div className="mt-2 w-full bg-gray-700 rounded-full h-1">
+                  <div className="bg-blue-500 h-1 rounded-full transition-all duration-300" style={{ width: '0%' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div  className="h-[2px] cursor-ns-resize  hover:bg-gray-400 transition flex items-center justify-center"
-        onMouseDown={handleMouseDown}>
+      {/* Main Editor Area */}
+      <div className="flex-1 flex flex-col gap-1">
+        <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${editorHeight}%` }}>
+          <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center justify-between font-semibold text-blue-400 text-base shadow">
+            <span>{"</> Code Editor"}</span>
+            {language && <span className="text-sm text-gray-400">{language.name}</span>}
+          </div>
+
+          <div className="flex-1 p-2 overflow-hidden">
+            {language && (
+              <CodeMirror
+                value={code}
+                height="100%"
+                extensions={[language.langExt(), EditorView.lineWrapping]}
+                theme="dark"
+                onChange={(val) => setCode(val)}
+                basicSetup={{ lineNumbers: true, foldGutter: false, highlightActiveLine: true }}
+                style={{
+                  height: "100%",
+                  fontFamily: "monospace",
+                  backgroundColor: "#232526",
+                  color: "#eee",
+                  fontSize: "14px",
+                  borderRadius: "0.5rem",
+                  overflow: "hidden",
+                }}
+              />
+            )}
+          </div>
+
+          <div className="flex items-center justify-end px-4 py-2 border-t border-gray-700 bg-[#232526] rounded-b-2xl">
+            <button
+              onClick={runCode}
+              disabled={loading}
+              className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Running..." : "Run Code"}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="h-[2px] cursor-ns-resize hover:bg-gray-400 transition flex items-center justify-center"
+          onMouseDown={() => (isDragging.current = true)}
+        >
           <div className="bg-gray-600 w-[2%] h-[80%] rounded-2xl"></div>
         </div>
 
-      {/* Terminal */}
-      <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700 " style={{ height: `${100 - editorHeight}%` }}>
-        <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center font-semibold text-green-400 text-base shadow">
-          {"</> Terminal"}
-        </div>
-        <div className="flex-1 p-4 font-mono text-sm text-gray-300 bg-[#232526] rounded-b-2xl overflow-auto">
-          <pre>{output || "$ Output will appear here..."}</pre>
+        <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${100 - editorHeight}%` }}>
+          <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center font-semibold text-green-400 text-base shadow">
+            {"</> Terminal"}
+          </div>
+          <div className="flex-1 p-4 hide-scrollbar font-mono text-sm text-gray-300 bg-[#232526] rounded-b-2xl overflow-auto">
+            <pre>{output || "$ Output will appear here..."}</pre>
+          </div>
         </div>
       </div>
     </div>

@@ -2,51 +2,68 @@
 import { supabase } from "../utils/supabaseClient";
 import React, { use } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { registerUser } from "../services/registeruser";4
+import { useState, useEffect } from "react";
+import { registerUser } from "../services/registerUser";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 const Signin = () => {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [session, setSession] = useState(null);
+  const [userError, setUserError] = useState();
   const router = useRouter();
+  const [PasswordError, setPasswordError] = useState();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (name === "password") {
+      if (value.length < 8) {
+        setPasswordError("Password must be at least 8 characters long.");
+      } else {
+        setPasswordError("");
+      }
+    }
   };
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: {session} } = await supabase.auth.getSession();
-      if (session) {
-        router.push("/profile");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        router.push('/profile');
       }
+    });
+    return () => {
+      subscription.unsubscribe();
     };
-    checkUser();
-  }, [router]);
+  }, []);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-  const { data , error} = await registerUser(form);
-   if (error) {
-      console.error("Error signing up:", error);
-      alert("Error signing up. Please try again.");
-    }
-    else {
-      console.log("User signed up successfully:", data);
-      alert("Account created successfully! Please check your email for verification.");
-     
+    setLoading(true);
+    setUserError(undefined);
+    const { data, error } = await registerUser(form);
+    setLoading(false);
+    if (error) {
+      setUserError(error.message);
+      console.log("Error signing up:", error);
+    } else {
+      // Optionally redirect or show success
+      // router.push('/profile');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center  px-4">
-      <div className="bg-[#2f3133] w-full max-w-md rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-6 text-white">
-          Sign up
-        </h2>
-
-        <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] px-4">
+      <div className="w-full max-w-md bg-[#232526] border border-gray-700 p-8 rounded-2xl shadow-2xl relative">
+        {/* Optional: Logo/avatar for branding, comment out if not needed */}
+        {/* <div className=\"flex flex-col items-center mb-6\">
+          <div className=\"w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg mb-2\">
+            <span className=\"text-white text-3xl font-bold\">⚡</span>
+          </div>
+        </div> */}
+        <h2 className="text-3xl font-bold text-white text-center mt-2 mb-2">Sign Up</h2>
+        <p className="text-gray-400 text-sm text-center mb-6">Create your account to get started.</p>
+        <form onSubmit={handleSignUp} className="flex flex-col gap-4 mt-2">
           <input
             name="username"
             type="text"
@@ -54,7 +71,7 @@ const Signin = () => {
             required
             autoComplete="username"
             onChange={handleChange}
-            className="bg-[#3d4042] rounded-lg h-12 px-4 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white placeholder-gray-400 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
           <input
             name="email"
@@ -63,7 +80,7 @@ const Signin = () => {
             required
             onChange={handleChange}
             autoComplete="email"
-            className="bg-[#3d4042] rounded-lg h-12 px-4 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white placeholder-gray-400 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
           <input
             name="password"
@@ -72,23 +89,32 @@ const Signin = () => {
             required
             onChange={handleChange}
             autoComplete="new-password"
-            className="bg-[#3d4042] rounded-lg h-12 px-4 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-blue-500"
+            className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white placeholder-gray-400 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
+
+          {PasswordError && (
+            <div className="bg-red-500/20 text-red-400 px-3 py-2 rounded text-sm border border-red-500/30">
+              {PasswordError}
+            </div>
+          )}
+          {userError && (
+            <div className="bg-red-500/20 text-red-400 px-3 py-2 rounded text-sm border border-red-500/30">
+              {userError}
+            </div>
+          )}
 
           <button
             type="submit"
-            className="h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition duration-300"
+            className="h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center disabled:opacity-60"
+            disabled={loading}
           >
-            Create Account
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
-
-          <p className="text-center text-sm text-gray-300 mt-2">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-400 hover:underline">
-              Login
-            </Link>
-          </p>
         </form>
+        <div className="mt-6 text-center text-gray-400 text-sm">
+          Already have an account?{' '}
+          <Link href="/login" className="text-blue-400 hover:underline font-medium">Login</Link>
+        </div>
       </div>
     </div>
   );
