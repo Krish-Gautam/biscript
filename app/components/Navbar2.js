@@ -32,7 +32,7 @@ const Navbar2 = () => {
         <div className="flex items-center gap-2">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-9 h-9 bg-neutral-800/80 rounded-lg flex items-center justify-center shadow-lg select-none">
               <span className="text-white text-sm font-bold">⚡</span>
             </div>
           </Link>
@@ -41,7 +41,7 @@ const Navbar2 = () => {
           <div className="relative">
             <button
               onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
-              className="flex items-center gap-2 px-1 py-1 bg-[#2a2a2d] hover:bg-[#3a3a3d] rounded-lg transition-colors border border-gray-600"
+              className="flex items-center gap-2 px-1 py-1 bg-[#2a2a2d] hover:bg-[#3a3a3d] rounded-lg transition-colors border border-gray-600 select-none"
             >
               <span className="text-lg">⚡</span>
               <span className="text-white font-medium">{currentLanguage}</span>
@@ -89,19 +89,6 @@ const Navbar2 = () => {
 
         {/* Right Section - User & Notifications */}
         <div className="flex items-center gap-1">
-          {/* Search */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search lessons..."
-              className="w-64 px-4 py-2 bg-[#2a2a2d] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <div className="absolute right-3 top-2.5">
-              <span className="text-gray-400">🔍</span>
-            </div>
-          </div>
-
-
           {/* User Profile */}
           <div className="relative">
             <button
@@ -147,13 +134,12 @@ const Navbar2 = () => {
       </div>
 
       {/* Click outside to close dropdowns */}
-      {(isLanguageDropdownOpen || isProfileDropdownOpen || isNotificationsOpen) && (
+      {(isLanguageDropdownOpen || isProfileDropdownOpen) && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => {
             setIsLanguageDropdownOpen(false);
             setIsProfileDropdownOpen(false);
-            setIsNotificationsOpen(false);
           }}
         />
       )}

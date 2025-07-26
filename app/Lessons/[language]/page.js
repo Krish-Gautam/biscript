@@ -24,7 +24,7 @@ const Problems = () => {
     fetchLessons()
   }, [])
 
-  const languages = ["React JavaScript","Python","Java","C++","C","C#","HTML","CSS","PHP","Node Js","Bash",];
+  const languages = ["React JavaScript", "Python", "Java", "C++", "C", "C#", "HTML", "CSS", "PHP", "Node Js", "Bash",];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#18181b] via-[#23272f] to-[#101014] text-white font-sans">
@@ -52,7 +52,10 @@ const Problems = () => {
             {languages.map((topic, i) => (
               <span
                 key={i}
-                className="bg-[#23272f] text-sm md:text-base px-5 py-2 rounded-full border border-white/10 hover:bg-[#31343b] transition cursor-pointer shadow font-medium"
+                className={`px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
+                     ${topic.toLowerCase() === language
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-[#23272f] hover:bg-[#31343b] text-white'}`}
               >
                 {topic}
               </span>
@@ -63,14 +66,13 @@ const Problems = () => {
             {problems.map((problem, i) => (
               <Link href={`/questions/${language}/${problem.title.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
                 <div
-                  className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 transition-all shadow-lg flex flex-col min-h-[160px] group w-full"
-                >
+                  className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 transition-all shadow-lg flex flex-col min-h-[160px] group w-full transition-transform hover:scale-[1.01]">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition">{problem.title}</h2>
                     <span className={`ml-auto text-xs px-3 py-1 rounded-full font-semibold ${difficultyColors[problem.difficulty]} bg-opacity-80`}>{problem.difficulty}</span>
                   </div>
                   <p className="text-gray-400 mt-1 text-sm md:text-base leading-relaxed flex-1">{problem.description}</p>
-                  <div className="mt-4 text-sm text-blue-400 cursor-pointer hover:underline font-medium">View Details →</div>
+                  <div className="mt-4 text-sm text-blue-400 cursor-pointer hover:underline font-medium select-none">View Details →</div>
                 </div>
               </Link>
             ))}

@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Navbar = () => {
   const [session, setSession] = useState(null);
-    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -33,13 +33,14 @@ const Navbar = () => {
 
 
   return (
+    <>
     <nav className="sticky top-0 z-50 w-[96vw] w-full bg-neutral-900/80 backdrop-blur-lg border border-white/10 shadow-2xl px-6 py-2 flex items-center justify-between transition-all" style={{ minHeight: '48px' }}>
       {/* Logo & Brand */}
       <Link href="/" className="flex items-center gap-2">
         <div className="w-7 h-7 bg-neutral-800/80 rounded-lg flex items-center justify-center shadow-sm">
           <span className="text-white text-base font-bold">⚡</span>
         </div>
-        <span className="text-lg font-bold text-white tracking-tight">Biscript</span>
+        <span className="text-lg font-bold text-white tracking-tight select-none">Biscript</span>
       </Link>
 
       {/* Navigation */}
@@ -98,9 +99,9 @@ const Navbar = () => {
                   </div>
                   <div className="p-2">
                     <Link href={'/profile'}>
-                    <button className="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-[#3a3a3d] rounded transition-colors">
-                      Profile
-                    </button>
+                      <button className="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-[#3a3a3d] rounded transition-colors">
+                        Profile
+                      </button>
                     </Link>
                     <button className="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-[#3a3a3d] rounded transition-colors">
                       Settings
@@ -112,7 +113,15 @@ const Navbar = () => {
                 </div>
               )}
             </div>
-      {/* Click outside to close dropdowns */}
+
+          </>
+
+          
+        )
+        }
+      </div >
+    </nav>
+    {/* Click outside to close dropdowns */}
       {(isProfileDropdownOpen) && (
         <div
           className="fixed inset-0 z-40"
@@ -122,10 +131,6 @@ const Navbar = () => {
         />
       )}
     </>
-  )
-}
-      </div >
-    </nav >
   );
 };
 

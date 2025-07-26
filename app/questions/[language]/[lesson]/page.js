@@ -11,6 +11,7 @@ import { getQuestion } from "@/app/services/getQuestions";
 const Page = () => {
   const params = useParams();
   const router = useRouter();
+  const lesson = params.lesson
   const language = params.language;
   const [currentLessons, setCurrentLesson] = useState(params.lesson);
   const [lessons, setLessons] = useState([]);
@@ -19,7 +20,8 @@ const Page = () => {
 
   const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
-
+   
+  {console.log('lesson', lesson)}
   // Resize Panel
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -87,7 +89,8 @@ const Page = () => {
             className="bg-gradient-to-b w-[100%] from-[#232526] to-[#232526]/80 h-full rounded-2xl flex flex-col gap-4 shadow-2xl border border-gray-700"
             
           >
-            <CodeEditor initialLanguage = {language}/>
+            <CodeEditor initialLanguage = {language} initialLesson = {lesson}/>
+            
           </div>
         </div>
 

@@ -22,23 +22,33 @@ export default function Home() {
     });
   });
 
+  const [typewriterText, setTypewriterText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const fullText = `$> ./init --soul-upload --mode=unstable
+# compiling ████... [OK]
+* injecting logic into chaos...
+>> SYSTEM://reality.patch() complete.`;
+
+  //fetch session
   useEffect(() => {
-     const fetchSession = async () => {
+    const fetchSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
-     }
+    }
 
-     fetchSession();
+    fetchSession();
   })
 
-  const handleProfileClick = ( () => {
+  const handleProfileClick = (() => {
     if (session) {
       router.push('/profile')
     } else {
       router.push('/signin')
     }
   })
-
+  
+  //set the date
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -49,12 +59,38 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  //animation of typing text 
+  useEffect(() => {
+    if (currentIndex < fullText.length) {
+      const timeout = setTimeout(() => {
+        setTypewriterText(fullText.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      }, 50); // Adjust speed here (lower = faster)
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, fullText]);
+
   return (
-    <div className="min-h-screen flex w-100vw flex-col items-center justify-center gap-12  px-6 py-16">
-      <h1 className="text-5xl font-bold text-white text-center">Start Learning Code the Fun Way</h1>
-      <p className="text-xl text-gray-300 text-center max-w-2xl">
-        Solve engaging challenges, earn achievements, and level up your programming skills one game at a time.
-      </p>
+    <div className="min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
+      {/* Enhanced Dark Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
+      
+      {/* Subtle radial gradient for depth */}
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
+      
+      {/* Subtle dark overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05]">
+          Start Learning Code the Fun Way
+        </h1>
+        <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05]">
+          Solve engaging challenges, earn achievements, and level up your programming skills one game at a time.
+        </p>
+      </div>
 
       <div className="rounded-3xl bg-white/10 p-1 border border-white/10 shadow-xl relative w-[1100px] max-w-full">
         <div className="rounded-3xl bg-black overflow-hidden relative h-[550px]">
@@ -79,7 +115,7 @@ export default function Home() {
           </div>
 
           {/* Main content window */}
-          <div className="absolute top-20 left-20 bg-[#131416] h-[470px] w-[600px] border border-white/10 border-b-0 rounded-t-2xl">
+          <div className="absolute top-20 flex flex-col left-20 bg-[#131416] h-[470px] w-[600px] border border-white/10 border-b-0 rounded-t-2xl">
             <div className="bg-[#17181A] w-full h-8 rounded-t-2xl flex items-center px-3 relative">
               <div className="flex gap-1">
                 <img width={12} height={12} src="/red.svg" alt="" />
@@ -90,6 +126,12 @@ export default function Home() {
                 Get Started
               </div>
             </div>
+            <div className="p-3">
+              <pre className="text-gray-400 relative">
+                {typewriterText}
+                <span className="animate-pulse">|</span>
+              </pre>
+            </div>
           </div>
 
           {/* Feature box */}
@@ -97,17 +139,17 @@ export default function Home() {
             <h2 className="text-white text-base font-semibold mb-3">Explore Features</h2>
             <ul className="flex flex-col gap-2">
               <Link href="/languages">
-              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
-                Languages
-              </li>
+                <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
+                  Languages
+                </li>
               </Link>
-              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
+              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Challenges
               </li>
-              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
+              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Leaderboard
               </li>
-              <li onClick={handleProfileClick} className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition hover:cursor-pointer">
+              <li onClick={handleProfileClick} className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Profile
               </li>
             </ul>

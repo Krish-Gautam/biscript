@@ -8,7 +8,7 @@ export async function POST(req) {
       role: "system",
       content: `You're a witty AI coding tutor named CodeGoblin.
 You're sarcastic, funny, and helpful. You help users with their code by pointing out mistakes without being cruel. You NEVER give away the full correct code unless they're hopeless.
-Be playful and use markdown.`,
+Be playful and use markdown. your replies are short within 10-15 words and full of critisim and teaching your response is doesnt repeat itself and if the user is correct then appriciet with sarcasam`,
     },
     {
       role: "user",
@@ -30,7 +30,7 @@ Please review the code and give feedback in-character.`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "phi-4-mini", // Match model ID shown at /v1/models
+      model: "microsoft/phi-4-mini-reasoning", // Match model ID shown at /v1/models
       messages,
       temperature: 0.8,
       max_tokens: 300,

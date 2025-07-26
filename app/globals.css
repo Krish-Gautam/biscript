@@ -37,14 +37,21 @@ body {
   bottom: 0;
   height: 2px;
   pointer-events: none;
-  background: linear-gradient(to right, transparent, #171717 20%, #171717 80%, transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    #171717 20%,
+    #171717 80%,
+    transparent
+  );
   opacity: 0.9;
 }
 
-.cm-editor, .cm-scroller {
+.cm-editor,
+.cm-scroller {
   background-color: #232526 !important; /* Your custom background */
-  color: #e5e7eb !important;  
-  border: none !important;        /* Tailwind's text-gray-200 */
+  color: #e5e7eb !important;
+  border: none !important; /* Tailwind's text-gray-200 */
 }
 
 cm-gutters {
@@ -69,4 +76,28 @@ cm-gutters {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Custom radial gradient for background */
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+.font-consolas {
+  font-family: "Consolas", "Courier New", monospace;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.animate-fade-in {
+  animation: fade-in 0.6s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s step-end infinite;
 }
