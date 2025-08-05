@@ -44,7 +44,7 @@ export default function QuestionForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#18181b] text-white">
       <div className="w-full max-w-lg bg-[#232526] p-8 rounded-2xl shadow-lg border border-gray-700">
-        <h2 className="text-2xl font-bold mb-6">{questionId ? "Edit Question" : "Add Question"}</h2>
+        <h2 className="text-2xl font-bold mb-6 select-none">{questionId ? "Edit Question" : "Add Question"}</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block mb-1 text-gray-300">Question Text</label>

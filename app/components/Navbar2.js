@@ -96,7 +96,7 @@ const Navbar2 = () => {
               className="flex items-center p-1 bg-[#2a2a2d] hover:bg-[#3a3a3d] rounded-lg transition-colors "
             >
               <div className="w-9 h-9  rounded-full flex items-center justify-center">
-               <Image className='rounded-full' height={40} width={40} src="/profil.jpeg"/>
+               <Image className='rounded-full' height={40} width={40} alt='' src="/profil.jpeg"/>
                
               </div>
               

@@ -143,9 +143,11 @@ export default function Home() {
                   Languages
                 </li>
               </Link>
+              <Link href="/challenges">
               <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Challenges
               </li>
+              </Link>
               <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Leaderboard
               </li>

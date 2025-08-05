@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { getLessons } from "../services/getLessons";
 import { getQuestion } from "../services/getQuestions";
 import { getGoblinLines } from "../services/getGoblinLines";
+import { Lemonada } from "next/font/google";
 
 const languageOptions = [
   { id: 63, name: "javaScript" },
@@ -14,20 +15,17 @@ const languageOptions = [
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [lessonTitle, setLessonTitle] = useState("");
-  const [lessonLanguage, setLessonLanguage] = useState(languageOptions[0].id);
-  const [lessonDescription, setLessonDescription] = useState("");
   const [currentLanguage, setCurrentLanguage] = useState(languageOptions[0].name);
   const [allLessons, setAllLessons] = useState([]);
   const [isLoadingLessons, setIsLoadingLessons] = useState(false);
   const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState([]);
-  const [lessonScripts, setLessonScripts] = useState({});
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState([]); 
   const [isLoadingScripts, setIsLoadingScripts] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedScript, setSelectedScript] = useState(null);
+  const [lessonScripts, setLessonScripts] = useState({})
 
   useEffect(() => {
     setIsLoadingLessons(true);
@@ -188,7 +186,7 @@ export default function AdminPanel() {
                 <ul className="space-y-2">
                   {lessonQuestions[selectedLesson.id]?.map((question) => (
                     <li key={question.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
-                      <span className="text-gray-200">{question.question_text}</span>
+                      <span className="text-gray-200 select-none">{question.question_text}</span>
                       <button
                         className="text-xs px-2 py-1 bg-blue-700 rounded text-white hover:bg-blue-800"
                         onClick={() => router.push(`/admin/question?id=${question.id}`)}
@@ -210,7 +208,7 @@ export default function AdminPanel() {
                 <ul className="space-y-2">
                   {lessonScripts[selectedLesson.id]?.map((script) => (
                     <li key={script.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
-                      <span className="text-gray-200">{script.content_text}</span>
+                      <span className="text-gray-200 select-none">{script.content_text}</span>
                       <button
                         className="text-xs px-2 py-1 bg-yellow-700 rounded text-white hover:bg-yellow-800"
                         onClick={() => router.push(`/admin/script?id=${script.id}`)}

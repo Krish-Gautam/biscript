@@ -47,10 +47,10 @@ const Navbar = () => {
       <div className="hidden md:flex items-center gap-5">
         <Link href="/languages" className="text-gray-200 hover:text-white font-medium transition">Languages</Link>
         <Link href="/lessons" className="text-gray-200 hover:text-white font-medium transition">Lessons</Link>
-        <button className="text-gray-200 hover:text-white font-medium transition bg-transparent">Challenges</button>
+        <Link href="/challenges" className="text-gray-200 hover:text-white font-medium transition bg-transparent">Challenges</Link>
         <button className="text-gray-200 hover:text-white font-medium transition bg-transparent">Leaderboard</button>
       </div>
-
+ 
       {/* Auth/Profile */}
       <div className="flex items-center gap-2">
         {!session ? (
@@ -77,7 +77,7 @@ const Navbar = () => {
                 className="flex items-center p-1 hover:bg-[#3a3a3d] rounded-lg transition-colors "
               >
                 <div className="w-9 h-9  rounded-full flex items-center justify-center">
-                  <Image className='rounded-full' height={40} width={40} src="/profil.jpeg" />
+                  <Image className='rounded-full' height={40} width={40} alt="" src="/profil.jpeg" />
 
                 </div>
 

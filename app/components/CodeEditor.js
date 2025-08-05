@@ -9,9 +9,12 @@ import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
 import { getLessons } from "@/app/services/getLessons";
 import { getQuestion } from "@/app/services/getQuestions";
-import { getGoblinLines } from "../services/getGoblinLines";
 import GoblinBox from "./GoblinBox";
-import { supabase } from "../utils/supabaseClient";
+import { getGoblinLines } from "../services/getGoblinLines";
+import { deserializePlan } from "../services/deserializedPlan";
+import { set } from "nprogress";
+
+
 
 const languageOptions = [
   { id: 63, name: "JavaScript", langExt: javascript },
@@ -19,6 +22,80 @@ const languageOptions = [
   { id: 54, name: "C++", langExt: cpp },
   { id: 62, name: "Java", langExt: java },
 ];
+
+const forLoopLessonPlan = [
+  {
+    trigger: 'intro',
+    message: "Welcome to Python — Python is an easy-to-learn language with simple, readable syntax, making it a great choice for your first step into programming.",
+    waitFor: null
+  },
+  {
+    trigger: 'intro',
+    message: "Let’s start with the simplest thing we can do — make the computer say something.",
+    waitFor: null,
+  },
+  {
+    trigger: 'intro',
+    message: "write `print('Hello world')` in the editor below. and run it",
+    waitFor: (code, output) => /\bprint\s*\(\s*(['"])Hello\s*world\1\s*\)/i.test(code) && /hello\s+world/i.test(output.trim()),
+  },
+  {
+    trigger: 'intro',
+    message: "Congratulations! you just write you first python code. Now let’s make it a bit more interesting.",
+    waitFor: null
+  },
+  {
+    trigger: 'variables',
+    message: "Create a variable by doing `name = 'your name'` and then print it with `print('Hi, my name is', name)`.",
+    waitFor: (code) =>/([a-zA-Z_]\w*)\s*=\s*(['"])(.*?)\2[\s\S]*?\bprint\s*\(\s*(['"])Hi,\s*my\s+name\s+is\4\s*,\s*\1\s*\)/i.test(code),
+    hint: "Try: name = 'Goblin'",
+    reactions: [
+      {
+        trigger: (code) => code.includes("var "),
+        response: "This isn’t JavaScript, you monster. No 'var' allowed."
+      },
+      {
+        trigger: (code) => code.includes(";"),
+        response: "Semicolons? What is this, 1999?"
+      },
+      {
+        trigger: (code) => code.trim() === "",
+        response: "Blank page strategy. Bold."
+      }
+    ]
+  },
+  {
+    trigger: 'loop',
+    message: "Now write a for loop that prints numbers 0 to 4. Or summon Cthulhu. Your choice.",
+   waitFor: (code) =>
+  /for\s+\w+\s+in\s+range\s*\(\s*5\s*\)\s*:/i.test(code) &&
+  /\bprint\s*\([^)]*\)/i.test(code),
+    hint: "Try: for i in range(5): print(i)",
+    reactions: [
+      {
+        trigger: (code) => /for\s*\(.*\)/.test(code),
+        response: "This isn’t JavaScript. Are you trying to hurt me?"
+      },
+      {
+        trigger: (code) => /while\s/.test(code),
+        response: "While loops? In *this* lesson? Disrespectful."
+      },
+      
+      {
+        trigger: (code) => code.trim() === "",
+        response: "You wrote... nothing. An avant-garde masterpiece."
+      }
+    ]
+  },
+  {
+    trigger: 'done',
+    message: "You survived. Barely. Congrats, I guess.",
+    waitFor: null
+  }
+];
+
+
+
 
 export default function CodeEditor({ initialLanguage, initialLesson }) {
   const [code, setCode] = useState("");
@@ -35,22 +112,139 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
   const [isLoadingLessons, setIsLoadingLessons] = useState(false);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState({});
   const isDragging = useRef(false);
-  const [goblinLines, setGoblinLines] = useState([])
+  const [goblinLine, setGoblinLine] = useState("")
   const [currentLesson, setCurrentLesson] = useState()
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [lessonStepIndex, setLessonStepIndex] = useState(0);
+  const [goblinTeaching, setGoblinTeaching] = useState(forLoopLessonPlan); // dynamically load from DB later
+  const [stepMessageShown, setStepMessageShown] = useState(false)
+  const [lastReaction, setLastReaction] = useState(null)
+  const [canCheckInput, setCanCheckInput] = useState(false);
 
 
-  // set the goblin lines for current lesson
+
+  const advanceLesson = () => {
+    setLessonStepIndex((prev) => prev + 1);
+    setStepMessageShown(false);
+    setLastReaction(null);
+  };
+
+  const [userProfile, setUserProfile] = useState({
+    name: "Anonymous Toad",
+    mistakes: [],
+    completedLessons: [],
+    goblinMood: "neutral"
+  });
+
   useEffect(() => {
-    const getlines = async () => {
-      if (currentLesson) {
-        const data = await getGoblinLines(currentLesson.id)
-        setGoblinLines(data)
+    const init = async () => {
+      // Wait until both initialLesson and lessons are available
+      if (!initialLesson || lessons.length === 0 || hasInitialized) return;
+      const lesson = lessons.find((l) => l.title.trim().toLowerCase() === initialLesson);
+      if (!lesson) return;
+      await handleLessonClick(lesson)
+      setCurrentLesson(lesson);
+
+      setOpenLessons((prev) => ({
+        ...prev,
+        [lesson.id]: true,
+      }));
+
+      if (!lessonQuestions[lesson.id]) {
+        const questions = await getQuestion(lesson.id);
+        setLessonQuestions((prev) => ({
+          ...prev,
+          [lesson.id]: questions,
+        }));
+      }
+
+      // Mark as initialized
+      setHasInitialized(true);
+    };
+
+    init();
+  }, [initialLesson, lessons, hasInitialized]);
+
+
+  // useEffect(() => {
+  //   const fetchGoblinTeaching = async () => {
+  //     if (currentLesson) {
+  //       const { data, error } = await getGoblinLines(currentLesson.id)
+  //       if (data && data.length > 0) {
+  //         // defensive: ensure plan exists and is an array
+  //         const fetchedPlan = Array.isArray(data[0].plan) ? data[0].plan : [];
+  //         console.log(fetchedPlan)
+  //         const deserializedPlan = deserializePlan(fetchedPlan)
+  //         console.log(deserializedPlan)
+  //         setGoblinTeaching(deserializedPlan);
+  //       }
+  //     };
+  //   }
+  //   fetchGoblinTeaching()
+  // }, [currentLesson])
+
+
+
+  // Step 1: Show message once on step load
+  useEffect(() => {
+    const currentStep = goblinTeaching?.[lessonStepIndex];
+    if (!currentStep) return;
+
+    setGoblinLine(currentStep.message);
+    setLastReaction(null);
+    setStepMessageShown(true);
+    setCanCheckInput(false); // block reaction for now
+
+    if (!currentStep.waitFor) {
+      setTimeout(() => {
+        setLessonStepIndex((prev) => prev + 1);
+      }, 8000);
+    } else {
+      // Only allow checking after some time
+      const timer = setTimeout(() => {
+        setCanCheckInput(true);
+      }, 3000); // let user actually read the step before we attack them
+
+      return () => clearTimeout(timer);
+    }
+  }, [lessonStepIndex, goblinTeaching]);
+
+  useEffect(() => {
+    const currentStep = goblinTeaching?.[lessonStepIndex];
+    if (!currentStep || !stepMessageShown || !currentStep.waitFor || !canCheckInput) return;
+
+    const passed = currentStep.waitFor(code, output);
+    if (passed) {
+      setLessonStepIndex((prev) => prev + 1);
+      setStepMessageShown(false);
+      setLastReaction(null);
+      return;
+    }
+
+    if (currentStep.reactions?.length) {
+      const matched = currentStep.reactions.find((r) => r.trigger(code));
+      if (matched && matched !== lastReaction) {
+        setGoblinLine(matched.response);
+        setLastReaction(matched);
+        setStepMessageShown(false);
+        setUserProfile((prev) => ({
+          ...prev,
+          mistakes: [...prev.mistakes, { step: currentStep.trigger, code }],
+        }));
+        return;
       }
     }
 
-    getlines()
-  }, [currentLesson])
+    const attempts = userProfile.mistakes.filter(m => m.step === currentStep.trigger).length;
+    if (attempts >= 3 && currentStep.hint && lastReaction?.response !== currentStep.hint) {
+      setGoblinLine(`Ugh, okay fine. Here's a hint: ${currentStep.hint}`);
+      setLastReaction({ response: currentStep.hint });
+      return;
+    }
+
+
+  }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput]);
+
 
   const handleLessonClick = async (lesson) => {
     setCurrentLesson(lesson);
@@ -115,7 +309,7 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
       const result = await res.json();
       const judgeOutput = result.stdout || result.stderr || "No output";
       setOutput(`${judgeOutput}`);
-      o
+
     } catch (err) {
       setOutput(err);
     } finally {
@@ -164,35 +358,34 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
   };
 
 
-useEffect(() => {
-  const init = async () => {
-    // Wait until both initialLesson and lessons are available
-    if (!initialLesson || lessons.length === 0 || hasInitialized) return;
+  useEffect(() => {
+    const init = async () => {
+      // Wait until both initialLesson and lessons are available
+      if (!initialLesson || lessons.length === 0 || hasInitialized) return;
+      const lesson = lessons.find((l) => l.title.trim().toLowerCase() === initialLesson);
+      if (!lesson) return;
+      await handleLessonClick(lesson)
+      setCurrentLesson(lesson);
 
-    const lesson = lessons.find((l) => l.title === initialLesson);
-    if (!lesson) return;
-   handleLessonClick(lesson)
-    setCurrentLesson(lesson);
-
-    setOpenLessons((prev) => ({
-      ...prev,
-      [lesson.id]: true,
-    }));
-
-    if (!lessonQuestions[lesson.id]) {
-      const questions = await getQuestion(lesson.id);
-      setLessonQuestions((prev) => ({
+      setOpenLessons((prev) => ({
         ...prev,
-        [lesson.id]: questions,
+        [lesson.id]: true,
       }));
-    }
 
-    // Mark as initialized
-    setHasInitialized(true);
-  };
+      if (!lessonQuestions[lesson.id]) {
+        const questions = await getQuestion(lesson.id);
+        setLessonQuestions((prev) => ({
+          ...prev,
+          [lesson.id]: questions,
+        }));
+      }
 
-  init();
-}, [initialLesson, lessons, hasInitialized]);
+      // Mark as initialized
+      setHasInitialized(true);
+    };
+
+    init();
+  }, [initialLesson, lessons, hasInitialized]);
 
   const handleQuestionClick = (question) => {
     setSelectedQuestion(question);
@@ -206,11 +399,11 @@ useEffect(() => {
 
   return (
     <>
-      {goblinLines.length != 0 &&
-        <div className="bg-[#1a1a1d] right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-2 rounded-2xl border border-gray-700 shadow-md space-y-2">
-          <GoblinBox lines={goblinLines} />
-        </div>
-      }
+
+      <div className="bg-[#1a1a1d] right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-2 rounded-2xl border border-gray-700 shadow-md space-y-2">
+        <GoblinBox response={goblinLine} />
+      </div>
+
       <div className="flex w-full h-full gap-4">
         {/* Sidebar */}
         <div
