@@ -66,7 +66,7 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form)
+    
     const {data, error} = await updateLesson(form);
 
     if(error){

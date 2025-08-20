@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { EditorView } from "@codemirror/view";
@@ -12,9 +12,13 @@ import { getQuestion } from "@/app/services/getQuestions";
 import GoblinBox from "./GoblinBox";
 import { getGoblinLines } from "../services/getGoblinLines";
 import { deserializePlan } from "../services/deserializedPlan";
-import { set } from "nprogress";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 
+
+
+/* ---------------------------------- Setup ---------------------------------- */
 
 const languageOptions = [
   { id: 63, name: "JavaScript", langExt: javascript },
@@ -23,172 +27,118 @@ const languageOptions = [
   { id: 62, name: "Java", langExt: java },
 ];
 
-const forLoopLessonPlan = [
-  {
-    trigger: 'intro',
-    message: "Welcome to Python — Python is an easy-to-learn language with simple, readable syntax, making it a great choice for your first step into programming.",
-    waitFor: null
-  },
-  {
-    trigger: 'intro',
-    message: "Let’s start with the simplest thing we can do — make the computer say something.",
-    waitFor: null,
-  },
-  {
-    trigger: 'intro',
-    message: "write `print('Hello world')` in the editor below. and run it",
-    waitFor: (code, output) => /\bprint\s*\(\s*(['"])Hello\s*world\1\s*\)/i.test(code) && /hello\s+world/i.test(output.trim()),
-  },
-  {
-    trigger: 'intro',
-    message: "Congratulations! you just write you first python code. Now let’s make it a bit more interesting.",
-    waitFor: null
-  },
-  {
-    trigger: 'variables',
-    message: "Create a variable by doing `name = 'your name'` and then print it with `print('Hi, my name is', name)`.",
-    waitFor: (code) =>/([a-zA-Z_]\w*)\s*=\s*(['"])(.*?)\2[\s\S]*?\bprint\s*\(\s*(['"])Hi,\s*my\s+name\s+is\4\s*,\s*\1\s*\)/i.test(code),
-    hint: "Try: name = 'Goblin'",
-    reactions: [
-      {
-        trigger: (code) => code.includes("var "),
-        response: "This isn’t JavaScript, you monster. No 'var' allowed."
-      },
-      {
-        trigger: (code) => code.includes(";"),
-        response: "Semicolons? What is this, 1999?"
-      },
-      {
-        trigger: (code) => code.trim() === "",
-        response: "Blank page strategy. Bold."
-      }
-    ]
-  },
-  {
-    trigger: 'loop',
-    message: "Now write a for loop that prints numbers 0 to 4. Or summon Cthulhu. Your choice.",
-   waitFor: (code) =>
-  /for\s+\w+\s+in\s+range\s*\(\s*5\s*\)\s*:/i.test(code) &&
-  /\bprint\s*\([^)]*\)/i.test(code),
-    hint: "Try: for i in range(5): print(i)",
-    reactions: [
-      {
-        trigger: (code) => /for\s*\(.*\)/.test(code),
-        response: "This isn’t JavaScript. Are you trying to hurt me?"
-      },
-      {
-        trigger: (code) => /while\s/.test(code),
-        response: "While loops? In *this* lesson? Disrespectful."
-      },
-      
-      {
-        trigger: (code) => code.trim() === "",
-        response: "You wrote... nothing. An avant-garde masterpiece."
-      }
-    ]
-  },
-  {
-    trigger: 'done',
-    message: "You survived. Barely. Congrats, I guess.",
-    waitFor: null
-  }
-];
+/* =============================== MAIN COMPONENT =============================== */
 
-
-
-
-export default function CodeEditor({ initialLanguage, initialLesson }) {
+export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, onLanguageChanged }, ref) {
+  /* ------------------------------- State Setup ------------------------------- */
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [editorHeight, setEditorHeight] = useState("60");
+  const [editorHeight, setEditorHeight] = useState(60);
   const [language, setLanguage] = useState(null);
+  const [canCheckInput, setCanCheckInput] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const [lastReaction, setLastReaction] = useState(null);
+  const [stepMessageShown, setStepMessageShown] = useState(false);
+  const router = useRouter();
+
+  // Sidebar & Lessons
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [lessons, setLessons] = useState([]);
-  const [openLessons, setOpenLessons] = useState([]);
+  const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingLessons, setIsLoadingLessons] = useState(false);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState({});
-  const isDragging = useRef(false);
-  const [goblinLine, setGoblinLine] = useState("")
-  const [currentLesson, setCurrentLesson] = useState()
-  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Goblin teaching system
+  const [goblinLine, setGoblinLine] = useState("");
+  const [currentLesson, setCurrentLesson] = useState(null);
+  const [goblinTeaching, setGoblinTeaching] = useState(null);
   const [lessonStepIndex, setLessonStepIndex] = useState(0);
-  const [goblinTeaching, setGoblinTeaching] = useState(forLoopLessonPlan); // dynamically load from DB later
-  const [stepMessageShown, setStepMessageShown] = useState(false)
-  const [lastReaction, setLastReaction] = useState(null)
-  const [canCheckInput, setCanCheckInput] = useState(false);
+  const [isLessonStarted, setIsLessonStarted] = useState(false);
 
-
-
-  const advanceLesson = () => {
-    setLessonStepIndex((prev) => prev + 1);
-    setStepMessageShown(false);
-    setLastReaction(null);
-  };
-
+  // User progress
   const [userProfile, setUserProfile] = useState({
     name: "Anonymous Toad",
     mistakes: [],
     completedLessons: [],
-    goblinMood: "neutral"
+    goblinMood: "neutral",
   });
 
+  // Refs for timers & drag handling
+  const autoAdvanceTimeoutRef = useRef(null);
+  const checkInputTimeoutRef = useRef(null);
+  const isDragging = useRef(false);
+
+  /* ------------------------------- Initialization ------------------------------- */
   useEffect(() => {
-    const init = async () => {
-      // Wait until both initialLesson and lessons are available
-      if (!initialLesson || lessons.length === 0 || hasInitialized) return;
-      const lesson = lessons.find((l) => l.title.trim().toLowerCase() === initialLesson);
-      if (!lesson) return;
-      await handleLessonClick(lesson)
-      setCurrentLesson(lesson);
+    if (!initialLanguage) return;
+    const formattedLang =
+      initialLanguage.charAt(0).toUpperCase() + initialLanguage.slice(1).toLowerCase();
+    const matchedLang = languageOptions.find((l) => l.name === formattedLang);
+    setLanguage(matchedLang || languageOptions[0]);
+    if (onLanguageChanged) {
+      onLanguageChanged((matchedLang || languageOptions[0]).name);
+    }
 
-      setOpenLessons((prev) => ({
-        ...prev,
-        [lesson.id]: true,
-      }));
-
-      if (!lessonQuestions[lesson.id]) {
-        const questions = await getQuestion(lesson.id);
-        setLessonQuestions((prev) => ({
-          ...prev,
-          [lesson.id]: questions,
-        }));
+    const fetchLessons = async () => {
+      setIsLoadingLessons(true);
+      try {
+        const data = await getLessons(initialLanguage);
+        // Sort lessons by lessonNumber (ascending)
+        const sortedLessons = data.sort((a, b) => a.lessonNumber - b.lessonNumber)
+        setLessons(sortedLessons);
+      } catch (err) {
+        console.error("Error fetching lessons:", err);
+      } finally {
+        setIsLoadingLessons(false);
       }
-
-      // Mark as initialized
-      setHasInitialized(true);
     };
+    fetchLessons();
+  }, [initialLanguage]);
 
-    init();
-  }, [initialLesson, lessons, hasInitialized]);
+  // Auto-select initial lesson
+  useEffect(() => {
+    if (!initialLesson || lessons.length === 0) return;
+    const lesson = lessons.find(
+      (l) => l.id === initialLesson
+    );
+    if (lesson) handleLessonInitialization(lesson);
+  }, [initialLesson, lessons]);
 
+  // Fetch goblin teaching for current lesson
+  useEffect(() => {
+    if (!currentLesson) return;
+    const fetchGoblinTeaching = async () => {
+      const { data } = await getGoblinLines(currentLesson.id);
+      if (data?.length > 0) {
+        setGoblinTeaching(deserializePlan(data[0].plan || []));
+      }
+    };
+    fetchGoblinTeaching();
+  }, [currentLesson]);
 
-  // useEffect(() => {
-  //   const fetchGoblinTeaching = async () => {
-  //     if (currentLesson) {
-  //       const { data, error } = await getGoblinLines(currentLesson.id)
-  //       if (data && data.length > 0) {
-  //         // defensive: ensure plan exists and is an array
-  //         const fetchedPlan = Array.isArray(data[0].plan) ? data[0].plan : [];
-  //         console.log(fetchedPlan)
-  //         const deserializedPlan = deserializePlan(fetchedPlan)
-  //         console.log(deserializedPlan)
-  //         setGoblinTeaching(deserializedPlan);
-  //       }
-  //     };
-  //   }
-  //   fetchGoblinTeaching()
-  // }, [currentLesson])
+  // helper function to clear both timers safely
+  const clearTimers = () => {
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+    if (checkInputTimeoutRef.current) {
+      clearTimeout(checkInputTimeoutRef.current);
+      checkInputTimeoutRef.current = null;
+    }
+  };
 
-
-
-  // Step 1: Show message once on step load
+  // Step 1: Show message once on step load, with auto-advance timers gated by start
   useEffect(() => {
     const currentStep = goblinTeaching?.[lessonStepIndex];
-    if (!currentStep) return;
+    if (!currentStep || !isLessonStarted) return;
+
+    // always clear old timers before new ones
+    clearTimers();
 
     setGoblinLine(currentStep.message);
     setLastReaction(null);
@@ -196,22 +146,33 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
     setCanCheckInput(false); // block reaction for now
 
     if (!currentStep.waitFor) {
-      setTimeout(() => {
+      const baseTimePerChar = 90; // ms per character
+      const minTime = 5000;
+      const maxTime = 12000;
+
+      const messageLength = currentStep.message.length;
+      const calculatedTime = Math.min(
+        Math.max(messageLength * baseTimePerChar, minTime),
+        maxTime
+      );
+
+      autoAdvanceTimeoutRef.current = setTimeout(() => {
         setLessonStepIndex((prev) => prev + 1);
-      }, 8000);
+      }, calculatedTime);
     } else {
       // Only allow checking after some time
-      const timer = setTimeout(() => {
+      checkInputTimeoutRef.current = setTimeout(() => {
         setCanCheckInput(true);
-      }, 3000); // let user actually read the step before we attack them
-
-      return () => clearTimeout(timer);
+      }, 8000);
     }
-  }, [lessonStepIndex, goblinTeaching]);
 
+    return clearTimers; // cleanup on step change
+  }, [lessonStepIndex, goblinTeaching, isLessonStarted]);
+
+  // Step 2: Handle waitFor + reactions
   useEffect(() => {
     const currentStep = goblinTeaching?.[lessonStepIndex];
-    if (!currentStep || !stepMessageShown || !currentStep.waitFor || !canCheckInput) return;
+    if (!currentStep || !currentStep.waitFor || !canCheckInput || !isLessonStarted) return;
 
     const passed = currentStep.waitFor(code, output);
     if (passed) {
@@ -222,7 +183,7 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
     }
 
     if (currentStep.reactions?.length) {
-      const matched = currentStep.reactions.find((r) => r.trigger(code));
+      const matched = currentStep.reactions.find((r) => r.trigger(code, output));
       if (matched && matched !== lastReaction) {
         setGoblinLine(matched.response);
         setLastReaction(matched);
@@ -241,50 +202,51 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
       setLastReaction({ response: currentStep.hint });
       return;
     }
+  }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput, isLessonStarted]);
 
+  // Final cleanup: clear timers on unmount
+  useEffect(() => clearTimers, []);
 
-  }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput]);
-
-
-  const handleLessonClick = async (lesson) => {
+  /* ------------------------------- Lesson Handlers ------------------------------- */
+  const handleLessonInitialization = async (lesson) => {
     setCurrentLesson(lesson);
+    setOpenLessons((prev) => ({ ...prev, [lesson.id]: true }));
 
-    const commentPrefix = {
-      JavaScript: "//",
-      Python: "#",
-      "C++": "//",
-      Java: "//"
-    };
+    const commentPrefix = { JavaScript: "//", Python: "#", "C++": "//", Java: "//" };
+    setCode(`${commentPrefix[language?.name || "JavaScript"]} ${lesson.title}\n\n`);
 
-    const langPrefix = commentPrefix[language?.name || "JavaScript"];
-    const lessonComment = `${langPrefix} ${lesson.title}\n\n`;
+    if (!lessonQuestions[lesson.id]) {
+      const questions = await getQuestion(lesson.id);
+      setLessonQuestions((prev) => ({ ...prev, [lesson.id]: questions }));
+    }
 
-    setCode(lessonComment); // overwrite or prepend to current code
+    resetTeachingFlow();
   };
 
-  // Fetch lessons for the current language
-  useEffect(() => {
-    if (!initialLanguage) return;
-    const formattedLang =
-      initialLanguage.charAt(0).toUpperCase() + initialLanguage.slice(1).toLowerCase();
-    const matchedLang = languageOptions.find((l) => l.name === formattedLang);
-    setLanguage(matchedLang || languageOptions[0]);
+  const handleLessonClick = async (lesson) => {
+    // navigate to the new lesson route
+    router.push(`/questions/${initialLanguage}/${lesson.id}`);
+  };
 
-    // Fetch lessons for the current language
-    const fetchLessons = async () => {
-      setIsLoadingLessons(true);
-      try {
-        const data = await getLessons(initialLanguage);
-        setLessons(data);
-      } catch (error) {
-        console.error("Error fetching lessons:", error);
-      } finally {
-        setIsLoadingLessons(false);
-      }
-    };
-    fetchLessons();
-  }, [initialLanguage]);
+  const toggleLesson = async (lessonId) => {
+    setOpenLessons((prev) => ({ ...prev, [lessonId]: !prev[lessonId] }));
+    if (!lessonQuestions[lessonId]) {
+      setIsLoadingQuestions((prev) => ({ ...prev, [lessonId]: true }));
+      const questions = await getQuestion(lessonId);
+      setLessonQuestions((prev) => ({ ...prev, [lessonId]: questions }));
+      setIsLoadingQuestions((prev) => ({ ...prev, [lessonId]: false }));
+    }
+  };
 
+  const resetTeachingFlow = () => {
+    clearTimeout(autoAdvanceTimeoutRef.current);
+    clearTimeout(checkInputTimeoutRef.current);
+    setLessonStepIndex(0);
+    setGoblinLine("");
+    setIsLessonStarted(false);
+  };
+
+  /* ------------------------------- Editor Actions ------------------------------- */
   const runCode = async () => {
     if (!language) return;
     setLoading(true);
@@ -317,13 +279,51 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
     }
   };
 
+  // Toolkit exposed to parent via ref
+  useImperativeHandle(ref, () => ({
+    run: runCode,
+    reset: () => {
+      const commentPrefix = { JavaScript: "//", Python: "#", "C++": "//", Java: "//" };
+      const lessonTitle = currentLesson?.title || (initialLesson ? String(initialLesson) : "");
+      setCode(`${commentPrefix[language?.name || "JavaScript"]} ${lessonTitle}\n\n`);
+      setOutput("");
+    },
+    copy: async () => {
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (e) {
+        console.error("Copy failed", e);
+      }
+    },
+    download: () => {
+      const nameToExt = { JavaScript: "js", Python: "py", "C++": "cpp", Java: "java" };
+      const ext = nameToExt[language?.name || "JavaScript"] || "txt";
+      const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `solution.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    setLanguage: async (name) => {
+      const matched = languageOptions.find((l) => l.name === name);
+      const fetchedLessons = await getLessons(name.toLowerCase());
+      if (matched) {
+        router.push(`/questions/${matched.name.toLowerCase()}/${fetchedLessons[0]?.id}`);
+      }
+    },
+    getState: () => ({ code, languageName: language?.name }),
+  }));
+
+  /* ------------------------------- Drag Resizing ------------------------------- */
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     const containerHeight = window.innerHeight * 0.9;
-    const newEditorHeight = (e.clientY / containerHeight) * 100;
-    if (newEditorHeight > 30 && newEditorHeight < 90) {
-      setEditorHeight(newEditorHeight);
-    }
+    const newHeight = (e.clientY / containerHeight) * 100;
+    if (newHeight > 30 && newHeight < 90) setEditorHeight(newHeight);
   };
 
   useEffect(() => {
@@ -334,58 +334,6 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
       window.removeEventListener("mouseup", () => (isDragging.current = false));
     };
   }, []);
-
-  const toggleLesson = async (lessonId) => {
-    setOpenLessons((prev) => ({
-      ...prev,
-      [lessonId]: !prev[lessonId],
-    }));
-
-    if (!lessonQuestions[lessonId]) {
-      setIsLoadingQuestions(prev => ({ ...prev, [lessonId]: true }));
-      try {
-        const questions = await getQuestion(lessonId);
-        setLessonQuestions((prev) => ({
-          ...prev,
-          [lessonId]: questions,
-        }));
-      } catch (error) {
-        console.error("Error fetching questions:", error);
-      } finally {
-        setIsLoadingQuestions(prev => ({ ...prev, [lessonId]: false }));
-      }
-    }
-  };
-
-
-  useEffect(() => {
-    const init = async () => {
-      // Wait until both initialLesson and lessons are available
-      if (!initialLesson || lessons.length === 0 || hasInitialized) return;
-      const lesson = lessons.find((l) => l.title.trim().toLowerCase() === initialLesson);
-      if (!lesson) return;
-      await handleLessonClick(lesson)
-      setCurrentLesson(lesson);
-
-      setOpenLessons((prev) => ({
-        ...prev,
-        [lesson.id]: true,
-      }));
-
-      if (!lessonQuestions[lesson.id]) {
-        const questions = await getQuestion(lesson.id);
-        setLessonQuestions((prev) => ({
-          ...prev,
-          [lesson.id]: questions,
-        }));
-      }
-
-      // Mark as initialized
-      setHasInitialized(true);
-    };
-
-    init();
-  }, [initialLesson, lessons, hasInitialized]);
 
   const handleQuestionClick = (question) => {
     setSelectedQuestion(question);
@@ -400,8 +348,37 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
   return (
     <>
 
-      <div className="bg-[#1a1a1d] right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-2 rounded-2xl border border-gray-700 shadow-md space-y-2">
+      <div className="bg-[#1a1a1d] right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
         <GoblinBox response={goblinLine} />
+        <div className="flex items-center justify-between gap-2 px-2 pb-2">
+          {!isLessonStarted ? (
+            <button
+              onClick={() => setIsLessonStarted(true)}
+              className=" cursor-pointer flex-1 px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-md transition"
+            >
+              Start Lesson
+            </button>
+          ) : (
+            <div className="flex w-full items-center gap-2">
+              <button
+                onClick={() => setLessonStepIndex((prev) => Math.max(0, prev - 1))}
+                disabled={!goblinTeaching || lessonStepIndex === 0 }
+                className="cursor-pointer flex-1 px-2 py-1 bg-gray-700 disabled:opacity-40 rounded-md hover:bg-gray-600 transition"
+                title="Previous line"
+              >
+                ← Prev
+              </button>
+              <button
+                onClick={() => setLessonStepIndex((prev) => Math.min((goblinTeaching?.length || 1) - 1, prev + 1))}
+                disabled={!goblinTeaching || lessonStepIndex >= (goblinTeaching?.length || 1) - 1}
+                className="cursor-pointer flex-1 px-2 py-1 bg-gray-700 disabled:opacity-40 rounded-md hover:bg-gray-600 transition"
+                title="Next line"
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex w-full h-full gap-4">
@@ -473,8 +450,8 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
                 filteredLessons.map((lesson) => (
                   <div key={lesson.id} className="space-y-1">
                     <button
-                      onClick={() => { toggleLesson(lesson.id); handleLessonClick(lesson); }}
-                      className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${openLessons[lesson.id]
+                      onClick={() => { handleLessonClick(lesson); }}
+                      className={`cursor-pointer select-none w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${openLessons[lesson.id]
                         ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-lg'
                         : 'bg-[#2a2a2d] hover:bg-[#3a3a3d] text-gray-200 hover:text-white'
                         }`}
@@ -487,8 +464,10 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
                         )}
                       </div>
                       {!isSidebarCollapsed && (
-                        <span className={`text-xs transition-transform duration-200 ${openLessons[lesson.id] ? 'rotate-90' : ''
-                          }`}>
+                        <span onClick={(e) => {
+                          e.stopPropagation();   // ⛔ prevent triggering button click
+                          toggleLesson(lesson.id);
+                        }} className={`select-none p-1 cursor-pointer text-xs transition-transform duration-200 ${openLessons[lesson.id] ? 'rotate-90' : ''}`}>
                           ▸
                         </span>
                       )}
@@ -553,7 +532,13 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
         </div>
 
         {/* Main Editor Area */}
-        <div className="flex-1 flex flex-col gap-1">
+        <motion.div
+          key={currentLesson?.id || "no-lesson"}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="flex-1 flex flex-col gap-1"
+        >
           <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${editorHeight}%` }}>
             <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center justify-between font-semibold text-gray-300 text-base shadow">
               <span>{"</> Code Editor"}</span>
@@ -605,11 +590,11 @@ export default function CodeEditor({ initialLanguage, initialLesson }) {
               {"</> Terminal"}
             </div>
             <div className="flex-1 p-4 hide-scrollbar font-mono text-sm text-gray-300 bg-[#232526] rounded-b-2xl overflow-auto">
-              <pre>{output || "$ Output will appear here..."}</pre>
+              {output}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
   );
-}
+});

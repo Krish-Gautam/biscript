@@ -4,6 +4,7 @@ import { supabase } from "../utils/supabaseClient";
 export async function registerUser({ email, password, username }) {
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
+    username,
     password,
     options: {
     emailRedirectTo: 'http://localhost:3000/profile', // or your real frontend route

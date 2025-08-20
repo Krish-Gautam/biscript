@@ -80,7 +80,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
       
       {/* Subtle dark overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+      <div className="select-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
       
       {/* Content */}
       <div className="relative z-10">

@@ -17,11 +17,12 @@ const Page = () => {
   const [lessons, setLessons] = useState([]);
   const [editorProblem, setEditorProblem] = useState("20");
   const isDragging = useRef(false);
-
   const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
+  const editorRef = useRef(null);
+  const [currentLanguage, setCurrentLanguage] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
    
-  {console.log('lesson', lesson)}
   // Resize Panel
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -81,7 +82,22 @@ const Page = () => {
 
   return (
     <>
-      <Navbar2 />
+      <Navbar2
+        title={`Lesson ${lesson.title}`}
+        difficulty={""}
+        onRun={async () => {
+          if (!editorRef.current) return;
+          setIsRunning(true);
+          await editorRef.current.run();
+          setIsRunning(false);
+        }}
+        onReset={() => editorRef.current && editorRef.current.reset()}
+        onCopy={() => editorRef.current && editorRef.current.copy()}
+        onDownload={() => editorRef.current && editorRef.current.download()}
+        currentLanguage={currentLanguage}
+        onLanguageChange={(name) => editorRef.current && editorRef.current.setLanguage(name)}
+        isRunning={isRunning}
+      />
       <div className="flex w-full h-[93vh] gap-2 p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
         <div className="flex w-[100%] gap-1">
           {/* Main Code/Terminal Area */}
@@ -89,7 +105,12 @@ const Page = () => {
             className="bg-gradient-to-b w-[100%] from-[#232526] to-[#232526]/80 h-full rounded-2xl flex flex-col gap-4 shadow-2xl border border-gray-700"
             
           >
-            <CodeEditor initialLanguage = {language} initialLesson = {lesson}/>
+            <CodeEditor
+              ref={editorRef}
+              initialLanguage={language}
+              initialLesson={lesson}
+              onLanguageChanged={(name) => setCurrentLanguage(name)}
+            />
             
           </div>
         </div>

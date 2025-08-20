@@ -40,11 +40,9 @@ export default function ScriptForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('title', title)
-    console.log('plan', plan)
+  
 
-
-    const { data, error } = await addScript({title, lessonId, plan})
+    const { data, error } = await addScript({ title, lessonId, plan })
 
     if (error) {
       console.log(error)
@@ -256,7 +254,14 @@ export default function ScriptForm() {
 
 
           <div className="flex gap-2">
-            <button className="flex-1 py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 transition disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleAddStep}>Add Step</button>
+            <button
+              type="button"
+              className="flex-1 py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleAddStep}
+            >
+              Add Step
+            </button>
+
             <button
               type="submit"
               disabled={isLoading}

@@ -20,7 +20,7 @@ export default function AdminPanel() {
   const [isLoadingLessons, setIsLoadingLessons] = useState(false);
   const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState([]); 
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState([]);
   const [isLoadingScripts, setIsLoadingScripts] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -78,6 +78,8 @@ export default function AdminPanel() {
     setSelectedScript(script);
   };
 
+
+
   return (
     <div className="flex min-h-screen bg-[#18181b] text-white">
       {/* Sidebar */}
@@ -126,7 +128,7 @@ export default function AdminPanel() {
           )}
 
           <div className="text-center Add bg-[#2A2A2D]  rounded-lg cursor-pointer">
-            <button className="cursor-pointer text-center p-3 w-full  select-none" onClick={() => {router.push(`/admin/addLesson?language=${currentLanguage}`)}}>Add Lesson</button>
+            <button className="cursor-pointer text-center p-3 w-full  select-none" onClick={() => { router.push(`/admin/addLesson?language=${currentLanguage}`) }}>Add Lesson</button>
           </div>
         </div>
       </div>
@@ -206,17 +208,20 @@ export default function AdminPanel() {
                 <div className="text-gray-500">No scripts available.</div>
               ) : (
                 <ul className="space-y-2">
-                  {lessonScripts[selectedLesson.id]?.map((script) => (
-                    <li key={script.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
-                      <span className="text-gray-200 select-none">{script.content_text}</span>
-                      <button
-                        className="text-xs px-2 py-1 bg-yellow-700 rounded text-white hover:bg-yellow-800"
-                        onClick={() => router.push(`/admin/script?id=${script.id}`)}
-                      >
-                        Edit
-                      </button>
-                    </li>
-                  ))}
+                  {Array.isArray(lessonScripts[selectedLesson.id]?.data) &&
+                    lessonScripts[selectedLesson.id].data.map((script) => (
+                      <li key={script.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
+                        <span className="text-gray-200 select-none">
+                          {script.plan.message} {/* Or whatever field you want to show */}
+                        </span>
+                        <button
+                          className="text-xs px-2 py-1 bg-yellow-700 rounded text-white hover:bg-yellow-800"
+                          onClick={() => router.push(`/admin/script?id=${script.id}`)}
+                        >
+                          Edit
+                        </button>
+                      </li>
+                    ))}
                 </ul>
               )}
             </div>

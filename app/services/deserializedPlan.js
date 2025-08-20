@@ -1,4 +1,5 @@
 import { waitForConvertor } from "./waitForconvertor";
+import { reactionConvertor } from "./reactionConvertor";
 
 export const deserializePlan = (rawPlan) => {
   if (!Array.isArray(rawPlan)) return [];
@@ -8,7 +9,7 @@ export const deserializePlan = (rawPlan) => {
     waitFor: waitForConvertor(step.waitFor),
     reactions: Array.isArray(step.reactions)
       ? step.reactions.map((r) => ({
-          trigger: waitForConvertor(r),
+          trigger: reactionConvertor(r),
           response: r?.response ?? "",
         }))
       : null,

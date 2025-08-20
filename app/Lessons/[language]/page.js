@@ -24,6 +24,10 @@ const Problems = () => {
     fetchLessons()
   }, [])
 
+  const handleLanguageChange = (lang) => {
+    window.location.href = `/Lessons/${lang}`;
+  }
+
   const languages = ["React JavaScript", "Python", "Java", "C++", "C", "C#", "HTML", "CSS", "PHP", "Node Js", "Bash",];
 
   return (
@@ -50,7 +54,8 @@ const Problems = () => {
           {/* Topics */}
           <section className="flex gap-3 p-2 overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
             {languages.map((topic, i) => (
-              <span
+                <span
+                onClick={() =>handleLanguageChange(topic.toLowerCase())}
                 key={i}
                 className={`px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
                      ${topic.toLowerCase() === language
@@ -64,7 +69,7 @@ const Problems = () => {
           {/* Problem Cards */}
           <section className="flex flex-col gap-6 w-full">
             {problems.map((problem, i) => (
-              <Link href={`/questions/${language}/${problem.title.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
+              <Link href={`/questions/${language}/${problem.id}`} key={i}>
                 <div
                   className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 transition-all shadow-lg flex flex-col min-h-[160px] group w-full transition-transform hover:scale-[1.01]">
                   <div className="flex items-center gap-3 mb-2">

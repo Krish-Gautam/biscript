@@ -1,35 +1,101 @@
 'use client'
-import React, { useState } from 'react'
-import { que_data } from '@/app/challenges/quedata/questions'
+import React, { use, useState } from 'react'
 import Link from 'next/link'
 import CodeMirror from "@uiw/react-codemirror"
 import { python } from "@codemirror/lang-python"
 import { EditorView } from "@codemirror/view"
+import { useEffect } from 'react'
+import { getChallengeData } from '@/app/services/getChallengeData'
+import { getTestCases } from '@/app/services/getTestCases'
+import { supabase } from '@/app/utils/supabaseClient'
 
 export default function CodingPage({ params }) {
+  // const { challengeId } = useParams()
   const [code, setCode] = useState('# Write your Python code here\n\n')
   const [output, setOutput] = useState('')
   const [isRunning, setIsRunning] = useState(false)
   const [showHints, setShowHints] = useState(false)
+  const [question, setQuestion] = useState(null)
+  const [language, setLanguage] = useState({ id: 71, name: "Python", langExt: python }) // Default to Python 3
+  const [loading, setLoading] = useState(false)
+  const [session, setSession] = useState(null)
+  const [testCases, setTestCases] = useState([])
+  const challengeId = params.id
   
-  const questionId = parseInt(params.id)
-  const question = que_data.find(item => item.id === questionId)
+
+  useEffect(() => {
+      const fetchSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+      }
+      fetchSession()
+  }, [])
+
+  useEffect(() => {
+      if (challengeId) {
+        const fetchData = async () => {
+          const  challengedata = await getChallengeData(challengeId)
+          console.log('challengedata:', challengedata)
+          setQuestion(challengedata[0])
+          const testdata = await getTestCases(challengeId)
+          setTestCases(testdata)
+          console.log('testdata:', testdata)
+        }
+        fetchData()
+      }
+    }, [challengeId])
+
+    // useEffect(()=> {
+    //   const fetchTestCases = async () => {
+    //     const { data, error } = await getChallengeData(challengeId);
+    //     if (error) {
+    //       console.error("Error fetching test cases:", error);
+    //     }
+    //     console.log('challengedata', data)
+    //     console.log('challengedata', data[0])
+    //   };
+    //   fetchTestCases();
+    // }, [challengeId])
 
   const runCode = async () => {
-    setIsRunning(true)
-    setOutput('Running code...')
-    
-    try {
-      // Simulate code execution (replace with actual Python execution service)
-      setTimeout(() => {
-        setOutput('Code executed successfully!\n\nNote: This is a demo output. Integrate with a Python execution service like Pyodide or a backend API for real execution.')
-        setIsRunning(false)
-      }, 2000)
-    } catch (error) {
-      setOutput(`Error: ${error.message}`)
-      setIsRunning(false)
+  if (!language) return;
+  setLoading(true);
+  setOutput("Running...");
+
+  try {
+    const res = await fetch("/api/challenges/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        challengeId,
+        source_code: code,
+        language_id: language.id,
+        userId: session?.user?.id
+      })
+    });
+
+    if (!res.ok) {
+      // Try to read JSON if possible, otherwise plain text
+      const text = await res.text();
+      throw new Error(`Server error ${res.status}: ${text}`);
     }
+
+    const data = await res.json();
+
+    if (data.allPassed) {
+      setOutput("✅ All test cases passed! Challenge completed.");
+    } else {
+      setOutput(`❌ Some test cases failed:\n${JSON.stringify(data.results, null, 2)}`);
+    }
+  } catch (err) {
+    setOutput("Error: " + err.message);
+  } finally {
+    setLoading(false);
   }
+};
+
+
+
 
   if (!question) {
     return (
@@ -57,12 +123,12 @@ export default function CodingPage({ params }) {
         <div className="bg-neutral-900/80 backdrop-blur-lg border-b border-white/10 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href={`/challenges/question/${questionId}`} className="text-blue-400 hover:text-blue-300 transition-colors group">
+              <Link href={`/challenges/question/${challengeId}`} className="text-blue-400 hover:text-blue-300 transition-colors group">
                 <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </Link>
-              <h1 className="text-xl font-bold text-white">Challenge {question.id} - Coding Environment</h1>
+              <h1 className="text-xl font-bold text-white">Challenge - Coding Environment</h1>
             </div>
             <span className="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">
               {question.category}
@@ -78,7 +144,7 @@ export default function CodingPage({ params }) {
               <h2 className="text-2xl font-bold text-white mb-4">Problem Statement</h2>
               <div className="bg-neutral-800/50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
                 <p className="text-gray-200 leading-relaxed">
-                  {question.que}
+                  {question.description}
                 </p>
               </div>
 
@@ -117,21 +183,29 @@ export default function CodingPage({ params }) {
               )}
 
               {/* Example Input/Output */}
-              <div className="space-y-4">
+              {testCases.length !== 0 && testCases.map((testCases, index) => (
+                <div className="space-y-4">
+                  <div className="font-semibold text-gray-200 mb-2">Example {index + 1}:</div>
                 <div className="bg-neutral-800/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-200 mb-2">Example Input:</h3>
-                  <code className="text-sm text-gray-300">
-                    {question.example_input || "// Add example input in your question data"}
+                  <h3 className="font-semibold  text-gray-200 mb-2">Input : {
+                    <code className="text-lg text-gray-300">
+                    {testCases.input || "// Add example input in your question data"}
                   </code>
+                  }</h3>
+                  
+                  <h3 className="font-semibold text-gray-200 mb-2">Output : {
+                    <code className="text-lg text-gray-300">
+                    {testCases.output || "// Add expected output in your question data"}
+                  </code>
+                  }</h3>
+                  
                 </div>
                 
-                <div className="bg-neutral-800/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-200 mb-2">Expected Output:</h3>
-                  <code className="text-sm text-gray-300">
-                    {question.example_output || "// Add expected output in your question data"}
-                  </code>
-                </div>
+               
               </div>
+              )
+                
+              )}
             </div>
           </div>
 

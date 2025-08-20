@@ -1,141 +1,140 @@
 'use client'
-import React from 'react'
-import { que_data } from '../../quedata/questions'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {useParams} from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { getChallengeData } from '@/app/services/getChallengeData'
+import { ArrowLeft, Zap, Shield, Star, Code, Target, Clock, Users, Award, BookOpen } from 'lucide-react'
+import { getTestCases } from '@/app/services/getTestCases'
 
 export default function QuestionPage() {
-     const params=useParams();
-  // Get the question ID from the URL parameters
-  const questionId = parseInt(params.id)
+  const { id } = useParams()
+  const [question, setQuestion] = useState(null)
   
-  // Find the specific question by ID
-  const question = que_data.find(item => item.id === questionId)
-  
-  // If question not found, show error
+
+  useEffect(() => {
+    if (id) {
+      const fetchData = async () => {
+        const  challengedata = await getChallengeData(id)
+        console.log('challengedata:', challengedata)
+        setQuestion(challengedata[0])
+        const testdata = await getTestCases(id)
+        setTestCases(testdata)
+        console.log('testdata:', testdata)
+      }
+      fetchData()
+    }
+  }, [id])
+
+  const getDifficultyIcon = (difficulty) => {
+    switch (difficulty) {
+      case 'Easy': return <Zap className="w-6 h-6 text-green-400" />
+      case 'Medium': return <Shield className="w-6 h-6 text-yellow-400" />
+      case 'Hard': return <Star className="w-6 h-6 text-red-400" />
+      default: return <Target className="w-6 h-6 text-blue-400" />
+    }
+  }
+
   if (!question) {
-    return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-white mb-4">Question Not Found</h1>
-          <p className="text-gray-400 mb-6">The question you're looking for doesn't exist.</p>
-          <Link 
-            href="/challenges" 
-            className="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-3 rounded-xl transition-colors border border-white/10"
-          >
-            Back to Challenges
-          </Link>
-        </div>
-      </div>
-    )
+    return <div className="text-center text-gray-400 mt-20">Loading...</div>
   }
 
   return (
     <div className="min-h-screen bg-neutral-950 relative">
-      {/* Background gradient */}
+      {/* Gradient bg */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
-      
-      {/* Content */}
-      <div className="relative z-10 px-6 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Back button */}
-          <Link 
-            href="/challenges" 
-            className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-8 font-medium transition-colors group"
-          >
-            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Challenges
-          </Link>
-          
-          {/* Question Card */}
-          <div className="bg-neutral-900/60 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-neutral-800 to-neutral-700 px-8 py-6 border-b border-white/10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-lg font-bold">#{question.id}</span>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-white">Challenge {question.id}</h1>
-                    <p className="text-gray-400 text-sm">Python Programming</p>
-                  </div>
-                </div>
-                <span className="bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium border border-white/20">
-                  {question.category}
-                </span>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-10">
+        {/* Back link */}
+        <Link href="/challenges" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
+          <ArrowLeft className="w-5 h-5" /> Back to Challenges
+        </Link>
+
+        {/* Main card */}
+        <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-800/90 border border-white/10 rounded-3xl p-8 shadow-2xl">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+            <div className="flex items-center gap-6">
+              <div className="p-3 bg-blue-600 rounded-xl shadow-md hover:bg-blue-700 transition-colors">
+                <Code className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">{question.title}</h1>
+                <p className="text-gray-300">{question.short_description || "Sharpen your coding skills with this challenge."}</p>
               </div>
             </div>
-            
-            {/* Question Content */}
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Problem Statement</h2>
-              <div className="bg-neutral-800/50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-lg">
-                <p className="text-lg text-gray-200 leading-relaxed">
-                  {question.que}
-                </p>
-              </div>
-              
-              {/* Additional sections */}
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-green-400 mb-3">Difficulty</h3>
-                  <p className="text-green-300">{question.category}</p>
-                </div>
-                
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-blue-400 mb-3">Challenge ID</h3>
-                  <p className="text-blue-300">#{question.id}</p>
-                </div>
-              </div>
-              
-              {/* Action buttons */}
-              <div className="flex gap-4">
-                <Link 
-                  href={`/challenges/question/${question.id}/code`}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg"
-                >
-                  Start Coding
-                </Link>
-                <Link 
-                  href={`/challenges/question/${question.id}/solution`} 
-                  className="border border-white/20 text-white hover:bg-white/10 px-8 py-4 rounded-xl transition-all duration-300 font-semibold"
-                >
-                  View Solution
-                </Link>
-              </div>
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-semibold shadow-lg">
+              {getDifficultyIcon(question.category)}
+              {question.category}
             </div>
           </div>
-          
-          {/* Navigation to other challenges */}
-          <div className="flex justify-between mt-8">
-            {questionId > 1 && (
-              <Link 
-                href={`/challenges/question/${questionId - 1}`}
-                className="bg-neutral-800/60 hover:bg-neutral-700/60 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Previous Challenge
-              </Link>
-            )}
-            
-            {questionId < que_data.length && (
-              <Link 
-                href={`/challenges/question/${questionId + 1}`}
-                className="bg-neutral-800/60 hover:bg-neutral-700/60 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 flex items-center gap-2 ml-auto"
-              >
-                Next Challenge
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            )}
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            <div className="bg-white/5 rounded-xl p-5 text-center border border-white/10">
+              <div className="text-2xl font-bold text-blue-400">{question.points || 100}</div>
+              <div className="text-gray-400 text-sm">Points</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-5 text-center border border-white/10">
+              <div className="text-2xl font-bold text-green-400">{question.timeLimit || '30 min'}</div>
+              <div className="text-gray-400 text-sm">Time Limit</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-5 text-center border border-white/10">
+              <div className="text-2xl font-bold text-purple-400">{question.participants || 150}</div>
+              <div className="text-gray-400 text-sm">Participants</div>
+            </div>
+          </div>
+
+          {/* Problem Statement */}
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <BookOpen className="w-6 h-6 text-blue-400" />
+              <h2 className="text-2xl font-bold text-white">Problem Overview</h2>
+            </div>
+            <p className="text-lg text-gray-200 leading-relaxed">
+              {question.description}
+            </p>
+          </div>
+
+          {/* Skills Tested */}
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold text-white mb-3">Skills Tested</h3>
+            <div className="flex flex-wrap gap-3">
+              {["Loops", "Conditionals", "Basic I/O", "Optimization"].map((skill, idx) => (
+                <span key={idx} className="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300 border border-white/10">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href={`/challenges/question/${question.id}/code`}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-semibold shadow-lg text-center"
+            >
+              Start Challenge
+            </Link>
+            <Link
+              href={`/challenges`}
+              className="flex-1 border border-white/20 text-white hover:bg-white/10 px-8 py-4 rounded-2xl transition-all duration-300 font-semibold text-center"
+            >
+              Browse More
+            </Link>
+          </div>
+        </div>
+
+        {/* Related challenges */}
+        <div className="mt-12">
+          <h3 className="text-xl font-semibold text-white mb-4">Related Challenges</h3>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((_, idx) => (
+              <div key={idx} className="bg-neutral-900 border border-white/10 rounded-xl p-5 hover:bg-neutral-800 transition">
+                <h4 className="text-white font-semibold mb-2">Sample Challenge {idx + 1}</h4>
+                <p className="text-gray-400 text-sm mb-3">Short description about this related challenge.</p>
+                <Link href="/challenges/question/1" className="text-blue-400 text-sm hover:underline">View Challenge</Link>
+              </div>
+            ))}
           </div>
         </div>
       </div>
