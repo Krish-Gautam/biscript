@@ -1,41 +1,56 @@
 import { supabase } from "../utils/supabaseClient";
 
-// Handles auth + inserting into profiles table
 export async function registerUser({ email, password, username }) {
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    username,
-    password,
-    options: {
-    emailRedirectTo: 'http://localhost:3000/profile', // or your real frontend route
-    data: { username }, // optional metadata
-  },
-  })
+  // Step 0: Check if username exists BEFORE signup
+  const { data: existingUser, error: checkError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single();
 
-  if (signUpError) {
-    // Handle "User already registered" case
-    if (
-      signUpError.message.includes("User already registered") ||
-      signUpError.message.includes("email") // fallback for other error messages
-    ) {
-      return { error: { message: "User already exists with this email." } };
-    }
-
-    // Return any other errors
-    return { error: signUpError };
+  if (existingUser) {
+    return { error: { message: "Username is already taken" } };
   }
 
-  const user = signUpData.user
+  if (checkError && checkError.code !== "PGRST116") {
+    // PGRST116 = no rows found (which is fine)
+    return { error: { message: checkError.message } };
+  }
 
-  const { error: dbError } = await supabase.from('profiles').insert([
+  // Step 1: Sign up user in Supabase Auth
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: "http://localhost:3000/profile",
+      data: { username },
+    },
+  });
+
+  if (signUpError) {
+    if (
+      signUpError.message.includes("already registered") ||
+      signUpError.message.toLowerCase().includes("email")
+    ) {
+      return { error: { message: "Email is already in use" } };
+    }
+    return { error: { message: signUpError.message } };
+  }
+
+  const user = signUpData.user;
+
+  // Step 2: Insert into profiles
+  const { error: dbError } = await supabase.from("profiles").insert([
     {
       id: user.id,
       username,
-      email
-    }
-  ])
+      email,
+    },
+  ]);
 
-  if (dbError) return { error: dbError }
+  if (dbError) {
+    return { error: { message: dbError.message } };
+  }
 
-  return { data: user }
+  return { data: user };
 }

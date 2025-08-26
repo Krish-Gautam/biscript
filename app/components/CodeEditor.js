@@ -21,11 +21,17 @@ import { useRouter } from "next/navigation";
 /* ---------------------------------- Setup ---------------------------------- */
 
 const languageOptions = [
-  { id: 63, name: "JavaScript", langExt: javascript },
+  { id: 63, name: "JavaScript", langExt: javascript, },
   { id: 71, name: "Python", langExt: python },
   { id: 54, name: "C++", langExt: cpp },
   { id: 62, name: "Java", langExt: java },
 ];
+const pistonLangMap = {
+  JavaScript: { piston: "javascript", ext: "js" },
+  Python: { piston: "python", ext: "py" },
+  "C++": { piston: "cpp", ext: "cpp" },
+  Java: { piston: "java", ext: "java" },
+};
 
 /* =============================== MAIN COMPONENT =============================== */
 
@@ -247,37 +253,78 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   };
 
   /* ------------------------------- Editor Actions ------------------------------- */
+  // const runCode = async () => {
+  //   if (!language) return;
+  //   setLoading(true);
+  //   setOutput("Running...");
+  //   try {
+  //     const res = await fetch(
+  //       "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "X-RapidAPI-Key": "0b1b9f6e3cmsh68207f8396df600p1dfeb2jsn02e4736b395c",
+  //           "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+  //         },
+  //         body: JSON.stringify({
+  //           source_code: code,
+  //           language_id: language.id,
+  //         }),
+  //       }
+  //     );
+
+  //     const result = await res.json();
+  //     const judgeOutput = result.stdout || result.stderr || "No output";
+  //     setOutput(`${judgeOutput}`);
+
+  //   } catch (err) {
+  //     setOutput(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const runCode = async () => {
-    if (!language) return;
-    setLoading(true);
-    setOutput("Running...");
-    try {
-      const res = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-RapidAPI-Key": "0b1b9f6e3cmsh68207f8396df600p1dfeb2jsn02e4736b395c",
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+  if (!language) return;
+  setLoading(true);
+  setOutput("Running...");
+
+  try {
+    const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
+
+    const res = await fetch("/api/piston/runCode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        language: langConfig.piston, // "python", "javascript", etc.
+        version: "3.12.0",
+        files: [
+          {
+            name: `main.${langConfig.ext}`, // main.py, main.js, etc.
+            content: code,
           },
-          body: JSON.stringify({
-            source_code: code,
-            language_id: language.id,
-          }),
-        }
-      );
+        ],
+      }),
+    });
 
-      const result = await res.json();
-      const judgeOutput = result.stdout || result.stderr || "No output";
-      setOutput(`${judgeOutput}`);
+    const result = await res.json();
 
-    } catch (err) {
-      setOutput(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const pistonOutput =
+      result.run?.stdout || result.run?.stderr || "No output";
+
+    setOutput(pistonOutput);
+  } catch (err) {
+    setOutput(err.message || "Error running code");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   // Toolkit exposed to parent via ref
   useImperativeHandle(ref, () => ({
@@ -362,7 +409,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
             <div className="flex w-full items-center gap-2">
               <button
                 onClick={() => setLessonStepIndex((prev) => Math.max(0, prev - 1))}
-                disabled={!goblinTeaching || lessonStepIndex === 0 }
+                disabled={!goblinTeaching || lessonStepIndex === 0}
                 className="cursor-pointer flex-1 px-2 py-1 bg-gray-700 disabled:opacity-40 rounded-md hover:bg-gray-600 transition"
                 title="Previous line"
               >
@@ -539,7 +586,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
           transition={{ duration: 0.25 }}
           className="flex-1 flex flex-col gap-1"
         >
-          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${editorHeight}%` }}>
+          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${editorHeight}%`, transition: 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center justify-between font-semibold text-gray-300 text-base shadow">
               <span>{"</> Code Editor"}</span>
               {language && <span className="text-sm text-gray-400">{language.name}</span>}
@@ -585,12 +632,12 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
             <div className="bg-gray-600 w-[2%] h-[80%] rounded-2xl"></div>
           </div>
 
-          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${100 - editorHeight}%` }}>
+          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${100 - editorHeight}%`, transition: 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center font-semibold text-gray-300 text-base shadow">
               {"</> Terminal"}
             </div>
             <div className="flex-1 p-4 hide-scrollbar font-mono text-sm text-gray-300 bg-[#232526] rounded-b-2xl overflow-auto">
-              {output}
+              {output ? output : <span className="text-gray-500 ">you output will appear here...</span>}
             </div>
           </div>
         </motion.div>

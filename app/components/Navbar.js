@@ -8,9 +8,15 @@ import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
 
 const Navbar = () => {
   const [session, setSession] = useState(null);
+  const [theme, setTheme] = useState('dark');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
+  }, [theme]);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -48,9 +54,9 @@ const Navbar = () => {
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-5">
           <Link href="/languages" className="text-gray-200 hover:text-white font-medium transition">Languages</Link>
-          <Link href="/lessons" className="text-gray-200 hover:text-white font-medium transition">Lessons</Link>
           <Link href="/challenges" className="text-gray-200 hover:text-white font-medium transition bg-transparent">Challenges</Link>
-          <button className="text-gray-200 hover:text-white font-medium transition bg-transparent">Leaderboard</button>
+          <Link href="/docs" className="text-gray-200 hover:text-white font-medium transition">Docs</Link>
+          <Link href="/community" className="text-gray-200 hover:text-white font-medium transition">Community</Link>
         </div>
 
         {/* Auth/Profile */}
@@ -59,13 +65,13 @@ const Navbar = () => {
             <>
               <button
                 onClick={() => router.push("/login")}
-                className="px-4 py-1 rounded-md text-gray-100 hover:text-white font-semibold transition border border-white/10 bg-neutral-800/60 backdrop-blur-sm shadow-sm text-sm"
+                className="cursor-pointer px-4 py-1 rounded-md text-gray-100 hover:text-white font-semibold transition border border-white/10 bg-neutral-800/60 backdrop-blur-sm shadow-sm text-sm"
               >
                 Login
               </button>
               <button
                 onClick={() => router.push("/signin")}
-                className="px-4 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-semibold shadow-sm border border-white/10 transition text-sm"
+                className="cursor-pointer px-4 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-semibold shadow-sm border border-white/10 transition text-sm"
               >
                 Get Started
               </button>
@@ -91,11 +97,27 @@ const Navbar = () => {
                   >
                     <User size={16} className="mr-2" /> Profile
                   </a>
+                  <button
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors w-full cursor-pointer"
+                  >
+                    <span className="mr-2">{theme === 'dark' ? '🌙' : '☀️'}</span> {theme === 'dark' ? 'Dark' : 'Light'} Mode
+                  </button>
+      <style>{`
+        .dark {
+          background: #18181b;
+          color: #eee;
+        }
+        .light {
+          background: #f7f7fa;
+          color: #222;
+        }
+      `}</style>
                   <a
-                    href="#"
+                    href="/profile/edit"
                     className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    <Settings size={16} className="mr-2" /> Settings
+                    <Settings size={16} className="mr-2" /> Edit Profile
                   </a>
                   <button
                     onClick={handleLogout}

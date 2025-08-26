@@ -26,36 +26,32 @@ export async function POST(req) {
     let results = [];
 
     for (let tc of testCases) {
-      const judgeRes = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-RapidAPI-Key": process.env.RAPID_API_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-          },
-          body: JSON.stringify({
-            source_code,
-            language_id,
-            stdin: String(tc.input),
-          }),
-        }
-      );
-
-      const result = await judgeRes.json();
-
-      const output = result.stdout?.trim() || result.stderr?.trim() || result.compile_output?.trim() || "";
+      // Use Piston API for code execution
+      const pistonRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/piston/runCode`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: "python", // should match pistonLangMap
+          version: "3.12.0",
+          files: [
+            {
+              name: `main.py`,
+              content: source_code,
+            },
+          ],
+          stdin: String(tc.input),
+        }),
+      });
+      const result = await pistonRes.json();
+      const output = result.run?.stdout?.trim() || result.run?.stderr?.trim() || result.compile?.stdout?.trim() || "";
       const expected = (tc.output || "").trim();
       const passed = output === expected;
-
       if (!passed) allPassed = false;
-
       results.push({
         input: tc.input,
         expected,
         output,
-        status: result.status?.description || "Unknown",
+        status: result.run?.code === 0 ? "Success" : "Error",
         passed,
       });
     }

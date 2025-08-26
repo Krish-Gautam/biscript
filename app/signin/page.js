@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { registerUser } from "../services/registerUser";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const Signin = () => {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
@@ -46,9 +47,10 @@ const Signin = () => {
     if (error) {
       setUserError(error.message);
       console.log("Error signing up:", error);
+      toast.error(error.message || "Sign up failed. Please try again.");
     } else {
       // Optionally redirect or show success
-      // router.push('/profile');
+      router.push('/profile');
     }
   };
 

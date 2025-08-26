@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar2 from "@/app/components/Navbar2";
 import Image from "next/image";
-import CodeEditor from "@/app/components/CodeEditor";
+import CodeEditor from "@/app/components/CodeEditor.dynamic";
 import { getLessons } from "@/app/services/getLessons";
 import { getQuestion } from "@/app/services/getQuestions";
 
@@ -116,14 +116,14 @@ const Page = () => {
         </div>
 
         {/* Right Panel */}
-        <div className="bg-gradient-to-b from-[#232526] to-[#414345] h-full w-[20%] rounded-2xl p-4 flex flex-col shadow-xl border border-gray-700 relative">
+        {/* <div className="bg-gradient-to-b from-[#232526] to-[#414345] h-full w-[20%] rounded-2xl p-4 flex flex-col shadow-xl border border-gray-700 relative">
           <div className="flex-1" />
           <input
             className="bg-[#232526] p-3 rounded-xl w-full border border-gray-700 text-gray-200 placeholder-gray-400 focus:ring-2 ring-blue-500 transition shadow-inner"
             type="text"
             placeholder="Search..."
           />
-        </div>
+        </div> */}
       </div>
     </>
   );

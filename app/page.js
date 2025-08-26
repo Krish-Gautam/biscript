@@ -30,15 +30,14 @@ export default function Home() {
 * injecting logic into chaos...
 >> SYSTEM://reality.patch() complete.`;
 
-  //fetch session
+  // fetch session once on mount
   useEffect(() => {
     const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-    }
-
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    };
     fetchSession();
-  })
+  }, [])
 
   const handleProfileClick = (() => {
     if (session) {
@@ -72,19 +71,19 @@ export default function Home() {
   }, [currentIndex, fullText]);
 
   return (
-    <div className="min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
+    <div className="select-none min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
       {/* Enhanced Dark Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
+      <div className="select-none absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
       
       {/* Subtle radial gradient for depth */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
+      <div className="select-none absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
       
       {/* Subtle dark overlay for depth */}
       <div className="select-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
       
       {/* Content */}
       <div className="relative z-10">
-        <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05]">
+    <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05] fade-in">
           Start Learning Code the Fun Way
         </h1>
         <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05]">
@@ -148,9 +147,11 @@ export default function Home() {
                 Challenges
               </li>
               </Link>
-              <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
-                Leaderboard
-              </li>
+              <Link href="/community">
+                <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
+                  Community
+                </li>
+              </Link>
               <li onClick={handleProfileClick} className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
                 Profile
               </li>

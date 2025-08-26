@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { loginUser } from '../services/loginUser';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -14,26 +15,30 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setUserExitsError(undefined);
+
     const { data, error } = await loginUser(form);
     setLoading(false);
+
     if (error) {
       setUserExitsError(error);
       console.error("Error logging in:", error);
+      toast.error("Login failed! Please try again.");
     } else {
+      toast.success("Logged in successfully!");
       router.push("/profile");
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d]">
       <div className="w-full max-w-md bg-[#232526] border border-gray-700 p-8 rounded-2xl shadow-2xl relative">
         {/* Logo/avatar */}
         <div className="flex flex-col items-center mb-6">
-          <h2 className="text-3xl font-bold text-white mt-2">Login In</h2>
+          <h2 className="text-3xl font-bold text-white mt-2">Welcome Back</h2>
           <p className="text-gray-400 text-sm mt-1">Welcome back! Please login to your account.</p>
         </div>
 
@@ -74,7 +79,7 @@ const Login = () => {
             className="h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center disabled:opacity-60"
             disabled={loading}
           >
-            {loading ? 'Loging In...' : 'Login In'}
+            Sign In
           </button>
         </form>
 

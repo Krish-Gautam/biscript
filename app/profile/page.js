@@ -1,21 +1,23 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Navbar2 from "../components/Navbar2";
+import Navbar from "../components/Navbar";
 import { supabase } from "../utils/supabaseClient";
 import { Edit, Trophy, Target, Award, TrendingUp, MapPin, User, Mail } from "lucide-react";
 import { getUserChallenges } from "../services/getUserChallenges";
+import { getProfile } from "../services/updateProfile";
 
 const page = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    username: "krish",
-    bio: "Passionate coder who loves solving complex problems and learning new technologies.",
-    location: "Mumbai, India"
+    username: "",
+    bio: "",
+    location: "",
+    avatar_url: ""
   });
   const [challenges, setChallenges] = useState([])
 
-  
+
 
   useEffect(() => {
     const checkUser = async () => {
@@ -25,25 +27,48 @@ const page = () => {
       } else {
         const user = session.user;
         setCurrentUser(user);
+        await fetchUserProfile(user.id);
       }
     };
     checkUser();
   }, []);
 
-  useEffect(() => {
-  if (currentUser?.id) {   // only runs when currentUser is set
-    const fetchchallenge = async () => {
-      console.log('userid', currentUser.id)
-      const { data, error } = await getUserChallenges(currentUser.id);
+  const fetchUserProfile = async (userId) => {
+    try {
+      const { data, error } = await getProfile(userId);
       if (error) {
-        console.error("Error fetching user challenges:", error);
+        console.error("Error fetching profile:", error);
+        return;
       }
-      setChallenges(data);
-      console.log("Fetched user challenges:", data);
+      console.log("edit form", data)
+
+      if (data) {
+        setEditForm({
+          username: data.username || "User",
+          bio: data.bio || "No bio available",
+          location: data.location || "Location not set",
+          avatar_url: data.avatar_url || "/profil.jpg"
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-    fetchchallenge();
-  }
-}, [currentUser?.id])
+  };
+
+  useEffect(() => {
+    if (currentUser?.id) {   // only runs when currentUser is set
+      const fetchchallenge = async () => {
+        console.log('userid', currentUser.id)
+        const { data, error } = await getUserChallenges(currentUser.id);
+        if (error) {
+          console.error("Error fetching user challenges:", error);
+        }
+        setChallenges(data);
+        console.log("Fetched user challenges:", data);
+      }
+      fetchchallenge();
+    }
+  }, [currentUser?.id])
 
 
   const handleEditSave = () => {
@@ -53,11 +78,7 @@ const page = () => {
 
   const handleEditCancel = () => {
     setIsEditing(false);
-    setEditForm({
-      username: "krish",
-      bio: "Passionate coder who loves solving complex problems and learning new technologies.",
-      location: "Mumbai, India"
-    });
+    fetchUserProfile(currentUser.id);
   };
 
   const stats = {
@@ -91,137 +112,104 @@ const page = () => {
 
   return (
     <>
+
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1d] to-[#0f0f0f] text-white font-sans">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Profile Info */}
             <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
-                
+              <div className="bg-[#18181b] rounded-3xl p-8 border border-white/10 shadow-xl relative overflow-hidden">
+                {/* Background decoration - subtle */}
+                <div className="absolute -top-8 -right-8 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-[60px]"></div>
+
                 {/* Profile Header */}
                 <div className="relative z-10">
                   <div className="flex flex-col items-center text-center mb-8">
                     {/* Profile Image */}
-                    <div className="relative mb-6">
-                      <div className="relative">
-                        <img 
-                          height={140} 
-                          width={140} 
-                          src="profil.jpeg" 
-                          alt="Profile" 
-                          className="rounded-3xl object-cover shadow-2xl border-4 border-white/20 ring-4 ring-blue-500/30"
-                        />
-                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-r from-green-400 to-green-500 rounded-full border-4 border-[#1a1a1d] flex items-center justify-center shadow-lg">
-                          <div className="w-4 h-4 bg-white rounded-full animate-pulse"></div>
-                        </div>
-                      </div>
+                    <div className="relative mb-6 w-32 h-32 rounded-full overflow-hidden border border-white/10 shadow-lg bg-[#202023] flex items-center justify-center">
+                      <img
+                        src={editForm.avatar_url || "/profil.jpg"}
+                        alt="Profile"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                    
+
                     {/* User Info */}
                     {currentUser && (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {isEditing ? (
                           <input
                             type="text"
                             value={editForm.username}
-                            onChange={(e) => setEditForm({...editForm, username: e.target.value})}
-                            className="text-3xl font-bold text-white bg-[#2a2a2d]/80 border border-white/20 rounded-xl px-4 py-2 text-center w-full backdrop-blur-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                            onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                            className="text-2xl font-semibold text-white bg-[#202023] border border-white/10 rounded-lg px-3 py-2 text-center w-full focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
                           />
                         ) : (
-                          <div className="text-3xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                          <div className="text-2xl font-semibold tracking-tight text-white">
                             {editForm.username}
                           </div>
                         )}
-                        
+
                         <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
                           <Mail className="w-4 h-4" />
                           <span>{currentUser.email}</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-center gap-2 text-green-400 text-sm font-medium">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          <span>Online</span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Edit Profile Button */}
+                  {/* Primary Action */}
                   <div className="mb-8">
                     {isEditing ? (
                       <div className="flex gap-3">
                         <button
                           onClick={handleEditSave}
-                          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-2xl font-semibold hover:from-green-400 hover:to-green-500 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 hover:shadow-green-500/25 hover:scale-105"
+                          className="flex-1 bg-green-600 hover:bg-green-500 text-white p-3 rounded-xl font-medium transition-all duration-150 shadow-sm"
                         >
                           <Edit size={16} />
-                          Save Changes
+                          <span className="ml-2">Save Changes</span>
                         </button>
                         <button
                           onClick={handleEditCancel}
-                          className="flex-1 bg-[#2a2a2d]/80 text-white p-4 rounded-2xl font-semibold hover:bg-[#3a3a3d] transition-all duration-200 border border-white/10 flex items-center justify-center backdrop-blur-sm hover:scale-105"
+                          className="flex-1 bg-[#202023] hover:bg-[#2a2a2d] text-white p-3 rounded-xl font-medium border border-white/10 transition-all duration-150"
                         >
                           Cancel
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-2xl font-semibold hover:from-blue-400 hover:to-purple-500 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 hover:shadow-blue-500/25 hover:scale-105"
+                      <a
+                        href="/profile/edit"
+                        className="w-full inline-flex items-center justify-center bg-white/10 hover:bg-white/15 text-white p-3 rounded-xl font-medium border border-white/10 transition-all duration-150"
                       >
                         <Edit size={16} />
-                        Edit Profile
-                      </button>
+                        <span className="ml-2">Edit Profile</span>
+                      </a>
                     )}
                   </div>
 
-                  {/* Bio Section */}
-                  {isEditing ? (
-                    <div className="space-y-3 mb-6">
-                      <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Bio
-                      </label>
-                      <textarea
-                        value={editForm.bio}
-                        onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
-                        className="w-full bg-[#2a2a2d]/80 border border-white/20 rounded-xl px-4 py-3 text-white text-sm resize-none backdrop-blur-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                        rows={3}
-                        placeholder="Tell us about yourself..."
-                      />
-                    </div>
-                  ) : (
-                    <div className="mb-6">
-                      <div className="bg-[#2a2a2d]/60 rounded-xl p-4 border border-white/10 backdrop-blur-sm">
-                        <p className="text-gray-300 text-sm leading-relaxed">{editForm.bio}</p>
+                  {/* About */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-300 mb-2">About</h4>
+                    {!editForm.bio ? (
+                      <div className="animate-pulse bg-[#202023] rounded-lg h-16 border border-white/10" />
+                    ) : (
+                      <div className="bg-[#202023] rounded-lg p-4 border border-white/10">
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          {editForm.bio}
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Location */}
-                  {isEditing ? (
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.location}
-                        onChange={(e) => setEditForm({...editForm, location: e.target.value})}
-                        className="w-full bg-[#2a2a2d]/80 border border-white/20 rounded-xl px-4 py-3 text-white text-sm backdrop-blur-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                        placeholder="Enter your location..."
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-gray-400 text-sm bg-[#2a2a2d]/60 rounded-xl p-3 border border-white/10 backdrop-blur-sm">
+                  {/* Contact & Location */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-gray-300 text-sm bg-[#202023] rounded-lg p-3 border border-white/10">
                       <MapPin className="w-4 h-4 text-blue-400" />
                       <span>{editForm.location}</span>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -297,11 +285,10 @@ const page = () => {
                     <div key={index} className="bg-[#2a2a2d]/80 p-4 rounded-xl border border-white/5 hover:border-white/20 transition-all hover:scale-105 backdrop-blur-sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
-                            challenge.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' : 
-                            challenge.rank === 2 ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 
-                            challenge.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
-                          }`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${challenge.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
+                              challenge.rank === 2 ? 'bg-gradient-to-r from-gray-400 to-gray-500' :
+                                challenge.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                            }`}>
                             {challenge.rank === 1 ? '🥇' : challenge.rank === 2 ? '🥈' : challenge.rank === 3 ? '🥉' : challenge.rank}
                           </div>
                           <div>

@@ -1,12 +1,22 @@
 import { supabase } from "../utils/supabaseClient";
 
-export const getLessons = async (language) => {
-    const {data, error} = await supabase.from('lessons').select('*').eq('language', language)
+const lessonsCache = new Map();
 
-    if(error) {
-        console.log(error)
-        return []
+export const getLessons = async (language) => {
+    if (!language) return [];
+    if (lessonsCache.has(language)) {
+        return lessonsCache.get(language);
+    }
+    const { data, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('language', language);
+
+    if (error) {
+        console.log(error);
+        return [];
     }
 
-    return data
+    lessonsCache.set(language, data);
+    return data;
 }
