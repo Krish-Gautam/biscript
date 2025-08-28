@@ -30,7 +30,6 @@ export default function QuestionForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form)
     const {data, error} = await addQuestion(form)
     
         if(error){

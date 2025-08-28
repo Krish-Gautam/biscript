@@ -38,7 +38,6 @@ export default function QuestionForm() {
                 console.error("Error fetching Quesiton:", error);
             } else {
                 setQuestionData(data[0]);
-                console.log("Fetched question data:", data[0]);
             }
         };
 
@@ -63,7 +62,6 @@ export default function QuestionForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(form)
         const { data, error } = await updateQuestion(form)
 
         if (error) {

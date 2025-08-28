@@ -86,7 +86,7 @@ export default function Home() {
     <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05] fade-in">
           Start Learning Code the Fun Way
         </h1>
-        <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05]">
+        <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05] fade-in">
           Solve engaging challenges, earn achievements, and level up your programming skills one game at a time.
         </p>
       </div>
@@ -117,9 +117,9 @@ export default function Home() {
           <div className="absolute top-20 flex flex-col left-20 bg-[#131416] h-[470px] w-[600px] border border-white/10 border-b-0 rounded-t-2xl">
             <div className="bg-[#17181A] w-full h-8 rounded-t-2xl flex items-center px-3 relative">
               <div className="flex gap-1">
-                <img width={12} height={12} src="/red.svg" alt="" />
-                <img width={12} height={12} src="/yellow.svg" alt="" />
-                <img width={12} height={12} src="/green.svg" alt="" />
+                <image width={12} height={12} src="/red.svg" alt="" />
+                <image width={12} height={12} src="/yellow.svg" alt="" />
+                <image width={12} height={12} src="/green.svg" alt="" />
               </div>
               <div className="absolute left-1/2 -translate-x-1/2 text-[#555657] text-sm font-semibold">
                 Get Started

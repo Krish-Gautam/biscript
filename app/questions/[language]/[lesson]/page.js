@@ -73,7 +73,6 @@ const Page = () => {
   const handleQuestionClick = (lessonId, questionTitle) => {
     const slug = questionTitle.toLowerCase().replace(/\s+/g, "-");
     if (lessonId === currentLessons) {
-      console.log("Same lesson, load question:", slug);
       // Optional: update state here if needed
     } else {
       router.push(`/questions/${language}/${lessonId}`);

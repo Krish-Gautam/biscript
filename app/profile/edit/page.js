@@ -5,7 +5,7 @@ import { supabase } from "../../utils/supabaseClient";
 import { updateProfile, getProfile } from "../../services/updateProfile";
 import { ArrowLeft, User, MapPin, Camera, Save, X, Check } from "lucide-react";
 import Navbar from "../../components/Navbar";
-
+import Image from "next/image";
 const EditProfile = () => {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState(null);
@@ -13,6 +13,14 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024); // <1024px = mobile
+    handleResize(); // initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -38,7 +46,6 @@ const EditProfile = () => {
 
   const fetchProfile = async (userId) => {
     try {
-      console.log('id', userId)
       const { data, error } = await getProfile(userId);
       if (error) {
         console.error("Error fetching profile:", error);
@@ -92,7 +99,7 @@ const EditProfile = () => {
       }
 
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      
+
 
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -140,8 +147,8 @@ const EditProfile = () => {
           {/* Message */}
           {message.text && (
             <div className={`mb-6 p-4 rounded-xl border ${message.type === 'success'
-                ? 'bg-green-500/20 border-green-500/30 text-green-400'
-                : 'bg-red-500/20 border-red-500/30 text-red-400'
+              ? 'bg-green-500/20 border-green-500/30 text-green-400'
+              : 'bg-red-500/20 border-red-500/30 text-red-400'
               }`}>
               <div className="flex items-center gap-2">
                 {message.type === 'success' ? <Check size={16} /> : <X size={16} />}
@@ -158,12 +165,14 @@ const EditProfile = () => {
                 <div className="text-center">
                   <div className="relative inline-block mb-6">
                     <div className="relative">
-                      <img
-                        height={160}
-                        width={160}
-                        src={formData.avatar_url || "/profil.jpg"}  // fallback avatar
+                      <Image
+                        width={128}
+                        height={128}
+                        src={formData.avatar_url || "/profil.jpg"}
                         alt="Profile"
-                        className="rounded-3xl object-cover shadow-2xl border-4 border-white/20 ring-4 ring-blue-500/30"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain"
                       />
 
                       {/* Upload Button */}
@@ -222,6 +231,36 @@ const EditProfile = () => {
                   </div>
                 </div>
               </div>
+              {!isMobile && (
+                <>
+                {/* Action Buttons */}
+              <div className="flex gap-8 mt-6 justify-between">
+                <button
+                  onClick={handleCancel}
+                  className="px-8 py-4 bg-[#2a2a2d]/80 text-white rounded-2xl font-semibold hover:bg-[#3a3a3d] transition-all duration-200 border border-white/10 backdrop-blur-sm hover:scale-105"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-400 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-blue-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={20} />
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+                </>
+              )}
             </div>
 
             {/* Right Column - Form Fields */}
@@ -277,33 +316,38 @@ const EditProfile = () => {
                 <p className="text-xs text-gray-500 mt-2">City, Country or any location you'd like to share</p>
               </div>
             </div>
-          </div>
+               
+               {isMobile && (
+                <>
+                {/* Action Buttons */}
+              <div className="flex gap-8 mt-6 justify-between">
+                <button
+                  onClick={handleCancel}
+                  className="px-8 py-4 bg-[#2a2a2d]/80 text-white rounded-2xl font-semibold hover:bg-[#3a3a3d] transition-all duration-200 border border-white/10 backdrop-blur-sm hover:scale-105"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-400 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-blue-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={20} />
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+                </>
+               )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 mt-8 justify-center">
-            <button
-              onClick={handleCancel}
-              className="px-8 py-4 bg-[#2a2a2d]/80 text-white rounded-2xl font-semibold hover:bg-[#3a3a3d] transition-all duration-200 border border-white/10 backdrop-blur-sm hover:scale-105"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-blue-400 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-blue-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={20} />
-                  Save Changes
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>

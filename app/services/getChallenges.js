@@ -6,6 +6,5 @@ export const getChallenges = async (challengeType) => {
     if (error) {
     console.error("Error fetching challenges:", error);
   }
-  console.log("Fetched challenges:", data);
   return { data, error };
 } 

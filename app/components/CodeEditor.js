@@ -253,78 +253,75 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   };
 
   /* ------------------------------- Editor Actions ------------------------------- */
-  // const runCode = async () => {
-  //   if (!language) return;
-  //   setLoading(true);
-  //   setOutput("Running...");
-  //   try {
-  //     const res = await fetch(
-  //       "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "X-RapidAPI-Key": "0b1b9f6e3cmsh68207f8396df600p1dfeb2jsn02e4736b395c",
-  //           "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-  //         },
-  //         body: JSON.stringify({
-  //           source_code: code,
-  //           language_id: language.id,
-  //         }),
-  //       }
-  //     );
-
-  //     const result = await res.json();
-  //     const judgeOutput = result.stdout || result.stderr || "No output";
-  //     setOutput(`${judgeOutput}`);
-
-  //   } catch (err) {
-  //     setOutput(err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const runCode = async () => {
-  if (!language) return;
-  setLoading(true);
-  setOutput("Running...");
-
-  try {
-    const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
-
-    const res = await fetch("/api/piston/runCode", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        language: langConfig.piston, // "python", "javascript", etc.
-        version: "3.12.0",
-        files: [
-          {
-            name: `main.${langConfig.ext}`, // main.py, main.js, etc.
-            content: code,
+    if (!language) return;
+    setLoading(true);
+    setOutput("Running...");
+    try {
+      const res = await fetch(
+        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-RapidAPI-Key": process.env.RAPID_API_KEY,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
-        ],
-      }),
-    });
+          body: JSON.stringify({
+            source_code: code,
+            language_id: language.id,
+          }),
+        }
+      );
 
-    const result = await res.json();
+      const result = await res.json();
+      const judgeOutput = result.stdout || result.stderr || "No output";
+      setOutput(`${judgeOutput}`);
 
-    const pistonOutput =
-      result.run?.stdout || result.run?.stderr || "No output";
+    } catch (err) {
+      setOutput(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setOutput(pistonOutput);
-  } catch (err) {
-    setOutput(err.message || "Error running code");
-  } finally {
-    setLoading(false);
-  }
-};
+//   const runCode = async () => {
+//   if (!language) return;
+//   setLoading(true);
+//   setOutput("Running...");
 
+//   try {
+//     const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
 
+//     const res = await fetch("/api/piston/runCode", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         language: langConfig.piston, // "python", "javascript", etc.
+//         version: "3.12.0",
+//         files: [
+//           {
+//             name: `main.${langConfig.ext}`, // main.py, main.js, etc.
+//             content: code,
+//           },
+//         ],
+//       }),
+//     });
 
+//     const result = await res.json();
+
+//     const pistonOutput =
+//       result.run?.stdout || result.run?.stderr || "No output";
+
+//     setOutput(pistonOutput);
+//   } catch (err) {
+//     setOutput(err.message || "Error running code");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   // Toolkit exposed to parent via ref
   useImperativeHandle(ref, () => ({

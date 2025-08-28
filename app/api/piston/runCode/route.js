@@ -1,8 +1,7 @@
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("➡️ Request to Piston:", body);
-
+    console.log("➡️ Request to Piston:", body)
     const res = await fetch("http://localhost:2000/api/v2/execute", {
       method: "POST",
       headers: {
@@ -12,7 +11,6 @@ export async function POST(req) {
     });
 
     const data = await res.json();
-    console.log("⬅️ Response from Piston:", data);
 
     return new Response(JSON.stringify(data), {
       status: 200,

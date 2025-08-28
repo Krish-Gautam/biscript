@@ -27,7 +27,6 @@ export default function LessonForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form)
     const {data, error} = await addLesson(form)
 
     if(error){

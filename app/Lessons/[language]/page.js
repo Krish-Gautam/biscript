@@ -53,7 +53,7 @@ const Problems = () => {
         <main className="flex-1 flex flex-col gap-6 w-full p-6">
           <div className="fade-in">
           {/* Topics */}
-          <section className="flex gap-3 p-2 overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          <section className="flex gap-3 p-4 hide-scrollbar overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
             {languages.map((topic, i) => (
                 <span
                 onClick={() =>handleLanguageChange(topic.toLowerCase())}

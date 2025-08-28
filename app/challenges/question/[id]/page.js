@@ -9,17 +9,15 @@ import { getTestCases } from '@/app/services/getTestCases'
 export default function QuestionPage() {
   const { id } = useParams()
   const [question, setQuestion] = useState(null)
+  const [testCases, setTestCases] = useState([])
   
 
   useEffect(() => {
     if (id) {
       const fetchData = async () => {
         const  challengedata = await getChallengeData(id)
-        console.log('challengedata:', challengedata)
+
         setQuestion(challengedata[0])
-        const testdata = await getTestCases(id)
-        setTestCases(testdata)
-        console.log('testdata:', testdata)
       }
       fetchData()
     }

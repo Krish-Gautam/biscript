@@ -25,7 +25,6 @@ export default function ScriptForm() {
       if (error) {
         console.error("Error fetching script:", error);
       } else if (data) {
-        console.log('data', data)
         setScriptData(data);
         setForm({
           id: id,
@@ -38,8 +37,6 @@ export default function ScriptForm() {
 
     fetchScript(scriptId);
   }, [scriptId]);
-
-  console.log('form', form)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

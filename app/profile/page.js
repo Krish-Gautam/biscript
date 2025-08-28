@@ -5,6 +5,8 @@ import { supabase } from "../utils/supabaseClient";
 import { Edit, Trophy, Target, Award, TrendingUp, MapPin, User, Mail } from "lucide-react";
 import { getUserChallenges } from "../services/getUserChallenges";
 import { getProfile } from "../services/updateProfile";
+import Image from "next/image";
+import Link from "next/link";
 
 const page = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -40,7 +42,6 @@ const page = () => {
         console.error("Error fetching profile:", error);
         return;
       }
-      console.log("edit form", data)
 
       if (data) {
         setEditForm({
@@ -58,13 +59,11 @@ const page = () => {
   useEffect(() => {
     if (currentUser?.id) {   // only runs when currentUser is set
       const fetchchallenge = async () => {
-        console.log('userid', currentUser.id)
         const { data, error } = await getUserChallenges(currentUser.id);
         if (error) {
           console.error("Error fetching user challenges:", error);
         }
         setChallenges(data);
-        console.log("Fetched user challenges:", data);
       }
       fetchchallenge();
     }
@@ -127,7 +126,9 @@ const page = () => {
                   <div className="flex flex-col items-center text-center mb-8">
                     {/* Profile Image */}
                     <div className="relative mb-6 w-32 h-32 rounded-full overflow-hidden border border-white/10 shadow-lg bg-[#202023] flex items-center justify-center">
-                      <img
+                      <Image
+                        width={128}
+                        height={128}
                         src={editForm.avatar_url || "/profil.jpg"}
                         alt="Profile"
                         loading="lazy"
@@ -179,13 +180,13 @@ const page = () => {
                         </button>
                       </div>
                     ) : (
-                      <a
+                      <Link
                         href="/profile/edit"
                         className="w-full inline-flex items-center justify-center bg-white/10 hover:bg-white/15 text-white p-3 rounded-xl font-medium border border-white/10 transition-all duration-150"
                       >
                         <Edit size={16} />
                         <span className="ml-2">Edit Profile</span>
-                      </a>
+                      </Link>
                     )}
                   </div>
 

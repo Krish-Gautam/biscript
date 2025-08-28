@@ -39,7 +39,6 @@ export default function LessonForm() {
       console.error("Error fetching lesson:", error);
     } else {
       setLessonData(data[0]);
-      console.log("Fetched lesson data:", data[0]);
     }
   };
 

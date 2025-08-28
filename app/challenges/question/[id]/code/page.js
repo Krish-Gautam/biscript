@@ -8,7 +8,16 @@ import { useEffect } from 'react'
 import { getChallengeData } from '@/app/services/getChallengeData'
 import { getTestCases } from '@/app/services/getTestCases'
 import { supabase } from '@/app/utils/supabaseClient'
+import { javascript } from "@codemirror/lang-javascript";
+import { cpp } from "@codemirror/lang-cpp";
+import { java } from "@codemirror/lang-java";
 
+const languageOptions = [
+  { id: 63, name: "JavaScript", langExt: javascript },
+  { id: 71, name: "Python", langExt: python },
+  { id: 54, name: "C++", langExt: cpp },
+  { id: 62, name: "Java", langExt: java },
+];
 export default function CodingPage({ params }) {
   const [selectedCase, setSelectedCase] = useState(0);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
@@ -17,7 +26,7 @@ export default function CodingPage({ params }) {
   const [output, setOutput] = useState('')
   const [results, setResults] = useState([])
   const [revealedCount, setRevealedCount] = useState(0)
-  const [panelWidth, setPanelWidth] = useState(50) // percent
+  const [panelWidth, setPanelWidth] = useState(30) // percent
   const sliderRef = React.useRef(null)
   const [isRunning, setIsRunning] = useState(false)
   const [showHints, setShowHints] = useState(false)
@@ -57,8 +66,6 @@ export default function CodingPage({ params }) {
   //     if (error) {
   //       console.error("Error fetching test cases:", error);
   //     }
-  //     console.log('challengedata', data)
-  //     console.log('challengedata', data[0])
   //   };
   //   fetchTestCases();
   // }, [challengeId])
@@ -272,7 +279,27 @@ export default function CodingPage({ params }) {
           <div className="flex flex-col" style={{ width: `${100 - panelWidth}%` }}>
             {/* Editor Header */}
             <div className="bg-neutral-800 border-b border-white/10 px-4 py-3 flex items-center justify-between">
-              <span className="font-medium text-white">Python Editor</span>
+              <div className="flex items-center gap-4">
+                <span className="font-medium text-white">Code Editor</span>
+                <select
+                  value={language.id}
+                  onChange={e => {
+                    const selected = languageOptions.find(l => l.id === Number(e.target.value));
+                    setLanguage(selected);
+                    // Optionally reset code for new language
+                    setCode(selected.name === "Python" ? '# Write your Python code here\n\n' : selected.name === "JavaScript" ? '// Write your JavaScript code here\n\n' : selected.name === "C++" ? '// Write your C++ code here\n\n' : '// Write your Java code here\n\n');
+                  }}
+                  className="bg-neutral-900 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-sm shadow hover:bg-neutral-800"
+                  style={{ minWidth: 120 }}
+                  aria-label="Select language"
+                >
+                  {languageOptions.map(opt => (
+                    <option key={opt.id} value={opt.id} className="bg-neutral-900 text-white">
+                      {opt.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button
                 onClick={runCode}
                 disabled={isRunning}
@@ -330,7 +357,7 @@ export default function CodingPage({ params }) {
                         <button
                           key={idx}
                           onClick={() => setSelectedCase(idx)}
-                          className={`px-3 py-1 rounded bg-neutral-800 text-white text-xs font-semibold border border-gray-700 focus:outline-none transition-all ${selectedCase === idx ? 'ring-2 ring-blue-400' : ''}`}
+                          className={`cursor-pointer select-none px-3 py-1 rounded bg-neutral-800 text-white text-xs font-semibold border border-gray-700 focus:outline-none transition-all ${selectedCase === idx ? 'ring-2 ring-blue-400' : ''}`}
                           aria-label={`Select Case ${idx + 1}`}
                         >
                           {icon} Case {idx + 1}

@@ -8,7 +8,7 @@ const server = app.listen(3001, () => console.log("✅ Server running on http://
 const wss = new WebSocketServer({ server });
 
 wss.on("connection", (ws) => {
-  console.log("⚡ Client connected");
+
 
   // Spawn a Python process (you can change to bash, node, etc.)
   const shell = pty.spawn("python3", [], {

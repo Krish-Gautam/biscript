@@ -14,6 +14,5 @@ export const addQuestion = async (form) => {
     return { data: null, error };
   }
 
-  console.log("Lesson added successfully:", data);
   return { data, error };
 }

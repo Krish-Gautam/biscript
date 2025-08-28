@@ -65,7 +65,7 @@ const Login = () => {
 
           <div className="flex justify-between items-center text-xs mt-1">
             <div></div>
-            <a href="#" className="text-blue-400 hover:underline">Forgot password?</a>
+            <Link href="#" className="text-blue-400 hover:underline">Forgot password?</Link>
           </div>
 
           {userExitsError && (
@@ -85,7 +85,7 @@ const Login = () => {
 
         <div className="mt-6 text-center text-gray-400 text-sm">
           Don't have an account?{' '}
-          <a href="/signin" className="text-blue-400 hover:underline font-medium">Sign up</a>
+          <Link href="/signin" className="text-blue-400 hover:underline font-medium">Sign up</Link>
         </div>
       </div>
     </div>

@@ -13,6 +13,5 @@ export const addScript = async ({title, lessonId, plan}) => {
     return { data: null, error };
   }
 
-  console.log("Script added successfully:", data);
   return { data, error };
 } 
