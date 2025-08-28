@@ -103,16 +103,30 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
       }
     };
     fetchLessons();
-  }, [initialLanguage]);
+  }, [initialLanguage, onLanguageChanged]);
 
   // Auto-select initial lesson
   useEffect(() => {
     if (!initialLesson || lessons.length === 0) return;
+    const handleLessonInitialization = async (lesson) => {
+      setCurrentLesson(lesson);
+      setOpenLessons((prev) => ({ ...prev, [lesson.id]: true }));
+
+      const commentPrefix = { JavaScript: "//", Python: "#", "C++": "//", Java: "//" };
+      setCode(`${commentPrefix[language?.name || "JavaScript"]} ${lesson.title}\n\n`);
+
+      if (!lessonQuestions[lesson.id]) {
+        const questions = await getQuestion(lesson.id);
+        setLessonQuestions((prev) => ({ ...prev, [lesson.id]: questions }));
+      }
+
+      resetTeachingFlow();
+    };
     const lesson = lessons.find(
       (l) => l.id === initialLesson
     );
     if (lesson) handleLessonInitialization(lesson);
-  }, [initialLesson, lessons]);
+  }, [initialLesson, lessons, lessonQuestions, language?.name]);
 
   // Fetch goblin teaching for current lesson
   useEffect(() => {
@@ -202,32 +216,20 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
       }
     }
 
-    const attempts = userProfile.mistakes.filter(m => m.step === currentStep.trigger).length;
-    if (attempts >= 3 && currentStep.hint && lastReaction?.response !== currentStep.hint) {
-      setGoblinLine(`Ugh, okay fine. Here's a hint: ${currentStep.hint}`);
-      setLastReaction({ response: currentStep.hint });
-      return;
-    }
-  }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput, isLessonStarted]);
+    // const attempts = userProfile.mistakes.filter(m => m.step === currentStep.trigger).length;
+    // if (attempts >= 3 && currentStep.hint && lastReaction?.response !== currentStep.hint) {
+    //   setGoblinLine(`Ugh, okay fine. Here's a hint: ${currentStep.hint}`);
+    //   setLastReaction({ response: currentStep.hint });
+    //   return;
+    // }
+  }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput, isLessonStarted, lastReaction]);
 
   // Final cleanup: clear timers on unmount
   useEffect(() => clearTimers, []);
 
   /* ------------------------------- Lesson Handlers ------------------------------- */
-  const handleLessonInitialization = async (lesson) => {
-    setCurrentLesson(lesson);
-    setOpenLessons((prev) => ({ ...prev, [lesson.id]: true }));
 
-    const commentPrefix = { JavaScript: "//", Python: "#", "C++": "//", Java: "//" };
-    setCode(`${commentPrefix[language?.name || "JavaScript"]} ${lesson.title}\n\n`);
 
-    if (!lessonQuestions[lesson.id]) {
-      const questions = await getQuestion(lesson.id);
-      setLessonQuestions((prev) => ({ ...prev, [lesson.id]: questions }));
-    }
-
-    resetTeachingFlow();
-  };
 
   const handleLessonClick = async (lesson) => {
     // navigate to the new lesson route
@@ -285,43 +287,43 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
     }
   };
 
-//   const runCode = async () => {
-//   if (!language) return;
-//   setLoading(true);
-//   setOutput("Running...");
+  //   const runCode = async () => {
+  //   if (!language) return;
+  //   setLoading(true);
+  //   setOutput("Running...");
 
-//   try {
-//     const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
+  //   try {
+  //     const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
 
-//     const res = await fetch("/api/piston/runCode", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         language: langConfig.piston, // "python", "javascript", etc.
-//         version: "3.12.0",
-//         files: [
-//           {
-//             name: `main.${langConfig.ext}`, // main.py, main.js, etc.
-//             content: code,
-//           },
-//         ],
-//       }),
-//     });
+  //     const res = await fetch("/api/piston/runCode", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         language: langConfig.piston, // "python", "javascript", etc.
+  //         version: "3.12.0",
+  //         files: [
+  //           {
+  //             name: `main.${langConfig.ext}`, // main.py, main.js, etc.
+  //             content: code,
+  //           },
+  //         ],
+  //       }),
+  //     });
 
-//     const result = await res.json();
+  //     const result = await res.json();
 
-//     const pistonOutput =
-//       result.run?.stdout || result.run?.stderr || "No output";
+  //     const pistonOutput =
+  //       result.run?.stdout || result.run?.stderr || "No output";
 
-//     setOutput(pistonOutput);
-//   } catch (err) {
-//     setOutput(err.message || "Error running code");
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  //     setOutput(pistonOutput);
+  //   } catch (err) {
+  //     setOutput(err.message || "Error running code");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Toolkit exposed to parent via ref
   useImperativeHandle(ref, () => ({

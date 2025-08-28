@@ -29,7 +29,7 @@ const Navbar = () => {
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();

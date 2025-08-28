@@ -12,8 +12,6 @@ export const waitForConvertor = (spec) => {
           const wrapped = spec.value.trim().startsWith("(")
             ? spec.value
             : `(${spec.value})`; // <- this line fixes the issue
-
-          // eslint-disable-next-line no-new-func
           return new Function(`return ${wrapped}`)();
         }
 

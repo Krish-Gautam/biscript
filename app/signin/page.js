@@ -36,7 +36,7 @@ const Signin = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();

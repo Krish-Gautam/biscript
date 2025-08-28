@@ -22,7 +22,7 @@ const Problems = () => {
     }
 
     fetchLessons()
-  }, [])
+  }, [language])
 
   const handleLanguageChange = (lang) => {
     window.location.href = `/Lessons/${lang}`;

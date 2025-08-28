@@ -208,7 +208,7 @@ export default function CodingPage({ params }) {
 
               {/* Example Input/Output */}
               {testCases.length !== 0 && testCases.map((testCases, index) => (
-                <div className="space-y-4">
+                <div key={index} className="space-y-4">
                   <div className="font-semibold text-gray-200 mb-2">Example {index + 1}:</div>
                   <div className="bg-neutral-800/50 rounded-lg p-4">
                     <h3 className="font-semibold  text-gray-200 mb-2">Input : {

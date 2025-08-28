@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../utils/supabaseClient";
 import { updateProfile, getProfile } from "../../services/updateProfile";
 import { ArrowLeft, User, MapPin, Camera, Save, X, Check } from "lucide-react";
-import Navbar from "../../components/Navbar";
 import Image from "next/image";
 const EditProfile = () => {
   const router = useRouter();
@@ -296,7 +295,7 @@ const EditProfile = () => {
                   className="w-full bg-[#2a2a2d]/80 border border-white/20 rounded-xl px-4 py-3 text-white text-sm resize-none backdrop-blur-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                   placeholder="Tell us about yourself..."
                 />
-                <p className="text-xs text-gray-500 mt-2">Share your interests, skills, or what you're passionate about</p>
+                <p className="text-xs text-gray-500 mt-2">Share your interests, skills, or what {`you're`} passionate about</p>
               </div>
 
               {/* Location */}
@@ -313,7 +312,7 @@ const EditProfile = () => {
                   className="w-full bg-[#2a2a2d]/80 border border-white/20 rounded-xl px-4 py-3 text-white text-sm backdrop-blur-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                   placeholder="Enter your location"
                 />
-                <p className="text-xs text-gray-500 mt-2">City, Country or any location you'd like to share</p>
+                <p className="text-xs text-gray-500 mt-2">City, Country or any location {`you'd`} like to share</p>
               </div>
             </div>
                

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { loginUser } from '../services/loginUser';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -84,7 +85,7 @@ const Login = () => {
         </form>
 
         <div className="mt-6 text-center text-gray-400 text-sm">
-          Don't have an account?{' '}
+          {`Don't`} have an account?{' '}
           <Link href="/signin" className="text-blue-400 hover:underline font-medium">Sign up</Link>
         </div>
       </div>

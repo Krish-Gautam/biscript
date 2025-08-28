@@ -8,7 +8,7 @@ import { getProfile } from "../services/updateProfile";
 import Image from "next/image";
 import Link from "next/link";
 
-const page = () => {
+const Page = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -313,4 +313,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

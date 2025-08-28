@@ -10,7 +10,6 @@ export const reactionConvertor = (spec) => {
       try {
         // Case 1: Stringified function
         if (spec.value.includes("=>")) {
-          // eslint-disable-next-line no-new-func
           return new Function(`return (${spec.value})`)();
         }
 
