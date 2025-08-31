@@ -77,7 +77,7 @@ const Languages = () => {
   ];
 
   return (
-    <div className="px-6 py-16 bg-[#1A1B1E] text-white min-h-screen">
+    <div className="px-6 py-10 md:py-16 bg-[#1A1B1E] text-white min-h-screen">
       <h1 className="text-4xl sm:text-5xl font-bold text-center mb-12 select-none">Languages Supported</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
         {languages.map((lang, idx) => (

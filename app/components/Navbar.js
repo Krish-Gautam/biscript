@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabaseClient";
 import Image from "next/image";
 import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { set } from "nprogress";
 
 const Navbar = () => {
   const [session, setSession] = useState(null);
@@ -40,6 +41,9 @@ const Navbar = () => {
     }
   };
 
+  const handleProfileClick = (() => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  });
 
   return (
     <Suspense fallback={<div className="w-full h-12 bg-neutral-900 animate-pulse flex items-center px-6"><div className="w-32 h-6 bg-gray-700 rounded mr-4"></div><div className="w-16 h-6 bg-gray-700 rounded"></div></div>}>
@@ -110,18 +114,25 @@ const Navbar = () => {
           ) : (
             <>
               {/* Profile Dropdown */}
-              <div className="relative group z-[9999]">
-                <button className="flex items-center space-x-2 hover:bg-gray-700 px-3 py-1 rounded transition-colors cursor-pointer">
+              <div className="relative z-[9999]">
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center space-x-2 hover:bg-gray-700 px-3 py-1 rounded transition-colors cursor-pointer"
+                >
                   <User size={20} />
                   <span>Profile</span>
                   <ChevronDown size={16} />
                 </button>
 
-                {/* Dropdown (still inside same group) */}
-                <div className="absolute right-0 mt-2 w-48 bg-[#252526] border border-gray-700 rounded shadow-lg 
-                  opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                  group-hover:translate-y-0 transform -translate-y-2 
-                  transition-all duration-200 z-[9999]">
+                {/* Dropdown */}
+                <div
+                  className={`
+      absolute right-0 mt-2 w-48 bg-[#252526] border border-gray-700 rounded shadow-lg
+      transform transition-all duration-200 z-[9999]
+      ${isProfileDropdownOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"}
+      md:group-hover:opacity-100 md:group-hover:visible md:group-hover:translate-y-0
+    `}
+                >
                   <Link
                     href="/profile"
                     className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
@@ -143,6 +154,7 @@ const Navbar = () => {
                 </div>
               </div>
 
+
             </>
           )
           }
@@ -157,7 +169,7 @@ const Navbar = () => {
           }}
         />
       )}
-  </Suspense>
+    </Suspense>
   );
 };
 

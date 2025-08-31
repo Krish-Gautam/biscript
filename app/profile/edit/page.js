@@ -160,13 +160,13 @@ const EditProfile = () => {
             {/* Left Column - Avatar and Basic Info */}
             <div className="space-y-6">
               {/* Avatar Section */}
-              <div className="select-none bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] rounded-3xl p-8 border border-white/10 shadow-2xl">
+              <div className="select-none bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] rounded-3xl p-4 border border-white/10 shadow-2xl">
                 <div className="text-center">
-                  <div className="relative inline-block mb-6">
+                  <div className="relative inline-block ">
                     <div className="relative">
                       <Image
-                        width={128}
-                        height={128}
+                        width={138}
+                        height={138}
                         src={formData.avatar_url || "/profil.jpg"}
                         alt="Profile"
                         loading="lazy"

@@ -14,4 +14,10 @@ const supabaseKey = isServer && supabaseServiceRoleKey
   ? supabaseServiceRoleKey
   : supabaseAnonKey
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,   // 👈 remembers login across reloads
+    autoRefreshToken: true, // 👈 keeps user logged in if token expires
+    detectSessionInUrl: true,
+  },
+})

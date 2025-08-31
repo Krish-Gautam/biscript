@@ -6,6 +6,7 @@ import Image from "next/image";
 import CodeEditor from "@/app/components/CodeEditor.dynamic";
 import { getLessons } from "@/app/services/getLessons";
 import { getQuestion } from "@/app/services/getQuestions";
+import { supabase } from "@/app/utils/supabaseClient";
 
 
 const Page = () => {
@@ -53,7 +54,21 @@ const Page = () => {
     fetchLessons();
   }, [language]);
   
+  useEffect(() => {
+      const checkUser = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "/signin";
+        } else {
+          const user = session.user;
+          setCurrentUser(user);
+          await fetchUserProfile(user.id);
+        }
+      };
+      checkUser();
+    }, []);
   
+
   // Toggle dropdown + fetch questions if needed
   const toggleLesson = async (lessonId) => {
     setOpenLessons((prev) => ({
@@ -96,8 +111,9 @@ const Page = () => {
         currentLanguage={currentLanguage}
         onLanguageChange={(name) => editorRef.current && editorRef.current.setLanguage(name)}
         isRunning={isRunning}
+        hamburgerToggle={() => editorRef.current && editorRef.current.hamburgerToggle()}
       />
-      <div className="flex w-full h-[93vh] gap-2 p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
+      <div className="flex w-full h-[93vh] gap-2 p-2 md:p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
         <div className="flex w-[100%] gap-1">
           {/* Main Code/Terminal Area */}
           <div

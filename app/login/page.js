@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from "react-hot-toast";
+import ProgressBar from '../components/ProgressBar';
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -35,6 +36,8 @@ const Login = () => {
     }
   };
   return (
+    <>
+    <ProgressBar />
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d]">
       <div className="w-full max-w-md bg-[#232526] border border-gray-700 p-8 rounded-2xl shadow-2xl relative">
         {/* Logo/avatar */}
@@ -90,6 +93,7 @@ const Login = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

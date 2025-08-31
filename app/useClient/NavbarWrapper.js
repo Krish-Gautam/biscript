@@ -9,7 +9,8 @@ export const NavbarWrapper = () => {
   const shouldHideNavbar = hideNavbaronpaths.some((path) => pathname.startsWith(path));
 
   if(shouldHideNavbar){
-    return null;  
+    return null;
   }
+
   return !shouldHideNavbar && <Navbar />;
 }

@@ -14,9 +14,7 @@ import { getGoblinLines } from "../services/getGoblinLines";
 import { deserializePlan } from "../services/deserializedPlan";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-
-
-
+import { set } from "nprogress";
 
 /* ---------------------------------- Setup ---------------------------------- */
 
@@ -64,6 +62,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   const [goblinTeaching, setGoblinTeaching] = useState(null);
   const [lessonStepIndex, setLessonStepIndex] = useState(0);
   const [isLessonStarted, setIsLessonStarted] = useState(false);
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
   // User progress
   const [userProfile, setUserProfile] = useState({
@@ -229,8 +228,6 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
 
   /* ------------------------------- Lesson Handlers ------------------------------- */
 
-
-
   const handleLessonClick = async (lesson) => {
     // navigate to the new lesson route
     router.push(`/questions/${initialLanguage}/${lesson.id}`);
@@ -362,6 +359,10 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
       }
     },
     getState: () => ({ code, languageName: language?.name }),
+    hamburgerToggle: () => {
+      setIsHamburgerOpen((prev) => !prev);
+      console.log(isHamburgerOpen);
+    }
   }));
 
   /* ------------------------------- Drag Resizing ------------------------------- */
@@ -393,8 +394,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
 
   return (
     <>
-
-      <div className="bg-[#1a1a1d] right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
+      <div className="bg-[#1a1a1d] hidden-md right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
         <GoblinBox response={goblinLine} />
         <div className="flex items-center justify-between gap-2 px-2 pb-2">
           {!isLessonStarted ? (
@@ -427,15 +427,62 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
         </div>
       </div>
 
-      <div className="flex w-full h-full gap-4">
+      <div className="flex w-full h-full gap-4 ">
         {/* Sidebar */}
         <div
-          className={`bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border border-gray-700 rounded-2xl shadow-xl transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-80'
+          className={`sidebar ${isHamburgerOpen ? "desktop-sidebar" : ""} bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border border-gray-700 rounded-2xl shadow-xl transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-80'
             }`}
         >
+          <style>{`
+          @media (max-width: 768px) {
+            .sidebar {
+              display: none !important;
+              border-radius: 0 ;
+            }
+          }
+          .desktop-sidebar {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 6vh;
+            animation: sidebar-slide-in 0.6s cubic-bezier(0.4,0,0.2,1);
+            z-index:999;
+            height: 86vh;
+          }
+
+          @keyframes sidebar-slide-in {
+            from {
+              opacity: 0;
+              transform: translateX(-40px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          @media (max-width: 768px) {
+            .hidden-md {
+              display: none
+            }
+          }
+          .display-md{
+            display: none;
+          }
+          @media (max-width: 768px) {
+            .display-md {
+              display: block;
+            }
+          }
+            .md-rounded-t-2xl {
+    @media (width >= 48rem /* 768px */) {
+        border-top-left-radius: var(--radius-2xl) /* 1rem = 16px */;
+        border-top-right-radius: var(--radius-2xl) /* 1rem = 16px */;
+    }
+}
+        `}</style>
           <div className="flex flex-col h-full">
             {/* Sidebar Header */}
-            <div className="bg-gradient-to-r from-[#2a2a2d] to-[#3a3a3d] p-4 rounded-t-2xl border-b border-gray-700">
+            <div className="bg-gradient-to-r from-[#2a2a2d] to-[#3a3a3d] p-2 md-rounded-t-2xl border-b border-gray-700">
               <div className="flex items-center justify-between">
                 {!isSidebarCollapsed && (
                   <div className="flex items-center gap-3">
@@ -450,7 +497,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
                 )}
                 <button
                   onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  className="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors shadow-sm"
+                  className={`w-8 h-8 ${isHamburgerOpen ? "hidden" : ""} bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors shadow-sm`}
                   title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                   <span className="text-gray-300 text-sm">

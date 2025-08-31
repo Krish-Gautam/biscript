@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { registerUser } from "../services/registerUser";
 import { useRouter } from "next/navigation";
+import ProgressBar from "../components/ProgressBar";
 import toast from "react-hot-toast";
 
 const Signin = () => {
@@ -55,6 +56,8 @@ const Signin = () => {
   };
 
   return (
+    <>
+    <ProgressBar />
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] px-4">
       <div className="w-full max-w-md bg-[#232526] border border-gray-700 p-8 rounded-2xl shadow-2xl relative">
         {/* Optional: Logo/avatar for branding, comment out if not needed */}
@@ -119,6 +122,7 @@ const Signin = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

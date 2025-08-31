@@ -71,8 +71,10 @@ export default function Home() {
   }, [currentIndex, fullText]);
 
   return (
+    
     <div className="select-none min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
       {/* Enhanced Dark Background */}
+      
       <div className="select-none absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
       
       {/* Subtle radial gradient for depth */}
@@ -83,10 +85,10 @@ export default function Home() {
       
       {/* Content */}
       <div className="relative z-10">
-    <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05] fade-in">
+    <h1 className="text-5xl font-bold text-white text-center mb-6 select-none transition-transform hover:scale-[1.05] animate-fade-in">
           Start Learning Code the Fun Way
         </h1>
-        <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05] fade-in">
+        <p className="text-xl text-gray-300 text-center max-w-2xl mb-8 select-none transition-transform hover:scale-[1.05] animate-fade-in">
           Solve engaging challenges, earn achievements, and level up your programming skills one game at a time.
         </p>
       </div>

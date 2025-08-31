@@ -26,15 +26,68 @@ const Problems = () => {
 
   const handleLanguageChange = (lang) => {
     window.location.href = `/Lessons/${lang}`;
+
   }
 
-  const languages = ["React JavaScript", "Python", "Java", "C++", "C", "C#", "HTML", "CSS", "PHP", "Node Js", "Bash",];
+  const languages = ["React JavaScript", "Python", "Java", "Cpp", "C", "HTML", "CSS", "PHP", "Node Js", "Bash",];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#18181b] via-[#23272f] to-[#101014] text-white font-sans">
+        <style>{`
+          @media (max-width: 768px) {
+            .sidebar {
+              display: none !important;
+              border-radius: 0 ;
+            }
+          }
+          .desktop-sidebar {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 6vh;
+            animation: sidebar-slide-in 0.6s cubic-bezier(0.4,0,0.2,1);
+            z-index:999;
+            height: 86vh;
+          }
+
+          @keyframes sidebar-slide-in {
+            from {
+              opacity: 0;
+              transform: translateX(-40px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          @media (max-width: 768px) {
+            .hidden-md {
+              display: none
+            }
+          }
+          .display-md{
+            display: none;
+          }
+          @media (max-width: 768px) {
+            .display-md {
+              display: block;
+            }
+          }
+          .md-rounded-t-2xl {
+          @media (width >= 48rem /* 768px */) {
+          border-top-left-radius: var(--radius-2xl) /* 1rem = 16px */;
+          border-top-right-radius: var(--radius-2xl) /* 1rem = 16px */;
+        }
+      }
+        .md-p-6 {
+    @media (width >= 48rem /* 768px */) {
+        padding: calc(var(--spacing) * 6) /* 1.5rem = 24px */;
+    }
+}
+        `}</style>
       <div className="flex flex-1 w-full h-full min-h-screen">
         {/* Sidebar */}
-        <aside className="h-full min-h-screen w-[18%] bg-[#18181b] rounded-none shadow-xl p-6 space-y-6 border-r border-white/10 flex flex-col gap-0 sticky top-0 self-start">
+        <aside className="sidebar h-full min-h-screen w-[18%] bg-[#18181b] rounded-none shadow-xl p-6 space-y-6 border-r border-white/10 flex flex-col gap-0 sticky top-0 self-start">
           <div className="flex items-center gap-3 bg-[#23272f] hover:bg-[#31343b] transition p-3 rounded-xl cursor-pointer shadow-sm">
             <span className="text-xl">📚</span>
             <span className="text-base font-medium">Library</span>
@@ -50,25 +103,28 @@ const Problems = () => {
           </div>
         </aside>
         {/* Main Content */}
-        <main className="flex-1 flex flex-col gap-6 w-full p-6">
-          <div className="fade-in">
+        <main className="flex-1 flex flex-col gap-6 w-full p-2 md-p-6">
+          <div className="animate-fade-in">
           {/* Topics */}
-          <section className="flex gap-3 p-4 hide-scrollbar overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-            {languages.map((topic, i) => (
+          <section className="flex gap-3 py-4 hide-scrollbar overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+            {languages.map((topic, i) => {
+              const topicslug = topic.toLowerCase().replace(/\s+/g, "-");
+              return (
                 <span
-                onClick={() =>handleLanguageChange(topic.toLowerCase())}
-                key={i}
-                className={`px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
-                     ${topic.toLowerCase() === language
+                  key={i}
+                  className={`px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
+                     ${topicslug === language
                     ? 'bg-blue-600 text-white'
                     : 'bg-[#23272f] hover:bg-[#31343b] text-white'}`}
               >
-                {topic}
+                <Link href={`/Lessons/${topicslug}`}>
+                  {topic}
+                </Link>
               </span>
-            ))}
+            )})}
           </section>
           {/* Problem Cards */}
-          <section className="flex flex-col gap-6 w-full">
+          <section className="flex flex-col animate-fade-in gap-6 w-full">
             {problems.map((problem, i) => (
               <Link href={`/questions/${language}/${problem.id}`} key={i}>
                 <div

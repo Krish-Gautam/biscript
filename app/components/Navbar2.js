@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Play, RotateCcw, Copy, Download, ChevronDown, Check } from "lucide-react";
+import { Play, RotateCcw, Copy, Download, ChevronDown, Check, Menu } from "lucide-react";
 
 export default function Navbar2({
   title,
@@ -22,6 +22,7 @@ export default function Navbar2({
   onLanguageChange,
   isRunning = false,
   isSubmitting = false,
+  hamburgerToggle,
   rightSlot,
 }) {
   const [langOpen, setLangOpen] = useState(false);
@@ -36,6 +37,21 @@ export default function Navbar2({
 
   return (
     <nav className="h-14 w-full bg-gradient-to-r from-[#1a1a1d] to-[#2a2a2d] border-b border-gray-700 shadow-lg">
+      <style>{`
+          @media (max-width: 768px) {
+            .hidden-md {
+              display: none
+            }
+          }
+          .display-md{
+            display: none;
+          }
+          @media (max-width: 768px) {
+            .display-md {
+              display: block;
+            }
+          }
+        `}</style>
       <div className="flex items-center justify-between h-full px-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -60,7 +76,7 @@ export default function Navbar2({
               onClick={() => setLangOpen((o) => !o)}
               aria-expanded={langOpen}
             >
-              <span className="text-xs">
+              <span className="text-sm">
                 {currentLanguage || languageOptions?.[0]?.name || "Language"}
               </span>
               <ChevronDown size={14} className={`${langOpen ? "rotate-180" : ""} transition-transform duration-200`} />
@@ -98,7 +114,7 @@ export default function Navbar2({
               setCopyTimer(t);
             }}
             disabled={copied}
-            className={`cursor-pointer px-3 py-1.5 rounded-md border ${
+            className={`cursor-pointer hidden-md px-3 py-1.5 rounded-md border ${
               copied
                 ? "bg-green-600/20 text-green-400 border-green-700"
                 : "bg-[#232526] hover:bg-[#2e2f31] text-gray-200 border-gray-700"
@@ -109,20 +125,20 @@ export default function Navbar2({
           </button>
           <button
             onClick={onDownload}
-            className="cursor-pointer px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700"
+            className="cursor-pointer hidden-md px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700"
             title="Download code"
           >
             <Download size={16} />
           </button>
           <button
             onClick={onReset}
-            className="cursor-pointer px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700"
+            className="cursor-pointer hidden-md px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700"
             title="Reset code"
           >
             <RotateCcw size={16} />
           </button>
 
-          <div className="w-px h-6 bg-gray-700 mx-1" />
+          <div className="w-px hidden-md h-6 bg-gray-700 mx-1" />
 
           {onSubmit && (
             <button
@@ -136,12 +152,18 @@ export default function Navbar2({
           <button
             onClick={onRun}
             disabled={isRunning}
-            className="px-4 py-1.5 bg-green-600 hover:bg-green-500 disabled:bg-green-900 text-white rounded-md shadow border border-green-700"
+            className="px-4 py-1.5 hidden-md bg-green-600 hover:bg-green-500 disabled:bg-green-900 text-white rounded-md shadow border border-green-700"
           >
-            <div className="flex items-center gap-2">
+            <div className="select-none hidden-md flex items-center gap-2">
               <Play size={16} />
               <span>{isRunning ? "Running..." : "Run"}</span>
             </div>
+          </button>
+          <button
+            onClick={hamburgerToggle}
+            className="cursor-pointer display-md px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700"
+          >
+            <Menu size={20} />
           </button>
 
           {rightSlot}

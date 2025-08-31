@@ -37,6 +37,20 @@ export default function CodingPage({ params }) {
   const [testCases, setTestCases] = useState([])
   const challengeId = params.id
 
+useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/signin";
+      } else {
+        const user = session.user;
+        setCurrentUser(user);
+        await fetchUserProfile(user.id);
+      }
+    };
+    checkUser();
+  }, []);
+
 
   useEffect(() => {
     const fetchSession = async () => {
