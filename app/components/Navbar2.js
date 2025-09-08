@@ -72,7 +72,7 @@ export default function Navbar2({
         <div className="flex items-center gap-2">
           <div className="relative">
             <button
-              className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700 ${langOpen ? "ring-1 ring-gray-600" : ""}`}
+              className={`cursor-pointer select-none flex items-center gap-2 px-3 py-1.5 bg-[#232526] hover:bg-[#2e2f31] text-gray-200 rounded-md border border-gray-700 ${langOpen ? "ring-1 ring-gray-600" : ""}`}
               onClick={() => setLangOpen((o) => !o)}
               aria-expanded={langOpen}
             >

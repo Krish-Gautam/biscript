@@ -81,17 +81,17 @@ const Navbar = () => {
         {/* Logo & Brand */}
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-neutral-800/80 rounded-lg flex items-center justify-center shadow-sm select-none">
-            <span className="text-white text-base font-bold">⚡</span>
+            <span className="text-white  text-base font-bold">⚡</span>
           </div>
           <span className="text-lg font-bold text-white tracking-tight select-none">Biscript</span>
         </Link>
 
-        {/* Navigation */}
+        {/* Navigation */} 
         <div className="hidden md:flex items-center gap-5">
-          <Link href="/languages" className="nav-anim-link text-gray-200 font-medium px-2" prefetch={true}>Languages</Link>
-          <Link href="/challenges" className="nav-anim-link text-gray-200 font-medium px-2" prefetch={true}>Challenges</Link>
-          <Link href="/docs" className="nav-anim-link text-gray-200 font-medium px-2" prefetch={true}>Docs</Link>
-          <Link href="/community" className="nav-anim-link text-gray-200 font-medium px-2" prefetch={true}>Community</Link>
+          <Link href="/languages" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Languages</Link>
+          <Link href="/challenges" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Challenges</Link>
+          <Link href="/docs" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Docs</Link>
+          <Link href="/community" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Community</Link>
         </div>
 
         {/* Auth/Profile */}
