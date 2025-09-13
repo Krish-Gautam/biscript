@@ -35,6 +35,7 @@ export default function CodingPage({ params }) {
   const [loading, setLoading] = useState(false)
   const [session, setSession] = useState(null)
   const [testCases, setTestCases] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
   const challengeId = params.id
 
 useEffect(() => {

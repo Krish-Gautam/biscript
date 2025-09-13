@@ -80,7 +80,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center disabled:opacity-60"
+            className="h-12 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition duration-300 shadow-lg flex items-center justify-center disabled:opacity-60"
             disabled={loading}
           >
             Sign In

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { supabase } from "../utils/supabaseClient";
 import { Edit, Trophy, Target, Award, TrendingUp, MapPin, User, Mail } from "lucide-react";
+import { getBadges } from "../services/getBagdes";
 import { getUserChallenges } from "../services/getUserChallenges";
 import { getProfile } from "../services/updateProfile";
 import Image from "next/image";
@@ -11,6 +12,7 @@ import Link from "next/link";
 const Page = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [badges, setBadges] = useState([]);
   const [editForm, setEditForm] = useState({
     username: "",
     bio: "",
@@ -81,6 +83,7 @@ const Page = () => {
   };
 
   const stats = {
+
     problemsSolved: 127,
     badgesEarned: 8,
     challengesWon: 15,
@@ -90,24 +93,9 @@ const Page = () => {
     languages: 8
   };
 
-  const badges = [
-    { name: "Problem Solver", icon: "🏆", color: "bg-yellow-500", description: "Solved 100+ problems" },
-    { name: "Streak Master", icon: "🔥", color: "bg-orange-500", description: "15 day streak" },
-    { name: "Speed Coder", icon: "⚡", color: "bg-blue-500", description: "Fastest solution" },
-    { name: "Accuracy King", icon: "🎯", color: "bg-green-500", description: "95%+ accuracy" },
-    { name: "Language Master", icon: "🌐", color: "bg-purple-500", description: "8 languages" },
-    { name: "Challenge Champion", icon: "👑", color: "bg-pink-500", description: "15 challenges won" },
-    { name: "Early Bird", icon: "🐦", color: "bg-indigo-500", description: "First to solve" },
-    { name: "Consistency", icon: "⭐", color: "bg-teal-500", description: "30 days active" }
-  ];
 
-  // const challenges = [
-  //   { name: "Weekly Coding Challenge", date: "2024-01-15", rank: 1, participants: 150 },
-  //   { name: "Algorithm Master", date: "2024-01-08", rank: 2, participants: 89 },
-  //   { name: "Data Structures", date: "2024-01-01", rank: 1, participants: 234 },
-  //   { name: "Dynamic Programming", date: "2023-12-25", rank: 3, participants: 67 },
-  //   { name: "System Design", date: "2023-12-18", rank: 1, participants: 45 }
-  // ];
+
+
 
   return (
     <>
@@ -222,7 +210,7 @@ const Page = () => {
                 <div className="bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] p-6 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-between mb-2">
                     <Target className="w-6 h-6 text-blue-400" />
-                    <span className="text-2xl font-bold text-blue-400">{stats.problemsSolved}</span>
+                    <span className="text-2xl font-bold text-blue-400">0</span>
                   </div>
                   <div className="text-gray-400 text-sm">Problems Solved</div>
                 </div>
@@ -230,7 +218,7 @@ const Page = () => {
                 <div className="bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] p-6 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-between mb-2">
                     <Award className="w-6 h-6 text-yellow-400" />
-                    <span className="text-2xl font-bold text-yellow-400">{stats.badgesEarned}</span>
+                    <span className="text-2xl font-bold text-yellow-400">{badges.length}</span>
                   </div>
                   <div className="text-gray-400 text-sm">Badges Earned</div>
                 </div>
@@ -238,7 +226,7 @@ const Page = () => {
                 <div className="bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] p-6 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-between mb-2">
                     <Trophy className="w-6 h-6 text-green-400" />
-                    <span className="text-2xl font-bold text-green-400">{stats.challengesWon}</span>
+                    <span className="text-2xl font-bold text-green-400">{challenges.length}</span>
                   </div>
                   <div className="text-gray-400 text-sm">Challenges Won</div>
                 </div>
@@ -246,7 +234,7 @@ const Page = () => {
                 <div className="bg-gradient-to-br from-[#1a1a1d] to-[#2a2a2d] p-6 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-between mb-2">
                     <TrendingUp className="w-6 h-6 text-purple-400" />
-                    <span className="text-2xl font-bold text-purple-400">#{stats.overallRanking}</span>
+                    <span className="text-2xl font-bold text-purple-400">#1</span>
                   </div>
                   <div className="text-gray-400 text-sm">Overall Ranking</div>
                 </div>
@@ -259,10 +247,10 @@ const Page = () => {
                   <h3 className="text-xl font-semibold text-white">Badges Earned</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {badges.map((badge, index) => (
+                  {badges.length > 0 && badges.map((badge, index) => (
                     <div key={index} className="bg-[#2a2a2d]/80 p-4 rounded-xl border border-white/5 hover:border-white/20 transition-all hover:scale-105 backdrop-blur-sm">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-10 h-10 ${badge.color} rounded-full flex items-center justify-center text-lg shadow-lg`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg`}>
                           {badge.icon}
                         </div>
                         <div>
@@ -273,6 +261,15 @@ const Page = () => {
                     </div>
                   ))}
                 </div>
+                {badges && badges.length === 0 && (
+                  <div className="text-center text-gray-400 text-sm mt-4">
+                    No badges earned yet. Here are all badges you can earn! 
+                    <Link href="/badges">
+                      <span className="text-blue-400 hover:underline"> View All Badges</span>
+                    </Link>
+                    
+                  </div>
+                )}
               </div>
 
               {/* Challenges Won Section */}

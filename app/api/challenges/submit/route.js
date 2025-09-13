@@ -74,7 +74,7 @@ export async function POST(req) {
         participants: challengeData.participants,
       },
       {
-        onConflict: ["challenge_id", "user_id"], // make sure your table has a unique constraint on these
+        onConflict: ["id"], // make sure your table has a unique constraint on these
       }
     );
 
