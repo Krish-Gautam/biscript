@@ -257,28 +257,21 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
     setLoading(true);
     setOutput("Running...");
     try {
-      const res = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-RapidAPI-Key": process.env.RAPID_API_KEY,
-            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-          },
-          body: JSON.stringify({
-            source_code: code,
-            language_id: language.id,
-          }),
-        }
-      );
+      const res = await fetch("/api/runCode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source_code: code,
+        language_id: language.id,
+      }),
+    });
 
       const result = await res.json();
       const judgeOutput = result.stdout || result.stderr || "No output";
       setOutput(`${judgeOutput}`);
 
     } catch (err) {
-      setOutput(err);
+      setOutput(err.message || String(err));
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ const Page = () => {
   const [lessonQuestions, setLessonQuestions] = useState({});
   const editorRef = useRef(null);
   const [currentLanguage, setCurrentLanguage] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
    
   // Resize Panel
@@ -62,7 +63,7 @@ const Page = () => {
         } else {
           const user = session.user;
           setCurrentUser(user);
-          await fetchUserProfile(user.id);
+          
         }
       };
       checkUser();
