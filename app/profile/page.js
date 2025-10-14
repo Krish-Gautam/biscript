@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProfileSkeleton } from "../components/LoadingSkeleton";
 
+
 const Page = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);

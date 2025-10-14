@@ -216,9 +216,11 @@ export const CodeEditorSkeleton = () => (
   </div>
 );
 
-export default {
+const LoadingSkeleton = {
   ProfileSkeleton,
   HomeSkeleton,
   ChallengeSkeleton,
   CodeEditorSkeleton,
 };
+
+export default LoadingSkeleton;

@@ -210,7 +210,7 @@ export const cancelIdleCallback = (id) => {
   return clearTimeout(id);
 };
 
-export default {
+const utils = {
   cachedFetch,
   clearCache,
   apiCall,
@@ -223,5 +223,7 @@ export default {
   safeLocalStorage,
   createIntersectionObserver,
   requestIdleCallback,
-  cancelIdleCallback
+  cancelIdleCallback,
 };
+
+export default utils;
