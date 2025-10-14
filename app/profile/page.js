@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useState, Suspense } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { Edit, Trophy, Target, Award, TrendingUp, MapPin, User, Mail } from "lucide-react";
 import { getBadges } from "../services/getBagdes";
@@ -8,6 +7,7 @@ import { getUserChallenges } from "../services/getUserChallenges";
 import { getProfile } from "../services/updateProfile";
 import Image from "next/image";
 import Link from "next/link";
+import { ProfileSkeleton } from "../components/LoadingSkeleton";
 
 const Page = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -19,19 +19,27 @@ const Page = () => {
     location: "",
     avatar_url: ""
   });
-  const [challenges, setChallenges] = useState([])
+  const [challenges, setChallenges] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
 
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "/signin";
+        } else {
+          const user = session.user;
+          setCurrentUser(user);
+          await fetchUserProfile(user.id);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsLoading(false);
         window.location.href = "/signin";
-      } else {
-        const user = session.user;
-        setCurrentUser(user);
-        await fetchUserProfile(user.id);
       }
     };
     checkUser();
@@ -61,11 +69,16 @@ const Page = () => {
   useEffect(() => {
     if (currentUser?.id) {   // only runs when currentUser is set
       const fetchchallenge = async () => {
-        const { data, error } = await getUserChallenges(currentUser.id);
-        if (error) {
-          console.error("Error fetching user challenges:", error);
+        try {
+          const { data, error } = await getUserChallenges(currentUser.id);
+          if (error) {
+            console.error("Error fetching user challenges:", error);
+            return;
+          }
+          setChallenges(data || []);
+        } catch (error) {
+          console.error("Error fetching challenges:", error);
         }
-        setChallenges(data);
       }
       fetchchallenge();
     }
@@ -97,6 +110,10 @@ const Page = () => {
 
 
 
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
   return (
     <>
 
@@ -119,9 +136,11 @@ const Page = () => {
                         height={128}
                         src={editForm.avatar_url || "/profil.jpg"}
                         alt="Profile"
-                        loading="lazy"
-                        decoding="async"
+                        loading="eager"
+                        priority
                         className="w-full h-full object-contain"
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                       />
                     </div>
 

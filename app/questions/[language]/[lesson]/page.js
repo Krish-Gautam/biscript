@@ -7,6 +7,7 @@ import CodeEditor from "@/app/components/CodeEditor.dynamic";
 import { getLessons } from "@/app/services/getLessons";
 import { getQuestion } from "@/app/services/getQuestions";
 import { supabase } from "@/app/utils/supabaseClient";
+import LazyCodeEditor from "@/app/components/LazyCodeEditor";
 
 
 const Page = () => {

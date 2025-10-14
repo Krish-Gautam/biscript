@@ -110,17 +110,18 @@ const Problems = () => {
             {languages.map((topic, i) => {
               const topicslug = topic.toLowerCase().replace(/\s+/g, "-");
               return (
+                <Link href={`/Lessons/${topicslug}`}>
                 <span
                   key={i}
-                  className={`px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
+                  className={`inline-block px-5 py-2 rounded-full border border-white/10 shadow font-medium cursor-pointer transition-transform hover:scale-[1.1] select-none
                      ${topicslug === language
                     ? 'bg-blue-600 text-white'
                     : 'bg-[#23272f] hover:bg-[#31343b] text-white'}`}
               >
-                <Link href={`/Lessons/${topicslug}`}>
+                
                   {topic}
-                </Link>
               </span>
+                </Link>
             )})}
           </section>
           {/* Problem Cards */}
@@ -128,7 +129,7 @@ const Problems = () => {
             {problems.map((problem, i) => (
               <Link href={`/questions/${language}/${problem.id}`} key={i}>
                 <div
-                  className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 transition-all shadow-lg flex flex-col min-h-[160px] group w-full transition-transform hover:scale-[1.01]">
+                  className="relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 animate-fade-in shadow-lg flex flex-col min-h-[160px] group w-full transition-transform hover:scale-[1.01]">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition">{problem.title}</h2>
                     <span className={`ml-auto text-xs px-3 py-1 rounded-full font-semibold ${difficultyColors[problem.difficulty]} bg-opacity-80`}>{problem.difficulty}</span>
