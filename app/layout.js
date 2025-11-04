@@ -5,12 +5,14 @@ import ProgressBar from "./components/ProgressBar";
 import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
 import { AuthProvider } from "./components/AuthProvider";
-import Navbar from "./components/Navbar";
+import { Plus_Jakarta_Sans } from 'next/font/google'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['200', '400', '600', '700'],
+  display: 'swap',
+})
+
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -35,7 +37,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body className={`${jakarta.className} min-h-screen flex flex-col`}>
         <div className="absolute top-0 z-[-2] h-screen w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
         {/* Wrap Navbar and children with AuthProvider */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
+import Image from "next/image";
 import { javascript } from "@codemirror/lang-javascript";
 import { EditorView } from "@codemirror/view";
 import { python } from "@codemirror/lang-python";
@@ -10,6 +11,7 @@ import { java } from "@codemirror/lang-java";
 import { getLessons } from "@/app/services/getLessons";
 import { getQuestion } from "@/app/services/getQuestions";
 import GoblinBox from "./GoblinBox";
+import AIInlineChat from "./AIInlineChat";
 import { getGoblinLines } from "../services/getGoblinLines";
 import { deserializePlan } from "../services/deserializedPlan";
 import { motion } from "framer-motion";
@@ -62,7 +64,20 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   const [goblinTeaching, setGoblinTeaching] = useState(null);
   const [lessonStepIndex, setLessonStepIndex] = useState(0);
   const [isLessonStarted, setIsLessonStarted] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (isChatOpen) {
+      setVisible(true);
+    } else {
+      const timer = setTimeout(() => setVisible(false), 150); // match transform duration
+      return () => clearTimeout(timer);
+    }
+  }, [isChatOpen]);
+
 
   // User progress
   const [userProfile, setUserProfile] = useState({
@@ -226,6 +241,16 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   // Final cleanup: clear timers on unmount
   useEffect(() => clearTimers, []);
 
+  // Close chat on Escape key
+  useEffect(() => {
+    if (!isChatOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setIsChatOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isChatOpen]);
+
   /* ------------------------------- Lesson Handlers ------------------------------- */
 
   const handleLessonClick = async (lesson) => {
@@ -258,13 +283,13 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
     setOutput("Running...");
     try {
       const res = await fetch("/api/runCode", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source_code: code,
-        language_id: language.id,
-      }),
-    });
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source_code: code,
+          language_id: language.id,
+        }),
+      });
 
       const result = await res.json();
       const judgeOutput = result.stdout || result.stderr || "No output";
@@ -277,7 +302,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
     }
   };
 
-  //   const runCode = async () => {
+
   //   if (!language) return;
   //   setLoading(true);
   //   setOutput("Running...");
@@ -387,7 +412,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
 
   return (
     <>
-      <div className="bg-[#1a1a1d] hidden-md right-90 top-40 z-40 fixed max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
+      <div className="bg-[#1a1a1d] fixed hidden-md right-90 top-40 z-40  max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
         <GoblinBox response={goblinLine} />
         <div className="flex items-center justify-between gap-2 px-2 pb-2">
           {!isLessonStarted ? (
@@ -420,7 +445,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
         </div>
       </div>
 
-      <div className="flex w-full h-full gap-4 ">
+      <div className="flex w-full h-full gap-2 ">
         {/* Sidebar */}
         <div
           className={`sidebar ${isHamburgerOpen ? "desktop-sidebar" : ""} bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border border-gray-700 rounded-2xl shadow-xl transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-80'
@@ -625,10 +650,20 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
           transition={{ duration: 0.25 }}
           className="flex-1 flex flex-col gap-1"
         >
-          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700" style={{ height: `${editorHeight}%`, transition: 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+          <div className="flex flex-col bg-[#18181b] rounded-2xl shadow-lg border border-gray-700 relative" style={{ height: `${editorHeight}%`, transition: 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             <div className="bg-gradient-to-r from-[#333333] to-[#232526] h-10 px-4 rounded-t-2xl flex items-center justify-between font-semibold text-gray-300 text-base shadow">
               <span>{"</> Code Editor"}</span>
-              {language && <span className="text-sm text-gray-400">{language.name}</span>}
+              <div className="flex items-center gap-2">
+                {language && <span className="text-sm text-gray-400">{language.name}</span>}
+                <button
+                  onClick={() => setIsChatOpen((v) => !v)}
+                  title="Toggle AI Chat"
+                  aria-pressed={isChatOpen}
+                  className={`w-8 h-8 rounded-lg cursor-pointer flex items-center justify-center transition-colors shadow-sm text-gray-200 ${isChatOpen ? 'bg-gray-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                >
+                  <Image src="/live-chat.png" alt="Chat" width={16} height={16} />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 p-2 overflow-hidden">
@@ -680,6 +715,22 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
             </div>
           </div>
         </motion.div>
+
+        {/* Inline AI chat panel (slides in from the right, styled like lessons sidebar) */}
+        <div
+          className={`ai-panel  bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border-[1px] border-gray-700 rounded-2xl z-50`}
+          style={{
+  width: visible ? '360px' : '0px',
+  transform: isChatOpen ? 'translateX(0)' : 'translateX(120%)',
+  opacity: isChatOpen ? 1 : 0,
+  transition: 'transform 480ms cubic-bezier(0.22,1,0.36,1), opacity 400ms ease'
+}}
+
+
+          aria-hidden={!isChatOpen}
+        >
+          <AIInlineChat onClose={() => setIsChatOpen(false)} />
+        </div>
       </div>
     </>
   );

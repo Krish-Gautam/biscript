@@ -1,6 +1,7 @@
  "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Play, RotateCcw, Copy, Download, ChevronDown, Check, Menu } from "lucide-react";
 
@@ -55,9 +56,9 @@ export default function Navbar2({
       <div className="flex items-center justify-between h-full px-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 bg-neutral-800/80 rounded-lg flex items-center justify-center shadow-lg select-none">
-              <span className="text-white text-sm font-bold">⚡</span>
-            </div>
+            
+              <Image src="/logo_icon.png" alt="Logo" width={36} height={36} />
+            
           </Link>
           {/* <div className="truncate">
             <div className="text-sm text-white truncate max-w-[40vw]">

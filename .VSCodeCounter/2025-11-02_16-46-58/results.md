@@ -1,0 +1,319 @@
+# Summary
+
+Date : 2025-11-02 16:46:58
+
+Directory c:\\webdevelopment\\Biscript\\biscript
+
+Total : 458 files,  22285 codes, 722 comments, 2341 blanks, all 25348 lines
+
+Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
+
+## Languages
+| language | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| JSON | 122 | 10,750 | 0 | 101 | 10,851 |
+| JavaScript | 100 | 8,481 | 384 | 1,089 | 9,954 |
+| Markdown | 12 | 1,067 | 3 | 321 | 1,391 |
+| Shell Script | 122 | 1,032 | 281 | 646 | 1,959 |
+| YAML | 10 | 307 | 1 | 52 | 360 |
+| XML | 17 | 205 | 8 | 9 | 222 |
+| Python | 18 | 120 | 33 | 35 | 188 |
+| PostCSS | 1 | 99 | 3 | 19 | 121 |
+| Docker | 5 | 68 | 7 | 23 | 98 |
+| Rust | 6 | 23 | 2 | 7 | 32 |
+| Makefile | 1 | 17 | 0 | 9 | 26 |
+| C# | 2 | 16 | 0 | 2 | 18 |
+| Ignore | 3 | 15 | 0 | 1 | 16 |
+| Visual Basic | 4 | 14 | 0 | 8 | 22 |
+| Dart | 3 | 9 | 0 | 0 | 9 |
+| JSON with Comments | 1 | 7 | 0 | 1 | 8 |
+| TypeScript | 5 | 5 | 0 | 3 | 8 |
+| Java | 1 | 5 | 0 | 0 | 5 |
+| Go | 1 | 5 | 0 | 3 | 8 |
+| C++ | 1 | 5 | 0 | 1 | 6 |
+| C | 1 | 5 | 0 | 1 | 6 |
+| GLSL | 1 | 5 | 0 | 2 | 7 |
+| Clojure | 1 | 5 | 0 | 0 | 5 |
+| Julia | 3 | 3 | 0 | 2 | 5 |
+| Ruby | 2 | 2 | 0 | 1 | 3 |
+| Perl | 2 | 2 | 0 | 0 | 2 |
+| PHP | 2 | 2 | 0 | 0 | 2 |
+| Lua | 2 | 2 | 0 | 0 | 2 |
+| R | 1 | 1 | 0 | 1 | 2 |
+| Swift | 1 | 1 | 0 | 0 | 1 |
+| MS SQL | 1 | 1 | 0 | 1 | 2 |
+| Raku | 1 | 1 | 0 | 0 | 1 |
+| PowerShell | 1 | 1 | 0 | 1 | 2 |
+| Groovy | 1 | 1 | 0 | 1 | 2 |
+| F# | 1 | 1 | 0 | 1 | 2 |
+| CoffeeScript | 1 | 1 | 0 | 0 | 1 |
+| pip requirements | 1 | 1 | 0 | 0 | 1 |
+
+## Directories
+| path | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| . | 458 | 22,285 | 722 | 2,341 | 25,348 |
+| . (Files) | 12 | 8,656 | 9 | 101 | 8,766 |
+| app | 78 | 6,510 | 370 | 815 | 7,695 |
+| app (Files) | 3 | 610 | 6 | 77 | 693 |
+| app\\Lessons | 1 | 143 | 0 | 11 | 154 |
+| app\\Lessons\\[language] | 1 | 143 | 0 | 11 | 154 |
+| app\\admin | 13 | 1,087 | 21 | 101 | 1,209 |
+| app\\admin (Files) | 1 | 223 | 0 | 10 | 233 |
+| app\\admin\\addLesson | 2 | 107 | 0 | 9 | 116 |
+| app\\admin\\addQuestion | 2 | 106 | 10 | 11 | 127 |
+| app\\admin\\addScript | 2 | 267 | 0 | 21 | 288 |
+| app\\admin\\lesson | 2 | 138 | 0 | 18 | 156 |
+| app\\admin\\question | 2 | 133 | 10 | 16 | 159 |
+| app\\admin\\script | 2 | 113 | 1 | 16 | 130 |
+| app\\ai-chat | 2 | 148 | 3 | 19 | 170 |
+| app\\api | 4 | 174 | 11 | 31 | 216 |
+| app\\api\\ai | 1 | 53 | 4 | 9 | 66 |
+| app\\api\\challenges | 1 | 78 | 7 | 14 | 99 |
+| app\\api\\challenges\\submit | 1 | 78 | 7 | 14 | 99 |
+| app\\api\\piston | 1 | 21 | 0 | 3 | 24 |
+| app\\api\\piston\\runCode | 1 | 21 | 0 | 3 | 24 |
+| app\\api\\runCode | 1 | 22 | 0 | 5 | 27 |
+| app\\badges | 1 | 41 | 0 | 8 | 49 |
+| app\\challenges | 4 | 933 | 16 | 80 | 1,029 |
+| app\\challenges (Files) | 1 | 286 | 3 | 23 | 312 |
+| app\\challenges\\question | 3 | 647 | 13 | 57 | 717 |
+| app\\challenges\\question\\[id] | 3 | 647 | 13 | 57 | 717 |
+| app\\challenges\\question\\[id] (Files) | 1 | 127 | 0 | 15 | 142 |
+| app\\challenges\\question\\[id]\\code | 1 | 404 | 13 | 30 | 447 |
+| app\\challenges\\question\\[id]\\solution | 1 | 116 | 0 | 12 | 128 |
+| app\\community | 1 | 18 | 0 | 4 | 22 |
+| app\\components | 13 | 1,460 | 246 | 202 | 1,908 |
+| app\\docs | 1 | 18 | 0 | 4 | 22 |
+| app\\home | 1 | 57 | 0 | 6 | 63 |
+| app\\languages | 1 | 106 | 0 | 8 | 114 |
+| app\\login | 1 | 87 | 0 | 15 | 102 |
+| app\\profile | 2 | 617 | 5 | 70 | 692 |
+| app\\profile (Files) | 1 | 298 | 1 | 35 | 334 |
+| app\\profile\\edit | 1 | 319 | 4 | 35 | 358 |
+| app\\questions | 1 | 122 | 11 | 17 | 150 |
+| app\\questions\\[language] | 1 | 122 | 11 | 17 | 150 |
+| app\\questions\\[language]\\[lesson] | 1 | 122 | 11 | 17 | 150 |
+| app\\services | 21 | 533 | 23 | 113 | 669 |
+| app\\signin | 1 | 117 | 4 | 9 | 130 |
+| app\\skeleton | 1 | 10 | 0 | 0 | 10 |
+| app\\useClient | 1 | 12 | 0 | 4 | 16 |
+| app\\utils | 5 | 217 | 24 | 36 | 277 |
+| piston | 353 | 6,946 | 336 | 1,417 | 8,699 |
+| piston (Files) | 13 | 505 | 8 | 124 | 637 |
+| piston\\.github | 6 | 268 | 0 | 43 | 311 |
+| piston\\.github\\ISSUE_TEMPLATE | 1 | 8 | 0 | 2 | 10 |
+| piston\\.github\\PULL_REQUEST_TEMPLATE | 1 | 10 | 0 | 2 | 12 |
+| piston\\.github\\workflows | 4 | 250 | 0 | 39 | 289 |
+| piston\\api | 12 | 2,634 | 10 | 205 | 2,849 |
+| piston\\api (Files) | 4 | 1,117 | 0 | 9 | 1,126 |
+| piston\\api\\src | 8 | 1,517 | 10 | 196 | 1,723 |
+| piston\\api\\src (Files) | 7 | 1,209 | 7 | 153 | 1,369 |
+| piston\\api\\src\\api | 1 | 308 | 3 | 43 | 354 |
+| piston\\builder | 2 | 44 | 5 | 18 | 67 |
+| piston\\cli | 10 | 1,058 | 3 | 82 | 1,143 |
+| piston\\cli (Files) | 4 | 573 | 0 | 5 | 578 |
+| piston\\cli\\commands | 6 | 485 | 3 | 77 | 565 |
+| piston\\cli\\commands (Files) | 2 | 243 | 1 | 29 | 273 |
+| piston\\cli\\commands\\ppman_commands | 4 | 242 | 2 | 48 | 292 |
+| piston\\docs | 4 | 316 | 3 | 123 | 442 |
+| piston\\packages | 292 | 1,929 | 272 | 778 | 2,979 |
+| piston\\packages (Files) | 4 | 119 | 2 | 36 | 157 |
+| piston\\packages\\MATL | 4 | 18 | 6 | 5 | 29 |
+| piston\\packages\\MATL\\22.5.0 | 2 | 9 | 3 | 3 | 15 |
+| piston\\packages\\MATL\\22.7.4 | 2 | 9 | 3 | 2 | 14 |
+| piston\\packages\\bash | 6 | 32 | 6 | 17 | 55 |
+| piston\\packages\\bash\\5.1.0 | 3 | 16 | 3 | 10 | 29 |
+| piston\\packages\\bash\\5.2.0 | 3 | 16 | 3 | 7 | 26 |
+| piston\\packages\\befunge93 | 2 | 10 | 5 | 6 | 21 |
+| piston\\packages\\befunge93\\0.2.0 | 2 | 10 | 5 | 6 | 21 |
+| piston\\packages\\bqn | 2 | 10 | 1 | 5 | 16 |
+| piston\\packages\\bqn\\1.0.0 | 2 | 10 | 1 | 5 | 16 |
+| piston\\packages\\brachylog | 2 | 13 | 6 | 7 | 26 |
+| piston\\packages\\brachylog\\1.0.0 | 2 | 13 | 6 | 7 | 26 |
+| piston\\packages\\brainfuck | 2 | 16 | 2 | 11 | 29 |
+| piston\\packages\\brainfuck\\2.7.3 | 2 | 16 | 2 | 11 | 29 |
+| piston\\packages\\cjam | 2 | 7 | 2 | 4 | 13 |
+| piston\\packages\\cjam\\0.6.5 | 2 | 7 | 2 | 4 | 13 |
+| piston\\packages\\clojure | 3 | 36 | 9 | 10 | 55 |
+| piston\\packages\\clojure\\1.10.3 | 3 | 36 | 9 | 10 | 55 |
+| piston\\packages\\cobol | 2 | 15 | 3 | 9 | 27 |
+| piston\\packages\\cobol\\3.1.2 | 2 | 15 | 3 | 9 | 27 |
+| piston\\packages\\coffeescript | 3 | 11 | 3 | 4 | 18 |
+| piston\\packages\\coffeescript\\2.5.1 | 3 | 11 | 3 | 4 | 18 |
+| piston\\packages\\cow | 2 | 10 | 4 | 5 | 19 |
+| piston\\packages\\cow\\1.0.0 | 2 | 10 | 4 | 5 | 19 |
+| piston\\packages\\crystal | 2 | 9 | 1 | 4 | 14 |
+| piston\\packages\\crystal\\1.9.2 | 2 | 9 | 1 | 4 | 14 |
+| piston\\packages\\dart | 9 | 42 | 3 | 14 | 59 |
+| piston\\packages\\dart\\2.12.1 | 3 | 14 | 1 | 6 | 21 |
+| piston\\packages\\dart\\2.19.6 | 3 | 14 | 1 | 4 | 19 |
+| piston\\packages\\dart\\3.0.1 | 3 | 14 | 1 | 4 | 19 |
+| piston\\packages\\dash | 2 | 15 | 2 | 9 | 26 |
+| piston\\packages\\dash\\0.5.11 | 2 | 15 | 2 | 9 | 26 |
+| piston\\packages\\deno | 9 | 67 | 2 | 9 | 78 |
+| piston\\packages\\deno\\1.16.2 | 3 | 24 | 1 | 4 | 29 |
+| piston\\packages\\deno\\1.32.3 | 3 | 24 | 1 | 1 | 26 |
+| piston\\packages\\deno\\1.7.5 | 3 | 19 | 0 | 4 | 23 |
+| piston\\packages\\dotnet | 6 | 94 | 5 | 13 | 112 |
+| piston\\packages\\dotnet\\5.0.201 | 6 | 94 | 5 | 13 | 112 |
+| piston\\packages\\dragon | 2 | 17 | 4 | 11 | 32 |
+| piston\\packages\\dragon\\1.9.8 | 2 | 17 | 4 | 11 | 32 |
+| piston\\packages\\elixir | 2 | 19 | 1 | 12 | 32 |
+| piston\\packages\\elixir\\1.11.3 | 2 | 19 | 1 | 12 | 32 |
+| piston\\packages\\emacs | 2 | 17 | 4 | 10 | 31 |
+| piston\\packages\\emacs\\27.1.0 | 2 | 17 | 4 | 10 | 31 |
+| piston\\packages\\emojicode | 2 | 15 | 0 | 9 | 24 |
+| piston\\packages\\emojicode\\1.0.2 | 2 | 15 | 0 | 9 | 24 |
+| piston\\packages\\erlang | 2 | 17 | 1 | 10 | 28 |
+| piston\\packages\\erlang\\23.0.0 | 2 | 17 | 1 | 10 | 28 |
+| piston\\packages\\file | 2 | 5 | 2 | 3 | 10 |
+| piston\\packages\\file\\0.0.1 | 2 | 5 | 2 | 3 | 10 |
+| piston\\packages\\forte | 2 | 13 | 2 | 7 | 22 |
+| piston\\packages\\forte\\1.0.0 | 2 | 13 | 2 | 7 | 22 |
+| piston\\packages\\forth | 2 | 16 | 0 | 5 | 21 |
+| piston\\packages\\forth\\0.7.3 | 2 | 16 | 0 | 5 | 21 |
+| piston\\packages\\freebasic | 6 | 18 | 2 | 4 | 24 |
+| piston\\packages\\freebasic\\1.8.0 | 3 | 9 | 1 | 3 | 13 |
+| piston\\packages\\freebasic\\1.9.0 | 3 | 9 | 1 | 1 | 11 |
+| piston\\packages\\gawk | 2 | 20 | 3 | 10 | 33 |
+| piston\\packages\\gawk\\5.1.0 | 2 | 20 | 3 | 10 | 33 |
+| piston\\packages\\gcc | 4 | 45 | 3 | 14 | 62 |
+| piston\\packages\\gcc\\10.2.0 | 4 | 45 | 3 | 14 | 62 |
+| piston\\packages\\go | 3 | 13 | 1 | 6 | 20 |
+| piston\\packages\\go\\1.16.2 | 3 | 13 | 1 | 6 | 20 |
+| piston\\packages\\golfscript | 2 | 9 | 3 | 5 | 17 |
+| piston\\packages\\golfscript\\1.0.0 | 2 | 9 | 3 | 5 | 17 |
+| piston\\packages\\groovy | 3 | 15 | 3 | 5 | 23 |
+| piston\\packages\\groovy\\3.0.7 | 3 | 15 | 3 | 5 | 23 |
+| piston\\packages\\haskell | 2 | 15 | 2 | 9 | 26 |
+| piston\\packages\\haskell\\9.0.1 | 2 | 15 | 2 | 9 | 26 |
+| piston\\packages\\husk | 2 | 13 | 3 | 4 | 20 |
+| piston\\packages\\husk\\1.0.0 | 2 | 13 | 3 | 4 | 20 |
+| piston\\packages\\iverilog | 2 | 17 | 1 | 6 | 24 |
+| piston\\packages\\iverilog\\11.0.0 | 2 | 17 | 1 | 6 | 24 |
+| piston\\packages\\japt | 2 | 7 | 2 | 3 | 12 |
+| piston\\packages\\japt\\2.0.0 | 2 | 7 | 2 | 3 | 12 |
+| piston\\packages\\java | 3 | 13 | 2 | 6 | 21 |
+| piston\\packages\\java\\15.0.2 | 3 | 13 | 2 | 6 | 21 |
+| piston\\packages\\jelly | 2 | 12 | 1 | 6 | 19 |
+| piston\\packages\\jelly\\0.1.31 | 2 | 12 | 1 | 6 | 19 |
+| piston\\packages\\julia | 9 | 51 | 15 | 21 | 87 |
+| piston\\packages\\julia\\1.5.4 | 3 | 17 | 5 | 8 | 30 |
+| piston\\packages\\julia\\1.6.1 | 3 | 17 | 5 | 8 | 30 |
+| piston\\packages\\julia\\1.8.5 | 3 | 17 | 5 | 5 | 27 |
+| piston\\packages\\kotlin | 4 | 26 | 6 | 6 | 38 |
+| piston\\packages\\kotlin\\1.4.31 | 2 | 13 | 3 | 4 | 20 |
+| piston\\packages\\kotlin\\1.8.20 | 2 | 13 | 3 | 2 | 18 |
+| piston\\packages\\lisp | 2 | 14 | 3 | 9 | 26 |
+| piston\\packages\\lisp\\2.1.2 | 2 | 14 | 3 | 9 | 26 |
+| piston\\packages\\llvm_ir | 2 | 8 | 1 | 4 | 13 |
+| piston\\packages\\llvm_ir\\12.0.1 | 2 | 8 | 1 | 4 | 13 |
+| piston\\packages\\lolcode | 2 | 14 | 4 | 7 | 25 |
+| piston\\packages\\lolcode\\0.11.2 | 2 | 14 | 4 | 7 | 25 |
+| piston\\packages\\lua | 6 | 26 | 10 | 6 | 42 |
+| piston\\packages\\lua\\5.4.2 | 3 | 13 | 5 | 4 | 22 |
+| piston\\packages\\lua\\5.4.4 | 3 | 13 | 5 | 2 | 20 |
+| piston\\packages\\mono | 4 | 52 | 4 | 17 | 73 |
+| piston\\packages\\mono\\6.12.0 | 4 | 52 | 4 | 17 | 73 |
+| piston\\packages\\nasm | 2 | 24 | 3 | 10 | 37 |
+| piston\\packages\\nasm\\2.15.5 | 2 | 24 | 3 | 10 | 37 |
+| piston\\packages\\nim | 4 | 28 | 4 | 16 | 48 |
+| piston\\packages\\nim\\1.4.4 | 2 | 14 | 2 | 9 | 25 |
+| piston\\packages\\nim\\1.6.2 | 2 | 14 | 2 | 7 | 23 |
+| piston\\packages\\node | 12 | 56 | 4 | 6 | 66 |
+| piston\\packages\\node\\15.10.0 | 3 | 14 | 1 | 3 | 18 |
+| piston\\packages\\node\\16.3.0 | 3 | 14 | 1 | 3 | 18 |
+| piston\\packages\\node\\18.15.0 | 3 | 14 | 1 | 0 | 15 |
+| piston\\packages\\node\\20.11.1 | 3 | 14 | 1 | 0 | 15 |
+| piston\\packages\\ocaml | 2 | 16 | 1 | 7 | 24 |
+| piston\\packages\\ocaml\\4.12.0 | 2 | 16 | 1 | 7 | 24 |
+| piston\\packages\\octave | 4 | 30 | 8 | 18 | 56 |
+| piston\\packages\\octave\\6.2.0 | 2 | 15 | 4 | 10 | 29 |
+| piston\\packages\\octave\\8.1.0 | 2 | 15 | 4 | 8 | 27 |
+| piston\\packages\\osabie | 2 | 18 | 1 | 11 | 30 |
+| piston\\packages\\osabie\\1.0.1 | 2 | 18 | 1 | 11 | 30 |
+| piston\\packages\\paradoc | 2 | 7 | 1 | 4 | 12 |
+| piston\\packages\\paradoc\\0.6.0 | 2 | 7 | 1 | 4 | 12 |
+| piston\\packages\\pascal | 4 | 40 | 8 | 14 | 62 |
+| piston\\packages\\pascal\\3.2.0 | 2 | 20 | 4 | 8 | 32 |
+| piston\\packages\\pascal\\3.2.2 | 2 | 20 | 4 | 6 | 30 |
+| piston\\packages\\perl | 6 | 32 | 2 | 17 | 51 |
+| piston\\packages\\perl\\5.26.1 | 3 | 16 | 1 | 10 | 27 |
+| piston\\packages\\perl\\5.36.0 | 3 | 16 | 1 | 7 | 24 |
+| piston\\packages\\php | 6 | 34 | 2 | 18 | 54 |
+| piston\\packages\\php\\8.0.2 | 3 | 17 | 1 | 10 | 28 |
+| piston\\packages\\php\\8.2.3 | 3 | 17 | 1 | 8 | 26 |
+| piston\\packages\\ponylang | 2 | 16 | 9 | 9 | 34 |
+| piston\\packages\\ponylang\\0.39.0 | 2 | 16 | 9 | 9 | 34 |
+| piston\\packages\\prolog | 2 | 18 | 2 | 9 | 29 |
+| piston\\packages\\prolog\\8.2.4 | 2 | 18 | 2 | 9 | 29 |
+| piston\\packages\\pure | 2 | 24 | 7 | 9 | 40 |
+| piston\\packages\\pure\\0.68.0 | 2 | 24 | 7 | 9 | 40 |
+| piston\\packages\\pwsh | 3 | 15 | 1 | 4 | 20 |
+| piston\\packages\\pwsh\\7.1.4 | 3 | 15 | 1 | 4 | 20 |
+| piston\\packages\\pyth | 2 | 7 | 2 | 4 | 13 |
+| piston\\packages\\pyth\\1.0.0 | 2 | 7 | 2 | 4 | 13 |
+| piston\\packages\\python | 24 | 173 | 11 | 96 | 280 |
+| piston\\packages\\python\\2.7.18 | 3 | 19 | 2 | 10 | 31 |
+| piston\\packages\\python\\3.10.0 | 3 | 23 | 1 | 12 | 36 |
+| piston\\packages\\python\\3.10.0-alpha.7 | 3 | 22 | 3 | 11 | 36 |
+| piston\\packages\\python\\3.11.0 | 3 | 23 | 1 | 12 | 36 |
+| piston\\packages\\python\\3.12.0 | 3 | 23 | 1 | 12 | 36 |
+| piston\\packages\\python\\3.5.10 | 3 | 18 | 1 | 10 | 29 |
+| piston\\packages\\python\\3.9.1 | 3 | 18 | 1 | 10 | 29 |
+| piston\\packages\\python\\3.9.4 | 3 | 27 | 1 | 19 | 47 |
+| piston\\packages\\racket | 2 | 9 | 3 | 5 | 17 |
+| piston\\packages\\racket\\8.3.0 | 2 | 9 | 3 | 5 | 17 |
+| piston\\packages\\raku | 3 | 9 | 1 | 2 | 12 |
+| piston\\packages\\raku\\6.100.0 | 3 | 9 | 1 | 2 | 12 |
+| piston\\packages\\retina | 2 | 16 | 5 | 7 | 28 |
+| piston\\packages\\retina\\1.2.0 | 2 | 16 | 5 | 7 | 28 |
+| piston\\packages\\rockstar | 2 | 9 | 4 | 5 | 18 |
+| piston\\packages\\rockstar\\1.0.0 | 2 | 9 | 4 | 5 | 18 |
+| piston\\packages\\rscript | 3 | 16 | 1 | 8 | 25 |
+| piston\\packages\\rscript\\4.1.1 | 3 | 16 | 1 | 8 | 25 |
+| piston\\packages\\ruby | 6 | 34 | 5 | 19 | 58 |
+| piston\\packages\\ruby\\2.5.1 | 3 | 17 | 1 | 10 | 28 |
+| piston\\packages\\ruby\\3.0.1 | 3 | 17 | 4 | 9 | 30 |
+| piston\\packages\\rust | 18 | 81 | 8 | 23 | 112 |
+| piston\\packages\\rust\\1.50.0 | 3 | 11 | 1 | 4 | 16 |
+| piston\\packages\\rust\\1.56.1 | 3 | 13 | 1 | 4 | 18 |
+| piston\\packages\\rust\\1.62.0 | 3 | 13 | 1 | 4 | 18 |
+| piston\\packages\\rust\\1.63.0 | 3 | 15 | 2 | 5 | 22 |
+| piston\\packages\\rust\\1.65.0 | 3 | 16 | 2 | 5 | 23 |
+| piston\\packages\\rust\\1.68.2 | 3 | 13 | 1 | 1 | 15 |
+| piston\\packages\\samarium | 2 | 7 | 1 | 2 | 10 |
+| piston\\packages\\samarium\\0.3.1 | 2 | 7 | 1 | 2 | 10 |
+| piston\\packages\\scala | 4 | 22 | 6 | 6 | 34 |
+| piston\\packages\\scala\\3.0.0 | 2 | 11 | 3 | 4 | 18 |
+| piston\\packages\\scala\\3.2.2 | 2 | 11 | 3 | 2 | 16 |
+| piston\\packages\\smalltalk | 2 | 16 | 1 | 9 | 26 |
+| piston\\packages\\smalltalk\\3.2.3 | 2 | 16 | 1 | 9 | 26 |
+| piston\\packages\\sqlite3 | 3 | 12 | 1 | 6 | 19 |
+| piston\\packages\\sqlite3\\3.36.0 | 3 | 12 | 1 | 6 | 19 |
+| piston\\packages\\swift | 3 | 9 | 2 | 3 | 14 |
+| piston\\packages\\swift\\5.3.3 | 3 | 9 | 2 | 3 | 14 |
+| piston\\packages\\typescript | 6 | 18 | 2 | 9 | 29 |
+| piston\\packages\\typescript\\4.2.3 | 3 | 9 | 1 | 6 | 16 |
+| piston\\packages\\typescript\\5.0.3 | 3 | 9 | 1 | 3 | 13 |
+| piston\\packages\\vlang | 4 | 16 | 6 | 5 | 27 |
+| piston\\packages\\vlang\\0.1.13 | 2 | 8 | 3 | 3 | 14 |
+| piston\\packages\\vlang\\0.3.3 | 2 | 8 | 3 | 2 | 13 |
+| piston\\packages\\vyxal | 2 | 13 | 5 | 5 | 23 |
+| piston\\packages\\vyxal\\2.4.1 | 2 | 13 | 5 | 5 | 23 |
+| piston\\packages\\yeethon | 3 | 17 | 6 | 10 | 33 |
+| piston\\packages\\yeethon\\3.10.0 | 3 | 17 | 6 | 10 | 33 |
+| piston\\packages\\zig | 8 | 56 | 4 | 19 | 79 |
+| piston\\packages\\zig\\0.10.1 | 2 | 15 | 1 | 4 | 20 |
+| piston\\packages\\zig\\0.7.1 | 2 | 11 | 1 | 5 | 17 |
+| piston\\packages\\zig\\0.8.0 | 2 | 15 | 1 | 5 | 21 |
+| piston\\packages\\zig\\0.9.1 | 2 | 15 | 1 | 5 | 21 |
+| piston\\repo | 5 | 97 | 1 | 27 | 125 |
+| piston\\tests | 7 | 63 | 33 | 16 | 112 |
+| piston\\var | 2 | 32 | 1 | 1 | 34 |
+| piston\\var\\docs | 2 | 32 | 1 | 1 | 34 |
+| piston\\var\\docs\\images | 2 | 32 | 1 | 1 | 34 |
+| public | 15 | 173 | 7 | 8 | 188 |
+
+Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)

@@ -432,54 +432,73 @@ export default function Home() {
               backgroundSize: '100px 100px',
             }}></div>
           </div>
+          <footer className="bg-[#0b1220] text-gray-200 border-t border-gray-800  relative">
+            <div className="max-w-7xl mx-auto px-6 py-12">
+              <div className="flex justify-between gap-8">
+                <div>
+                  <Link href="/" className="flex items-center space-x-3">
+                    
+                    <span className="font-semibold text-2xl mb-2">BiScript</span>
+                  </Link>
+                  <p className="mt-3  text-gray-400 max-w-xs ">
+                    Bite-sized coding challenges, automated feedback, and practical placement playbooks to help you land the job.
+                  </p>
+                </div>
 
-          <div className="max-w-4xl mx-auto text-center relative z-10">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-4xl font-bold text-white mb-8"
-            >
-              About Biscript
-            </motion.h2>
+                <nav aria-label="Product" className="flex flex-col">
+                  <h3 className="text-xl  font-light text-gray-300 mb-2">Product</h3>
+                  <ul className="mt-3 space-y-4">
+                    <li>
+                      <Link href="/resume-analysis" className="text-gray-400 hover:text-gray-100 ">Learn Coding</Link>
+                    </li>
+                    <li>
+                      <Link href="/placement-playbook" className="text-gray-400 hover:text-gray-100">Coding Challenges</Link>
+                    </li>
+                    <li>
+                      <Link href="/pricing" className="text-gray-400 hover:text-gray-100">AI Assistance</Link>
+                    </li>
+                  </ul>
+                </nav>
 
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="text-xl text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed"
-            >
-              Our mission is to make coding feel like a game while fostering community-driven learning.
-              We believe that programming should be accessible, engaging, and fun for everyone, regardless of their background or experience level.
-            </motion.p>
+                <nav aria-label="Company" className="flex flex-col ">
+                  <h3 className="text-xl  font-light text-gray-300 mb-2">Company</h3>
+                  <ul className="mt-3 space-y-4 ">
+                    <li>
+                      <Link href="/about" className="text-gray-400 hover:text-gray-100">About Us</Link>
+                    </li>
+                    <li>
+                      <Link href="/contact" className="text-gray-400 hover:text-gray-100">Contact</Link>
+                    </li>
+                  </ul>
+                </nav>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="mb-16"
-            >
-              <button
-                onClick={handleProfileClick}
-                className="bg-white/10  backdrop-blur-sm hover:bg-white/15 text-white px-8 py-4 my-4 rounded-xl font-semibold border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              >
-                Get Started
-              </button>
-            </motion.div>
+                <nav aria-label="Legal" className="flex flex-col">
+                  <h3 className="text-xl  font-light text-gray-300 mb-2">Legal</h3>
+                  <ul className="mt-3 space-y-4 ">
+                    <li>
+                      <Link href="/privacy" className="text-gray-400 hover:text-gray-100">Privacy Policy</Link>
+                    </li>
+                    <li>
+                      <Link href="/terms" className="text-gray-400 hover:text-gray-100">Terms &amp; Conditions</Link>
+                    </li>
+                    <li>
+                      <Link href="/refund" className="text-gray-400 hover:text-gray-100">Refund Policy</Link>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              viewport={{ once: true }}
-              className="text-gray-400 text-sm"
-            >
-              © 2025 Biscript — Learn. Play. Code.
-            </motion.p>
-          </div>
+              <div className="mt-12 border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between">
+                <p className="text-sm text-gray-500 ">© {new Date().getFullYear()} Biscript. All rights reserved.</p>
+                <div className="mt-4 md:mt-0 flex items-center space-x-4">
+                  <Link href="/contact" className="text-sm text-gray-400 hover:text-gray-100">Support</Link>
+                  <a href="mailto:biscript15@gmail.com" className="text-sm  text-gray-400 hover:text-gray-100">biscript15@gmail.com</a>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+
         </motion.section>
       </div>
     </>

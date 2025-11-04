@@ -52,5 +52,22 @@ export async function registerUser({ email, password, username }) {
     return { error: { message: dbError.message } };
   }
 
+  //step 3: add user progress entry 
+  const { data: newUser, error: insertError } = await supabase
+      .from("user_progress")
+      .insert([
+        {
+          user_id: user.id,
+          progress: [], // or whatever your default structure is
+        },
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      return new Response(JSON.stringify({ error: insertError.message }), { status: 500 });
+    }
+
   return { data: user };
 }

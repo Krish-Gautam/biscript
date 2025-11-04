@@ -1,81 +1,58 @@
-let userState = {
-  firstVisit: true,
-  achievements: ["variablesMastered"],
-  lastLesson: "variables",
-};
+import { supabase } from "@/app/utils/supabaseClient";
 
 
 export async function POST(req) {
-  try {
-    const { message } = await req.json();
+  const { userId, message } = await req.json();
 
-    // Fixed + conditional lines
-    let fixedLines = [];
-    if (userState.firstVisit) {
-      fixedLines.push("👋 Hello! Welcome to Biscript, your funny coding tutor!");
-      userState.firstVisit = false;
-    }
-    if (userState.achievements.includes("loopsCompleted")) {
-      fixedLines.push("🎉 I see you completed loops! Ready for some functions or recursion?");
-    }
+  // 1️⃣ Fetch the user state
+  const { data: userState } = await supabase
+    .from("user_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
 
-    // Build dynamic prompt
-    const dynamicPrompt = `
+  // 2️⃣ Build the prompt
+  const dynamicPrompt = `
 You are Biscript: a funny coding tutor AI.
-Rules:
-- Always use humor
-- Suggest next topics based on user achievements
-- Keep answers concise keep it only 5-6 words
-User state:
+Student data:
+First visit: ${userState.first_visit}
 Achievements: ${userState.achievements.join(", ")}
-Last lesson: ${userState.lastLesson}
+Last lesson: ${userState.last_lesson}
+Points: ${userState.points}
 
-User asks: ${message}
+When replying:
+- Be short (<=2 sentences)
+- Add light humor
+- Suggest next challenge if user mastered current topic
+
+Student says: ${message}
 `;
 
-    // Call Ollama API
-    const response = await fetch("http://127.0.0.1:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "mistral",
-        prompt: dynamicPrompt,
-      }),
-    });
+  // 3️⃣ Query Ollama
+  const response = await fetch("http://127.0.0.1:11434/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "llama3", prompt: dynamicPrompt }),
+  });
 
-    // Ollama streams NDJSON → collect into full string
-    const reader = response.body.getReader();
-    let result = "";
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true }).trim();
-      const lines = chunk.split("\n").filter(Boolean);
-
-      for (const line of lines) {
-        try {
-          const json = JSON.parse(line);
-          if (json.response) result += json.response;
-        } catch (e) {
-          console.error("Bad JSON chunk:", line);
-        }
-      }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let output = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value);
+    const lines = chunk.split("\n").filter(Boolean);
+    for (const line of lines) {
+      try {
+        const json = JSON.parse(line);
+        if (json.response) output += json.response;
+      } catch {}
     }
-
-    const dynamicLine = result || "Hmm, I got nothing 😅";
-    const fullResponse = [...fixedLines, dynamicLine].join("\n");
-
-    return new Response(JSON.stringify({ reply: fullResponse }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    console.error("AI route error:", err);
-    return new Response(JSON.stringify({ reply: "Error connecting to Ollama" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
   }
+
+
+  return new Response(JSON.stringify({ reply: output }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }

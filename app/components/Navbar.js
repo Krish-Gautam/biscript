@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../components/AuthProvider";
 import { User, ChevronDown, Settings, LogOut } from "lucide-react";
@@ -45,10 +46,15 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full bg-neutral-900/80 border border-white/10 shadow-2xl px-6 py-2 flex items-center justify-between">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
-        <div className="w-7 h-7 bg-neutral-800/80 rounded-lg flex items-center justify-center shadow-sm select-none">
-          <span className="text-white text-base font-bold">⚡</span>
-        </div>
-        <span className="text-lg font-bold text-white tracking-tight select-none">Biscript</span>
+        
+        <Image
+  src="/logo6.png"
+  alt="Logo"
+  width={120}
+  height={50}
+  style={{ objectFit: "contain", width: "120px", height: "40px" }}
+/>
+
       </Link>
 
       {/* Links */}
@@ -65,13 +71,13 @@ const Navbar = () => {
           <>
             <button
               onClick={() => router.push("/login")}
-              className="px-4 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
+              className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Login
             </button>
             <button
               onClick={() => router.push("/signin")}
-              className="px-4 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
+              className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Get Started
             </button>
