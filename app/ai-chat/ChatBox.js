@@ -90,7 +90,7 @@ export default function ChatBox() {
         <div className="p-4 h-[60vh] md:h-[66vh] overflow-auto space-y-4 bg-[#18181b]">
           {messages.length === 0 && (
             <div className="text-center text-gray-400">
-              Ask me anything about coding or lessons — I'll keep it short and funny.
+              Ask me anything about coding or lessons — {`I'll`} keep it short and funny.
             </div>
           )}
 
