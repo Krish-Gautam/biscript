@@ -1,38 +1,77 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLessons } from "../services/getLessons";
 import { getQuestion } from "../services/getQuestions";
 import { getGoblinLines } from "../services/getGoblinLines";
-import { Lemonada } from "next/font/google";
+import { getChallenges } from "../services/getChallenges";
 
-const languageOptions = [
-  { id: 63, name: "javaScript" },
-  { id: 71, name: "python" },
-  { id: 54, name: "c++" },
-  { id: 62, name: "java" },
-];
+/* -------------------- CONFIG -------------------- */
+
+const LANGUAGES = ["javascript", "python", "c++", "java"];
+const CHALLENGE_TYPES = ["solo", "competitive", "collaborative"];
+
+/* -------------------- MOCK DATA (REPLACE LATER) -------------------- */
+
+const mockLessons = {
+  javascript: [
+    { id: 1, title: "Variables", description: "JS variables" },
+    { id: 2, title: "Loops", description: "JS loops" },
+  ],
+  python: [{ id: 3, title: "Basics", description: "Python basics" }],
+};
+
+const mockQuestions = {
+  1: [{ id: 11, text: "What is let?" }],
+  2: [{ id: 12, text: "Explain for loop" }],
+};
+
+const mockScripts = {
+  1: [{ id: 21, message: "Hi, I am Goblin 👋" }],
+};
+
+const mockChallenges = {
+  solo: [{ id: 101, title: "Reverse String" }],
+  competitive: [{ id: 102, title: "Fastest Sort" }],
+  collaborative: [{ id: 103, title: "Build Chat App" }],
+};
+
+
+
+/* -------------------- COMPONENT -------------------- */
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [currentLanguage, setCurrentLanguage] = useState(languageOptions[0].name);
+  /* -------- Global UI State -------- */
+  const [mode, setMode] = useState("lessons"); // lessons | challenges
+  const [activeEditor, setActiveEditor] = useState(null);
+
+  /* -------- Lessons State -------- */
+  const [language, setLanguage] = useState("python");
   const [allLessons, setAllLessons] = useState([]);
-  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false)
+  const [selectedLesson, setSelectedLesson] = useState(null);
   const [openLessons, setOpenLessons] = useState({});
   const [lessonQuestions, setLessonQuestions] = useState({});
   const [isLoadingQuestions, setIsLoadingQuestions] = useState([]);
   const [isLoadingScripts, setIsLoadingScripts] = useState([]);
-  const [selectedLesson, setSelectedLesson] = useState(null);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedScript, setSelectedScript] = useState(null);
   const [lessonScripts, setLessonScripts] = useState({})
+  const [lessonTab, setLessonTab] = useState("overview"); // overview | questions | scripts
+  const [challenges, setChallenges] = useState([])
+  const [selectedChallenge, setSelectedChallenge] = useState(null);
+
+  /* -------- Challenges State -------- */
+  const [challengeType, setChallengeType] = useState("solo");
 
   useEffect(() => {
     setIsLoadingLessons(true);
     const fetchLessons = async () => {
-      if (currentLanguage) {
+      if (language) {
         try {
-          const data = await getLessons(currentLanguage.toLowerCase());
+          const data = await getLessons(language.toLowerCase());
           setAllLessons(data);
         } catch (error) {
           console.error("Error fetching lessons:", error);
@@ -42,7 +81,20 @@ export default function AdminPanel() {
       }
     };
     fetchLessons();
-  }, [currentLanguage]);
+  }, [language]);
+
+  const handleChallengeClick = async (type) => {
+    setChallengeType(type);
+
+    try {
+      const { data } = await getChallenges(type);
+      console.log(data)
+      setChallenges(data);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+    }
+  };
+
 
   const handleLessonClick = async (lesson) => {
     setSelectedLesson(lesson);
@@ -61,7 +113,7 @@ export default function AdminPanel() {
       setIsLoadingScripts((prev) => ({ ...prev, [lesson.id]: true }));
       try {
         const scripts = await getGoblinLines(lesson.id);
-        setLessonScripts((prev) => ({ ...prev, [lesson.id]: scripts }));
+        setLessonScripts((prev) => ({ ...prev, [lesson.id]: scripts.data[0] }));
       } catch (error) {
         console.error("Error fetching scripts:", error);
       } finally {
@@ -70,164 +122,272 @@ export default function AdminPanel() {
     }
   };
 
-  const handleQuestionClick = (question) => {
-    setSelectedQuestion(question);
-  };
 
-  const handleScriptClick = (script) => {
-    setSelectedScript(script);
-  };
-
-
+  /* -------------------- RENDER -------------------- */
 
   return (
-    <div className="flex min-h-screen bg-[#18181b] text-white">
-      {/* Sidebar */}
-      <div className="flex flex-col w-80 bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border-r border-gray-700 p-4 space-y-4">
-        <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
-        <div>
-          <label className="block mb-1 text-gray-300">Select Language</label>
-          <select
-            value={currentLanguage}
-            onChange={e => setCurrentLanguage(e.target.value)}
-            className="w-full px-2 py-2 rounded bg-[#18181b] border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            {languageOptions.map(lang => (
-              <option key={lang.id} value={lang.name}>{lang.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1 overflow-y-auto hide-scrollbar space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-          {isLoadingLessons ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
-              <span className="ml-3 text-gray-400 text-sm">Loading lessons...</span>
-            </div>
-          ) : allLessons.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-400 text-4xl mb-2">📝</div>
-              <p className="text-gray-400 text-sm">No lessons found</p>
-            </div>
-          ) : (
-            allLessons.map((lesson) => (
-              <button
-                key={lesson.id}
-                onClick={() => handleLessonClick(lesson)}
-                className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center justify-between select-none group ${selectedLesson?.id === lesson.id
-                  ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-lg'
-                  : 'bg-[#2a2a2d] hover:bg-[#3a3a3d] text-gray-200 hover:text-white'
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full transition-all duration-200 ${selectedLesson?.id === lesson.id ? 'bg-white scale-125' : 'bg-gray-400'}`}></div>
-                  <span className="font-medium text-sm truncate">{lesson.title}</span>
-                </div>
-                <span className="text-xs">{selectedLesson?.id === lesson.id ? '✔' : ''}</span>
-              </button>
-            ))
-          )}
+    <div className="flex h-screen bg-[#18181b] text-white">
+      {/* ================= TOP MODE BAR ================= */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-[#1f1f23] border-b border-gray-700 flex items-center px-6 z-50">
+        <button
+          className={`mr-4 cursor-pointer px-4 py-1 rounded ${mode === "lessons" ? "bg-blue-600" : "bg-[#2a2a2d]"
+            }`}
+          onClick={() => {
+            setMode("lessons");
+            setActiveEditor(null);
+          }}
+        >
+          Lessons Manager
+        </button>
 
-          <div className="text-center Add bg-[#2A2A2D]  rounded-lg cursor-pointer">
-            <button className="cursor-pointer text-center p-3 w-full  select-none" onClick={() => { router.push(`/admin/addLesson?language=${currentLanguage}`) }}>Add Lesson</button>
-          </div>
-        </div>
+        <button
+          className={`px-4 cursor-pointer py-1 rounded ${mode === "challenges" ? "bg-blue-600" : "bg-[#2a2a2d]"
+            }`}
+          onClick={() => {
+            setMode("challenges");
+            setActiveEditor(null);
+          }}
+        >
+          Challenges Manager
+        </button>
       </div>
-      {/* Main Content */}
-      <div className="flex-1 p-10">
-        {!selectedLesson ? (
-          <div className="max-w-xl mx-auto bg-[#232526] p-8 rounded-2xl shadow-lg border border-gray-700 text-center">
-            <h3 className="text-xl font-semibold mb-4">Welcome, Admin!</h3>
-            <p className="text-gray-400 mb-4">Select a lesson from the sidebar to view or manage its details, questions, and scripts.</p>
-            <button
-              className="mt-4 px-6 py-2 bg-[#28c244] text-white rounded-lg font-semibold hover:bg-green-600 transition"
-              onClick={() => router.push("/admin/lesson")}
+
+      {/* ================= SIDEBAR ================= */}
+      <aside className="flex flex-col w-80 bg-gradient-to-b from-[#1a1a1d] to-[#2a2a2d] border-r border-gray-700 p-4 space-y-4">
+        {mode === "lessons" ? (
+          <>
+            <label className="text-sm text-gray-400">Language</label>
+            <select
+              className="w-full mt-1 mb-4 cursor-pointer bg-[#18181b] border border-gray-600 rounded p-2"
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+                setSelectedLesson(null);
+              }}
             >
-              ➕ Add New Lesson
-            </button>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto bg-[#232526] p-8 rounded-2xl shadow-lg border border-gray-700">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">{selectedLesson.title}</h3>
-              <div className="flex gap-2">
+              {LANGUAGES.map((l) => (
+                <option key={l}>{l}</option>
+              ))}
+            </select>
+
+            <div className="space-y-2 ">
+              {allLessons.map((lesson) => (
                 <button
-                  className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
-                  onClick={() => router.push(`/admin/lesson?id=${selectedLesson.id}&language=${currentLanguage}`)}
+                  key={lesson.id}
+                  onClick={() => handleLessonClick(lesson)}
+                  className={`w-full cursor-pointer text-left p-3 rounded ${selectedLesson?.id === lesson.id
+                    ? "bg-gray-700"
+                    : "bg-[#2a2a2d]"
+                    }`}
+                >
+                  {lesson.title}
+                </button>
+              ))}
+            </div>
+
+            <button className="mt-4 w-full bg-green-600 rounded p-2 cursor-pointer"
+              onClick={() => { router.push(`/admin/addLesson?language=${language}`) }}>
+              + Add Lesson
+            </button>
+          </>
+        ) : (
+          <>
+            <h4 className="mb-3 font-semibold">Challenge Types</h4>
+            {CHALLENGE_TYPES.map((t) => (
+              <button
+                key={t}
+                className={`w-full cursor-pointer mb-2 p-2 rounded ${challengeType === t ? "bg-gray-700" : "bg-[#2a2a2d]"
+                  }`}
+                onClick={() => handleChallengeClick(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </>
+        )}
+      </aside>
+
+      {/* ================= MAIN WORKSPACE ================= */}
+      <main className="flex-1 pt-20 p-8 overflow-y-auto hide-scrollbar">
+        {mode === "lessons" && !selectedLesson && (
+          <div className="text-gray-400 text-center">
+            Select a lesson to manage it
+          </div>
+        )}
+
+        {mode === "lessons" && selectedLesson && (
+          <>
+            <h2 className="text-xl font-bold mb-4">
+              {selectedLesson.title}
+            </h2>
+
+            {/* Tabs */}
+            <div className="flex gap-3 mb-4">
+              {["overview", "questions", "scripts"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`px-4 py-1 cursor-pointer rounded ${lessonTab === tab ? "bg-blue-600" : "bg-[#2a2a2d]"
+                    }`}
+                  onClick={() => setLessonTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Overview */}
+            {lessonTab === "overview" && (
+              <div className="bg-[#232526] p-4 rounded">
+                <p>{selectedLesson.description}</p>
+                <button
+                  className="mt-3 bg-blue-600 cursor-pointer px-3 py-1 rounded"
+                  onClick={() => router.push(`/admin/lesson?id=${selectedLesson.id}&language=${language}`)}
                 >
                   Edit Lesson
                 </button>
-                <button
-                  className="px-4 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer"
-                  onClick={() => router.push(`/admin/addQuestion?lessonId=${selectedLesson.id}`)}
-                >
-                  Add Question
-                </button>
-                <button
-                  className="px-4 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition cursor-pointer"
-                  onClick={() => router.push(`/admin/addScript?lessonId=${selectedLesson.id}`)}
-                >
-                  Add Script
+              </div>
+            )}
+
+            {/* Questions */}
+            {lessonTab === "questions" && (
+              <div className="space-y-2">
+                {mockQuestions[selectedLesson.id]?.map((q) => (
+                  <div
+                    key={q.id}
+                    className="bg-[#232526] p-3 rounded flex justify-between"
+                  >
+                    <span>{q.text}</span>
+                    <button
+                      className="bg-blue-600 px-2 rounded"
+                      onClick={() =>
+                        setActiveEditor({ type: "question", data: q })
+                      }
+                    >
+                      Edit
+                    </button>
+                  </div>
+                ))}
+                <button className="bg-green-600 px-3 py-1 rounded">
+                  + Add Question
                 </button>
               </div>
-            </div>
-            <div className="mb-4">
-              <span className="text-gray-400">Language: </span>
-              <span className="font-medium">{selectedLesson.language || currentLanguage.name}</span>
-            </div>
-            <div className="mb-6">
-              <span className="text-gray-400">Description: </span>
-              <span className="font-medium">{selectedLesson.description || "No description."}</span>
-            </div>
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-2">Questions</h4>
-              {isLoadingQuestions[selectedLesson.id] ? (
-                <div className="text-gray-400">Loading questions...</div>
-              ) : lessonQuestions[selectedLesson.id]?.length === 0 ? (
-                <div className="text-gray-500">No questions available.</div>
-              ) : (
-                <ul className="space-y-2">
-                  {lessonQuestions[selectedLesson.id]?.map((question) => (
-                    <li key={question.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
-                      <span className="text-gray-200 select-none">{question.question_text}</span>
-                      <button
-                        className="text-xs px-2 py-1 bg-blue-700 rounded text-white hover:bg-blue-800"
-                        onClick={() => router.push(`/admin/question?id=${question.id}`)}
-                      >
-                        Edit
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-2">Scripts</h4>
-              {isLoadingScripts[selectedLesson.id] ? (
-                <div className="text-gray-400">Loading scripts...</div>
-              ) : lessonScripts[selectedLesson.id]?.length === 0 ? (
-                <div className="text-gray-500">No scripts available.</div>
-              ) : (
-                <ul className="space-y-2">
-                  {Array.isArray(lessonScripts[selectedLesson.id]?.data) &&
-                    lessonScripts[selectedLesson.id].data.map((script) => (
-                      <li key={script.id} className="bg-[#18181b] rounded p-3 flex items-center justify-between">
-                        <span className="text-gray-200 select-none">
-                          {script.plan.message} {/* Or whatever field you want to show */}
-                        </span>
-                        <button
-                          className="text-xs px-2 py-1 bg-yellow-700 rounded text-white hover:bg-yellow-800"
-                          onClick={() => router.push(`/admin/script?id=${script.id}`)}
-                        >
-                          Edit
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
-          </div>
+            )}
+
+            {/* Scripts */}
+            {lessonTab === "scripts" && (
+              <div className="space-y-2">
+                {lessonScripts[selectedLesson.id]?.plan?.map((script, index) => (
+                  <div
+                    key={index} // index is OK here since order matters
+                    className="bg-[#232526] p-3 rounded flex items-center justify-between"
+                  >
+                    <span>{script.message}</span>
+
+                    <button
+                      className="bg-blue-600 px-2 py-1 cursor-pointer rounded"
+                      onClick={() =>
+                        router.push(
+                          `/admin/script?id=${lessonScripts[selectedLesson.id]?.id}`
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
+                  </div>
+                ))}
+
+                <button className="bg-green-600 px-3 py-1 rounded">
+                  + Add Script
+                </button>
+              </div>
+            )}
+          </>
         )}
-      </div>
+
+        {mode === "challenges" && (
+          <>
+            <h2 className="text-xl font-bold mb-4 capitalize">
+              {challengeType} Challenges
+            </h2>
+
+            {challenges.map((c) => (
+              <div
+                key={c.id}
+                className="bg-[#232526] p-4 rounded mb-3 items-center flex justify-between gap-4"
+              >
+                {/* Left content */}
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-semibold">
+                      {c.title}
+                    </h3>
+
+                    {/* Category badge */}
+                    {c.category && (
+                      <span className="text-xs px-2 py-[4px] rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        {c.category}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  {c.description && (
+                    <p className="text-sm text-gray-400 line-clamp-2">
+                      {c.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Right actions */}
+                <div className="flex items-center gap-2">
+                  <button
+                    className="bg-emerald-600 px-3 py-2 cursor-pointer h-fit rounded text-sm hover:bg-emerald-700 transition"
+                    onClick={() => router.push(`/addtestcase/${c.id}`)}
+                  >
+                    Add TestCases
+                  </button>
+
+                  <button
+                    className="bg-blue-600 px-3 py-2 cursor-pointer h-fit rounded text-sm hover:bg-blue-700 transition"
+                    onClick={() =>
+                      setActiveEditor({ type: "challenge", data: c })
+                    }
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+
+
+            <button className="mt-3 bg-green-600 cursor-pointer px-4 py-2 rounded" onClick={() => { router.push(`/admin/addChallenges?type=${challengeType}`) }}>
+              + Add Challenge
+            </button>
+          </>
+        )}
+      </main>
+
+      {/* ================= RIGHT EDITOR ================= */}
+      <aside className="w-96 bg-[#1a1a1d] border-l border-gray-700 p-4 pt-20">
+        {!activeEditor ? (
+          <div className="text-gray-500 text-center">
+            Select something to edit
+          </div>
+        ) : (
+          <>
+            <h3 className="font-semibold mb-3 capitalize">
+              Editing {activeEditor.type}
+            </h3>
+            <textarea
+              className="w-full h-40 bg-[#18181b] border border-gray-600 rounded p-2"
+              defaultValue={JSON.stringify(activeEditor.data, null, 2)}
+            />
+            <button className="mt-3 bg-green-600 px-4 py-1 rounded">
+              Save
+            </button>
+          </>
+        )}
+      </aside>
     </div>
   );
-} 
+}

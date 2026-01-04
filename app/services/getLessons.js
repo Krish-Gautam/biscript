@@ -10,7 +10,9 @@ export const getLessons = async (language) => {
     const { data, error } = await supabase
         .from('lessons')
         .select('*')
-        .eq('language', language);
+        .eq('language', language)
+        .order('lesson_number', { ascending: true });
+
 
     if (error) {
         console.log(error);

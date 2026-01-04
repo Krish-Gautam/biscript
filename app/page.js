@@ -1,21 +1,80 @@
 "use client";
+import GoblinBox from "@/app/components/GoblinBox";
 import Image from "next/image";
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy, use } from "react";
 import Link from "next/link";
 import { supabase } from "./utils/supabaseClient";
 import { useRouter } from "next/navigation";
 import { HomeSkeleton } from "./components/LoadingSkeleton";
 import { motion } from "framer-motion";
+import { useRef } from "react";
 import { Code, Target, Users, Zap, Brain, Globe, Trophy, BookOpen } from "lucide-react";
 
 export default function Home() {
   const [session, setSession] = useState()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [lessonStepIndex, setLessonStepIndex] = useState(0);
+  const [goblinLine, setGoblinLine] = useState("");
+  const [currentEmoji, setCurrentEmoji] = useState("");
+  const [isDisabled, setIsDisabled] = useState(false);
   const [time, setTime] = useState(() => {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   });
+
+  const dragStart = useRef({ x: 0, y: 0 });
+  const grabOffset = useRef({ x: 0, y: 0 });
+  const didDrag = useRef(false);
+  const DRAG_THRESHOLD = 6;
+
+
+  const goblinTeaching = [
+    {
+      message: "Hey there, little guy. I’m Miko.",
+      trigger: "intro",
+      waitFor: null,
+      reactions: [],
+      emoji: "/hi.png"
+    },
+    {
+      message: "This is where you learn to code… the fun way.",
+      trigger: "intro",
+      waitFor: null,
+      reactions: [],
+      emoji: "/sitting.png"
+    },
+    {
+      message: "I’ll explain things, crack a joke or two, and poke you a little when you mess up.",
+      trigger: "intro",
+      waitFor: null,
+      reactions: [],
+      emoji: "/angry.png"
+    },
+    {
+      message: "Relax — I tease because I care.",
+      trigger: "intro",
+      waitFor: null,
+      reactions: [],
+      emoji: "/idea.png"
+    },
+    {
+      message: "Now go on. Let’s make your brain work.",
+      trigger: "intro_end",
+      waitFor: null,
+      reactions: [],
+      emoji: "/sitting.png"
+    }
+  ];
+
+  useEffect(() => {
+    const currentStep = goblinTeaching?.[lessonStepIndex];
+    if (currentStep && currentStep.emoji) {
+      setGoblinLine(currentStep.message);
+      setCurrentEmoji(currentStep.emoji);
+    }
+  }, [goblinTeaching, lessonStepIndex]);
+
 
   const [date, setDate] = useState(() => {
     const now = new Date();
@@ -33,6 +92,46 @@ export default function Home() {
 # compiling ████... [OK]
 * injecting logic into chaos...
 >> SYSTEM://reality.patch() complete.`;
+
+
+  const [pos, setPos] = useState({ x: 1100, y: 180 });
+  const dragRef = useRef(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const onMouseDown = (e) => {
+    const rect = dragRef.current.getBoundingClientRect();
+
+    dragStart.current = { x: e.clientX, y: e.clientY };
+
+    // 👇 THIS is what you were missing
+    grabOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+
+    didDrag.current = false;
+
+    const onMouseMove = (ev) => {
+      const dx = Math.abs(ev.clientX - dragStart.current.x);
+      const dy = Math.abs(ev.clientY - dragStart.current.y);
+
+      if (dx + dy > DRAG_THRESHOLD) {
+        didDrag.current = true;
+
+        setPos({
+          x: ev.clientX - grabOffset.current.x,
+          y: ev.clientY - grabOffset.current.y,
+        });
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
 
   // fetch session once on mount with caching
   useEffect(() => {
@@ -84,6 +183,7 @@ export default function Home() {
     return <HomeSkeleton />;
   }
 
+
   return (
     <>
       <style jsx>{`
@@ -96,7 +196,47 @@ export default function Home() {
           50% { opacity: 0.6; }
         }
       `}</style>
+
       <div className="select-none w-full relative bg-black">
+        <div ref={dragRef} onMouseDown={onMouseDown} style={{ left: pos.x, top: pos.y }}
+          className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white   overflow-visible border-gray-700 shadow-md space-y-2 cursor-move select-none">
+          <div
+          className="cursor-pointer"
+            onClick={() => {
+              if (didDrag.current) return; // 🚫 ignore click after drag
+              setIsDisabled(prev => !prev);
+            }}
+            style={{
+              position: "absolute",
+              top: -70,
+              left: "60%",
+              zIndex: 99,
+            }}>
+            <Image
+              src={currentEmoji}
+              alt="Goblin"
+              width={134}
+              height={134}
+              draggable={false}
+            />
+          </div>
+          {!isDisabled && (<GoblinBox className="w-[350px] h-[250px] " response={goblinLine}
+            isLessonStarted={true}
+            canGoPrev={lessonStepIndex > 0}
+            canGoNext={
+              goblinTeaching &&
+              lessonStepIndex < goblinTeaching.length - 1
+            }
+            onPrev={() =>
+              setLessonStepIndex((prev) => Math.max(0, prev - 1))
+            }
+            onNext={() =>
+              setLessonStepIndex((prev) =>
+                Math.min((goblinTeaching?.length || 1) - 1, prev + 1)
+              )} />)}
+
+        </div>
+
         {/* Hero Section */}
         <div className="min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
           {/* Base gradient - consistent dark theme */}
@@ -437,7 +577,7 @@ export default function Home() {
               <div className="flex justify-between gap-8">
                 <div>
                   <Link href="/" className="flex items-center space-x-3">
-                    
+
                     <span className="font-semibold text-2xl mb-2">BiScript</span>
                   </Link>
                   <p className="mt-3  text-gray-400 max-w-xs ">

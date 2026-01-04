@@ -3,97 +3,187 @@ import { getTestCases } from "@/app/services/getTestCases";
 import { getChallengeData } from "@/app/services/getChallengeData";
 import { supabase } from "@/app/utils/supabaseClient";
 
+/* -------------------- Runner builders -------------------- */
 
-const judge0LangMap = {
-  python: 71, // Python 3.12
-  javascript: 63,
-  c: 50,
-  cpp: 54,
-};
+function buildPythonSource({ userCode, fnName, params, inputs }) {
+  const assignments = params.map((p, i) => {
+    return `${p} = ${JSON.stringify(inputs[i])}`;
+  });
+
+  return `
+${assignments.join("\n")}
+
+${userCode}
+
+print(${fnName}(${params.join(", ")}))
+`;
+}
+
+function buildJavaScriptSource({ userCode, fnName, params, inputs }) {
+  const assignments = params.map((p, i) => {
+    return `const ${p} = ${JSON.stringify(inputs[i])};`;
+  });
+
+  return `
+${assignments.join("\n")}
+
+${userCode}
+
+console.log(${fnName}(${params.join(", ")}));
+`;
+}
+
+/* -------------------- API -------------------- */
 
 export async function POST(req) {
   try {
     const { challengeId, source_code, language_id, userId } = await req.json();
 
     if (!challengeId || !source_code || !language_id || !userId) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+      return Response.json(
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Fetch challenge data and test cases
-    const testCases = await getTestCases(challengeId);
-    const challengeDataArr = await getChallengeData(challengeId);
+    /* -------------------- Load test schema -------------------- */
+    const tcRows = await getTestCases(challengeId);
+    const testSchema = tcRows[0]?.data;
 
-    const challengeData = challengeDataArr[0]; // adjust based on API shape
-    let allPassed = true;
-    let results = [];
+    if (!testSchema) {
+      return Response.json(
+        { error: "Test schema not found" },
+        { status: 500 }
+      );
+    }
 
-    for (let tc of testCases) {
-      // Use Piston API for code execution
-      // Use Judge0 API for code execution
+    const { params, testCases } = testSchema;
+
+    /* -------------------- Load challenge metadata -------------------- */
+    const [challenge] = await getChallengeData(challengeId);
+    const function_name = challenge.function_name; // MUST exist in DB
+
+    if (!function_name || !params?.length) {
+      return Response.json(
+        { error: "Challenge function signature not defined" },
+        { status: 500 }
+      );
+    }
+
+    const normalize = (s = "") =>
+      s
+        .replace(/\r\n/g, "\n")
+        .split("\n")
+        .map(l => l.trim())
+        .join("\n")
+        .trim();
+
+    /* -------------------- Execute one test -------------------- */
+    const runTestCase = async (tc) => {
+      if (!Array.isArray(tc.inputs)) {
+        return { passed: false, error: "Invalid test case format" };
+      }
+
+      if (tc.inputs.length !== params.length) {
+        return {
+          passed: false,
+          error: "Input count does not match parameter count",
+        };
+      }
+
+      let wrappedSource = "";
+
+      if (language_id === 71) {
+        wrappedSource = buildPythonSource({
+          userCode: source_code,
+          fnName: function_name,
+          params,
+          inputs: tc.inputs,
+        });
+      } else if (language_id === 63) {
+        wrappedSource = buildJavaScriptSource({
+          userCode: source_code,
+          fnName: function_name,
+          params,
+          inputs: tc.inputs,
+        });
+      } else {
+        return { passed: false, error: "Language not supported yet" };
+      }
+
       const res = await fetch(
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+        "https://judge0-ce.p.rapidapi.com/submissions?wait=true&base64_encoded=false",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-RapidAPI-Key": process.env.RAPID_API_KEY, // put your key in .env
+            "X-RapidAPI-Key": process.env.RAPID_API_KEY,
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
           body: JSON.stringify({
-            source_code,
-            language_id: language_id,
-            stdin: String(tc.input),
+            source_code: wrappedSource,
+            language_id,
+            stdin: "",
+            cpu_time_limit: 2,
+            memory_limit: 128000,
           }),
         }
       );
+
       const result = await res.json();
-      const output = (result.stdout || result.stderr || result.compile_output || "").trim();
-      const expected = (tc.output || "").trim();
-      const passed = output === expected;
-      if (!passed) allPassed = false;
-      results.push({
-        input: tc.input,
-        expected,
-        output,
-        status: result.run?.code === 0 ? "Success" : "Error",
-        passed,
-      });
-    }
- 
-    if (allPassed) {
-  const { data, error } = await supabase
-    .from("user_challenges")
-    .upsert(
-      {
-        challenge_id: challengeId,
-        user_id: userId,
-        title: challengeData.title,
-        participants: challengeData.participants,
-      },
-      {
-        onConflict: ["id"], // make sure your table has a unique constraint on these
+      console.log("RAW JUDGE0 RESPONSE:", result);
+      console.log("WRAPPED SOURCE:\n", wrappedSource);
+
+
+      if (result.status?.id !== 3) {
+        return {
+          passed: false,
+          error: result.status?.description,
+          details: result.stderr || result.compile_output,
+        };
       }
-    );
 
-  if (error) console.error("Supabase upsert error:", error);
-}
+      const stdout =
+        typeof result.stdout === "string" ? result.stdout : "";
 
+      const passed =
+        normalize(stdout) === normalize(String(tc.output));
 
-    return new Response(JSON.stringify({ allPassed, results }), { status: 200 });
+      return {
+        passed,
+        expected: tc.output,
+        output: stdout,
+      };
+    };
 
-  } catch (error) {
-    console.error("Error in /api/challenges/submit:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error", details: error.message }),
+    /* -------------------- Run all tests -------------------- */
+    const results = [];
+    for (const tc of testCases) {
+      results.push(await runTestCase(tc));
+    }
+
+    const allPassed = results.every(r => r.passed);
+
+    if (allPassed) {
+      await supabase
+        .from("user_challenges")
+        .upsert(
+          {
+            challenge_id: challengeId,
+            user_id: userId,
+            title: challenge.title,
+          },
+          { onConflict: ["challenge_id", "user_id"] }
+        );
+    }
+
+    return Response.json({ allPassed, results }, { status: 200 });
+
+  } catch (err) {
+    console.error("SUBMISSION ERROR", err);
+    return Response.json(
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
-
-
-// n = int(input())
-// for i in range(1, n + 1):
-//     print(i)

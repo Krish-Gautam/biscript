@@ -71,31 +71,6 @@ const Page = () => {
     }, []);
   
 
-  // Toggle dropdown + fetch questions if needed
-  const toggleLesson = async (lessonId) => {
-    setOpenLessons((prev) => ({
-      ...prev,
-      [lessonId]: !prev[lessonId],
-    }));
-
-    if (!lessonQuestions[lessonId]) {
-      const questions = await getQuestion(lessonId);
-      setLessonQuestions((prev) => ({
-        ...prev,
-        [lessonId]: questions,
-      }));
-    }
-  };
-  // Handle question click
-  const handleQuestionClick = (lessonId, questionTitle) => {
-    const slug = questionTitle.toLowerCase().replace(/\s+/g, "-");
-    if (lessonId === currentLessons) {
-      // Optional: update state here if needed
-    } else {
-      router.push(`/questions/${language}/${lessonId}`);
-    }
-  };
-
   return (
     <>
       <Navbar2
@@ -132,15 +107,6 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Right Panel */}
-        {/* <div className="bg-gradient-to-b from-[#232526] to-[#414345] h-full w-[20%] rounded-2xl p-4 flex flex-col shadow-xl border border-gray-700 relative">
-          <div className="flex-1" />
-          <input
-            className="bg-[#232526] p-3 rounded-xl w-full border border-gray-700 text-gray-200 placeholder-gray-400 focus:ring-2 ring-blue-500 transition shadow-inner"
-            type="text"
-            placeholder="Search..."
-          />
-        </div> */}
       </div>
     </>
   );

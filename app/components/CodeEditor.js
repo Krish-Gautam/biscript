@@ -16,6 +16,7 @@ import { getGoblinLines } from "../services/getGoblinLines";
 import { deserializePlan } from "../services/deserializedPlan";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+
 import { set } from "nprogress";
 
 /* ---------------------------------- Setup ---------------------------------- */
@@ -60,6 +61,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
 
   // Goblin teaching system
   const [goblinLine, setGoblinLine] = useState("");
+  const [currentEmoji, setCurrentEmoji] = useState("");
   const [currentLesson, setCurrentLesson] = useState(null);
   const [goblinTeaching, setGoblinTeaching] = useState(null);
   const [lessonStepIndex, setLessonStepIndex] = useState(0);
@@ -91,6 +93,8 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   const autoAdvanceTimeoutRef = useRef(null);
   const checkInputTimeoutRef = useRef(null);
   const isDragging = useRef(false);
+
+
 
   /* ------------------------------- Initialization ------------------------------- */
   useEffect(() => {
@@ -175,6 +179,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
     clearTimers();
 
     setGoblinLine(currentStep.message);
+    setCurrentEmoji(currentStep.emoji);
     setLastReaction(null);
     setStepMessageShown(true);
     setCanCheckInput(false); // block reaction for now
@@ -230,12 +235,6 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
       }
     }
 
-    // const attempts = userProfile.mistakes.filter(m => m.step === currentStep.trigger).length;
-    // if (attempts >= 3 && currentStep.hint && lastReaction?.response !== currentStep.hint) {
-    //   setGoblinLine(`Ugh, okay fine. Here's a hint: ${currentStep.hint}`);
-    //   setLastReaction({ response: currentStep.hint });
-    //   return;
-    // }
   }, [code, output, goblinTeaching, lessonStepIndex, canCheckInput, isLessonStarted, lastReaction]);
 
   // Final cleanup: clear timers on unmount
@@ -303,43 +302,6 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   };
 
 
-  //   if (!language) return;
-  //   setLoading(true);
-  //   setOutput("Running...");
-
-  //   try {
-  //     const langConfig = pistonLangMap[language.name]; // map your CodeMirror lang to Piston
-
-  //     const res = await fetch("/api/piston/runCode", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         language: langConfig.piston, // "python", "javascript", etc.
-  //         version: "3.12.0",
-  //         files: [
-  //           {
-  //             name: `main.${langConfig.ext}`, // main.py, main.js, etc.
-  //             content: code,
-  //           },
-  //         ],
-  //       }),
-  //     });
-
-  //     const result = await res.json();
-
-  //     const pistonOutput =
-  //       result.run?.stdout || result.run?.stderr || "No output";
-
-  //     setOutput(pistonOutput);
-  //   } catch (err) {
-  //     setOutput(err.message || "Error running code");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   // Toolkit exposed to parent via ref
   useImperativeHandle(ref, () => ({
     run: runCode,
@@ -382,24 +344,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
       console.log(isHamburgerOpen);
     }
   }));
-
-  /* ------------------------------- Drag Resizing ------------------------------- */
-  const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
-    const containerHeight = window.innerHeight * 0.9;
-    const newHeight = (e.clientY / containerHeight) * 100;
-    if (newHeight > 30 && newHeight < 90) setEditorHeight(newHeight);
-  };
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", () => (isDragging.current = false));
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", () => (isDragging.current = false));
-    };
-  }, []);
-
+  
   const handleQuestionClick = (question) => {
     setSelectedQuestion(question);
     // You can add logic here to load the question content into the ed
@@ -409,39 +354,76 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
   const filteredLessons = lessons.filter(lesson =>
     lesson.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  /* ------------------------------- Drag Resizing ------------------------------- */
+  
+const [pos, setPos] = useState({ x: 990, y: 160 });
+const dragRef = useRef(null);
+const offsetRef = useRef({ x: 0, y: 0 });
+
+const onMouseDown = (e) => {
+  e.preventDefault(); // 🔴 REQUIRED
+  offsetRef.current = {
+    x: e.clientX - pos.x,
+    y: e.clientY - pos.y,
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
+
+const onMouseMove = (e) => {
+  setPos({
+    x: e.clientX - offsetRef.current.x,
+    y: e.clientY - offsetRef.current.y,
+  });
+};
+
+const onMouseUp = () => {
+  document.removeEventListener("mousemove", onMouseMove);
+  document.removeEventListener("mouseup", onMouseUp);
+};
+
 
   return (
     <>
-      <div className="bg-[#1a1a1d] fixed hidden-md right-90 top-40 z-40  max-w-[400px] w-[300px]  text-white p-[5px] rounded-xl border border-gray-700 shadow-md space-y-2">
-        <GoblinBox response={goblinLine} />
-        <div className="flex items-center justify-between gap-2 px-2 pb-2">
-          {!isLessonStarted ? (
-            <button
-              onClick={() => setIsLessonStarted(true)}
-              className=" cursor-pointer flex-1 px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-md transition"
-            >
-              Start Lesson
-            </button>
-          ) : (
-            <div className="flex w-full items-center gap-2">
-              <button
-                onClick={() => setLessonStepIndex((prev) => Math.max(0, prev - 1))}
-                disabled={!goblinTeaching || lessonStepIndex === 0}
-                className="cursor-pointer flex-1 px-2 py-1 bg-gray-700 disabled:opacity-40 rounded-md hover:bg-gray-600 transition"
-                title="Previous line"
-              >
-                ← Prev
-              </button>
-              <button
-                onClick={() => setLessonStepIndex((prev) => Math.min((goblinTeaching?.length || 1) - 1, prev + 1))}
-                disabled={!goblinTeaching || lessonStepIndex >= (goblinTeaching?.length || 1) - 1}
-                className="cursor-pointer flex-1 px-2 py-1 bg-gray-700 disabled:opacity-40 rounded-md hover:bg-gray-600 transition"
-                title="Next line"
-              >
-                Next →
-              </button>
-            </div>
-          )}
+      <div ref={dragRef} onMouseDown={onMouseDown} style={{ left: pos.x, top: pos.y }} 
+      className=" fixed z-40 max-w-[400px] w-[300px] text-white p-[5px] cursor-move select-none">
+        <GoblinBox
+          response={goblinLine}
+          emoji={currentEmoji}
+          isLessonStarted={isLessonStarted}
+          canGoPrev={lessonStepIndex > 0}
+          canGoNext={
+            goblinTeaching &&
+            lessonStepIndex < goblinTeaching.length - 1
+          }
+          onStart={() => setIsLessonStarted(true)}
+          onPrev={() =>
+            setLessonStepIndex((prev) => Math.max(0, prev - 1))
+          }
+          onNext={() =>
+            setLessonStepIndex((prev) =>
+              Math.min((goblinTeaching?.length || 1) - 1, prev + 1)
+            )
+          }/>
+        <div className="flex items-center justify-between gap-2 px-2 pb-1">
+            {!isLessonStarted && (
+              <div className="flex justify-center px-2 pb-1">
+                <button
+                  onClick={() => setIsLessonStarted(true)}
+                  className="
+                    group flex items-center gap-2
+                    text-sm font-mono
+                    text-green-400
+                    transition-all duration-200
+                    hover:text-green-300
+                    cursor-pointer
+                  "
+                >
+                  <span className="opacity-70">start lesson →</span>
+                </button>
+              </div>)}
+
         </div>
       </div>
 
@@ -711,7 +693,7 @@ export default forwardRef(function CodeEditor({ initialLanguage, initialLesson, 
               {"</> Terminal"}
             </div>
             <div className="flex-1 p-4 hide-scrollbar font-mono text-sm text-gray-300 bg-[#232526] rounded-b-2xl overflow-auto">
-              {output ? output : <span className="text-gray-500 ">you output will appear here...</span>}
+              {output ? output : <span className="text-gray-500 ">your output will appear here...</span>}
             </div>
           </div>
         </motion.div>

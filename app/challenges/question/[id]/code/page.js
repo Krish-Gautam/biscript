@@ -11,6 +11,8 @@ import { supabase } from '@/app/utils/supabaseClient'
 import { javascript } from "@codemirror/lang-javascript";
 import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
+import { useRef } from 'react'
+import { Copy, Check } from "lucide-react";
 
 const languageOptions = [
   { id: 63, name: "JavaScript", langExt: javascript },
@@ -30,15 +32,17 @@ export default function CodingPage({ params }) {
   const sliderRef = React.useRef(null)
   const [isRunning, setIsRunning] = useState(false)
   const [showHints, setShowHints] = useState(false)
+  const [showSolution, setShowSolution] = useState(false)
   const [question, setQuestion] = useState(null)
   const [language, setLanguage] = useState({ id: 71, name: "Python", langExt: python }) // Default to Python 3
   const [loading, setLoading] = useState(false)
   const [session, setSession] = useState(null)
   const [testCases, setTestCases] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
-  const challengeId = params.id
+  const [copied, setCopied] = useState(false);
+  const { id: challengeId } = use(params);
 
-useEffect(() => {
+  useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -46,11 +50,27 @@ useEffect(() => {
       } else {
         const user = session.user;
         setCurrentUser(user);
-        await fetchUserProfile(user.id);
       }
     };
     checkUser();
   }, []);
+
+  const handleCopySolution = async () => {
+    try {
+      await navigator.clipboard.writeText(question.solution);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+
+  const [copyTimer, setCopyTimer] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimer) clearTimeout(copyTimer);
+    };
+  }, [copyTimer]);
 
 
   useEffect(() => {
@@ -61,6 +81,50 @@ useEffect(() => {
     fetchSession()
   }, [])
 
+  const codeWindowRef = useRef(null);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    if (!showSolution) return;
+
+    const codeWindow = codeWindowRef.current;
+    const header = headerRef.current;
+    if (!codeWindow || !header) return;
+
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const onMouseDown = (e) => {
+      isDragging = true;
+      const rect = codeWindow.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      document.body.style.userSelect = "none";
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+      codeWindow.style.left = `${e.clientX - offsetX}px`;
+      codeWindow.style.top = `${e.clientY - offsetY}px`;
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+      document.body.style.userSelect = "";
+    };
+
+    header.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      header.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [showSolution]);
+
   useEffect(() => {
     if (challengeId) {
       setIsLoadingContent(true);
@@ -68,22 +132,13 @@ useEffect(() => {
         const challengedata = await getChallengeData(challengeId)
         setQuestion(challengedata[0])
         const testdata = await getTestCases(challengeId)
-        setTestCases(testdata)
+        setTestCases(testdata[0])
         setIsLoadingContent(false);
       }
       fetchData()
     }
   }, [challengeId])
 
-  // useEffect(()=> {
-  //   const fetchTestCases = async () => {
-  //     const { data, error } = await getChallengeData(challengeId);
-  //     if (error) {
-  //       console.error("Error fetching test cases:", error);
-  //     }
-  //   };
-  //   fetchTestCases();
-  // }, [challengeId])
 
   const runCode = async () => {
     if (!language) return;
@@ -111,6 +166,7 @@ useEffect(() => {
       const data = await res.json();
 
       setResults(data.results || [])
+      console.log("result", data.results)
       setOutput("")
       // Animate reveal of each test case result
       setRevealedCount(0)
@@ -146,8 +202,64 @@ useEffect(() => {
     )
   }
 
+
   return (
-  <div className="min-h-screen bg-neutral-950 relative animate-fade-in">
+    <div className="min-h-screen bg-neutral-950 relative animate-fade-in">
+
+      {showSolution && (
+        <div
+          ref={codeWindowRef}
+          className="fixed z-50 w-[80%] max-w-3xl bg-[#1e1e1e] rounded-xl border border-gray-700 shadow-2xl"
+          style={{ left: "50%", top: "20%" }}
+        >
+          {/* Header */}
+          <div
+            ref={headerRef}
+            className="code-header cursor-pointer flex items-center justify-between px-4 py-2 bg-[#2a2a2a] border-b border-gray-700 rounded-t-xl "
+          >
+            <span className="text-sm text-gray-300 font-semibold">
+              Solution
+            </span>
+            <div className='flex gap-2'>
+              <button
+                onClick={async () => {
+                  if (copied) return;
+                  await handleCopySolution();
+                  setCopied(true);
+                  const t = setTimeout(() => setCopied(false), 2000);
+                  setCopyTimer(t);
+                }}
+                disabled={copied}
+                className={`cursor-pointer hidden-md px-3 py-1.5 rounded-md border ${copied
+                  ? "bg-green-600/20 text-green-400 border-green-700"
+                  : "bg-[#232526] hover:bg-[#2e2f31] text-gray-200 border-gray-700"
+                  }`}
+                title={copied ? "Copied" : "Copy code"}
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </button>
+              <button
+                onClick={() => setShowSolution(false)}
+                className="cursor-pointer hidden-md px-3 py-1.5 rounded-md border bg-[#232526] hover:bg-[#2e2f31] text-gray-200 border-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Code */}
+          <div className="p-3">
+            <CodeMirror
+              value={question.solution}
+              extensions={[javascript()]}
+              theme="dark"
+              editable={false}
+              height="300px"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-slate-900"></div>
       <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/20 to-black/60"></div>
@@ -190,24 +302,30 @@ useEffect(() => {
               {/* Hints Section - Only for Easy and Medium */}
               {(question.category === 'Easy' || question.category === 'Medium') && (
                 <div className="mb-6">
-                  <button
-                    onClick={() => setShowHints(!showHints)}
-                    className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
-                  >
-                    {showHints ? 'Hide Hints' : 'Show Hints'} 💡
-                  </button>
+                  <div className='flex gap-2'>
+                    <button
+                      onClick={() => setShowHints(!showHints)}
+                      className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
+                    >
+                      {showHints ? 'Hide Hints' : 'Show Hints'} 💡
+                    </button>
+                    <button
+                      onClick={() => setShowSolution(!showSolution)}
+                      className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
+                    >
+                      {showSolution ? 'Hide Solution' : 'Show Solution'} 💡
+                    </button>
+                  </div>
 
                   {showHints && (
                     <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
                       <h3 className="font-semibold text-yellow-400 mb-2">Hints:</h3>
                       <div className="text-yellow-300 space-y-2">
-                        {question.hints ? (
-                          question.hints.map((hint, index) => (
-                            <p key={index} className="flex items-start">
-                              <span className="font-bold mr-2">{index + 1}.</span>
-                              {hint}
-                            </p>
-                          ))
+                        {question.hint ? (
+                          <p className="flex items-start">
+                            <span className="font-bold mr-2">1.</span>
+                            {question.hint}
+                          </p>
                         ) : (
                           <div>
                             <p>• Break down the problem into smaller steps</p>
@@ -222,29 +340,33 @@ useEffect(() => {
               )}
 
               {/* Example Input/Output */}
-              {testCases.length !== 0 && testCases.map((testCases, index) => (
-                <div key={index} className="space-y-4">
-                  <div className="font-semibold text-gray-200 mb-2">Example {index + 1}:</div>
-                  <div className="bg-neutral-800/50 rounded-lg p-4">
-                    <h3 className="font-semibold  text-gray-200 mb-2">Input : {
-                      <code className="text-lg text-gray-300">
-                        {testCases.input || "// Add example input in your question data"}
-                      </code>
-                    }</h3>
+              {testCases?.input?.length > 0 &&
+                testCases.input.map((input, index) => (
+                  <div key={index} className="space-y-4">
+                    <div className="font-semibold text-gray-200 mb-2">
+                      Example {index + 1}:
+                    </div>
 
-                    <h3 className="font-semibold text-gray-200 mb-2">Output : {
-                      <code className="text-lg text-gray-300">
-                        {testCases.output || "// Add expected output in your question data"}
-                      </code>
-                    }</h3>
+                    <div className="bg-neutral-800/50 rounded-lg p-4 space-y-2">
+                      <div>
+                        <span className="font-semibold text-gray-200">Input:</span>{" "}
+                        <code className="text-lg text-gray-300">
+                          {input || "// Add example input in your question data"}
+                        </code>
+                      </div>
 
+                      <div>
+                        <span className="font-semibold text-gray-200">Output:</span>{" "}
+                        <code className="text-lg text-gray-300">
+                          {testCases.output?.[index] ??
+                            "// Add expected output in your question data"}
+                        </code>
+                      </div>
+                    </div>
                   </div>
+                ))
+              }
 
-
-                </div>
-              )
-
-              )}
             </div>
           </div>
 
@@ -253,7 +375,7 @@ useEffect(() => {
             ref={sliderRef}
             className="group flex items-center justify-center"
             style={{
-              
+
               top: 0,
               left: `${panelWidth}%`,
               width: "6px", // wider invisible area for grabbing
@@ -292,6 +414,8 @@ useEffect(() => {
 
           {/* Code Editor Panel */}
           <div className="flex flex-col" style={{ width: `${100 - panelWidth}%` }}>
+
+
             {/* Editor Header */}
             <div className="bg-neutral-800 border-b border-white/10 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -318,7 +442,7 @@ useEffect(() => {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                className="bg-green-600 cursor-pointer hover:bg-green-700 disabled:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
               >
                 {isRunning ? (
                   <>
@@ -360,69 +484,97 @@ useEffect(() => {
                   <span className="ml-2 animate-spin h-4 w-4 border-2 border-green-400 border-t-transparent rounded-full"></span>
                 )}
               </div>
-                <div className="flex gap-2 mb-4">
-                  {testCases.length > 0 ? (
-                    testCases.map((tc, idx) => {
-                      const res = results[idx];
-                      let icon = <span className="text-gray-400">⏺</span>;
-                      if (res && idx < revealedCount) {
-                        icon = res.passed ? <span className="text-green-400">✔️</span> : <span className="text-red-400">❌</span>;
-                      }
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => setSelectedCase(idx)}
-                          className={`cursor-pointer select-none px-3 py-1 rounded bg-neutral-800 text-white text-xs font-semibold border border-gray-700 focus:outline-none transition-all ${selectedCase === idx ? 'ring-2 ring-blue-400' : ''}`}
-                          aria-label={`Select Case ${idx + 1}`}
-                        >
-                          {icon} Case {idx + 1}
-                        </button>
-                      );
-                    })
-                  ) : (
-                    <span className="text-gray-400">No test cases found.</span>
-                  )}
-                </div>
-                {/* Details for selected case only */}
-                {testCases[selectedCase] && (
-                  (() => {
-                    const tc = testCases[selectedCase];
-                    const res = results[selectedCase];
+              <div className="flex gap-2 mb-4">
+                {testCases?.input?.length > 0 ? (
+                  testCases.input.map((_, idx) => {
+                    const res = results?.[idx];
+
                     let icon = <span className="text-gray-400">⏺</span>;
-                    let outputVal = '';
-                    let hint = '';
-                    let runtime = '';
-                    let memory = '';
-                    if (res && selectedCase < revealedCount) {
-                      icon = res.passed ? <span className="text-green-400">✔️</span> : <span className="text-red-400">❌</span>;
-                      outputVal = res.output;
-                      runtime = res.runtime ? `${res.runtime}s` : '--';
-                      memory = res.memory ? `${res.memory} KB` : '--';
-                      if (!res.passed) {
-                        hint = tc.hint || 'Check your logic and edge cases.';
-                      }
+                    if (res && idx < revealedCount) {
+                      icon = res.passed
+                        ? <span className="text-green-400">✔️</span>
+                        : <span className="text-red-400">❌</span>;
                     }
+
                     return (
-                      <div className={`flex flex-col gap-1 animate-fade-in`} style={{ opacity: res && selectedCase < revealedCount ? 1 : 0.5 }}>
-                        <div className="flex items-center gap-2">
-                          {icon}
-                          <span className="text-white">Case {selectedCase + 1} Details:</span>
-                          <span className="text-gray-300">Input:</span>
-                          <code className="bg-neutral-800 px-2 py-1 rounded">{tc.input}</code>
-                          <span className="text-gray-300">Expected:</span>
-                          <code className="bg-neutral-800 px-2 py-1 rounded">{tc.output}</code>
-                          <span className="text-gray-300">Output:</span>
-                          <code className="bg-neutral-800 px-2 py-1 rounded">{outputVal || '--'}</code>
-                        </div>
-                        {hint && (
-                          <div className="text-yellow-400 text-xs ml-8">💡 Hint: {hint}</div>
-                        )}
-                      </div>
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedCase(idx)}
+                        className={`cursor-pointer select-none px-3 py-1 rounded bg-neutral-800 text-white text-xs font-semibold border border-gray-700 focus:outline-none transition-all ${selectedCase === idx ? "ring-2 ring-blue-400" : ""
+                          }`}
+                        aria-label={`Select Case ${idx + 1}`}
+                      >
+                        {icon} Case {idx + 1}
+                      </button>
                     );
-                  })()
+                  })
+                ) : (
+                  <span className="text-gray-400">No test cases found.</span>
                 )}
+
               </div>
-              <style>{`
+              {/* Details for selected case only */}
+              {testCases?.input?.[selectedCase] && (() => {
+                const res = results?.[selectedCase];
+
+                let icon = <span className="text-gray-400">⏺</span>;
+                let outputVal = '--';
+                let hint = '';
+                let runtime = '--';
+                let memory = '--';
+
+                if (res && selectedCase < revealedCount) {
+                  icon = res.passed
+                    ? <span className="text-green-400">✔️</span>
+                    : <span className="text-red-400">❌</span>;
+
+                  outputVal = res.output ?? '--';
+                  runtime = res.runtime ? `${res.runtime}s` : '--';
+                  memory = res.memory ? `${res.memory} KB` : '--';
+
+                  if (!res.passed) {
+                    hint = 'Check your logic and edge cases.';
+                  }
+                }
+
+                return (
+                  <div
+                    className="flex flex-col gap-1 animate-fade-in"
+                    style={{ opacity: res && selectedCase < revealedCount ? 1 : 0.5 }}
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      {icon}
+                      <span className="text-white">
+                        Case {selectedCase + 1} Details:
+                      </span>
+
+                      <span className="text-gray-300">Input:</span>
+                      <code className="bg-neutral-800 px-2 py-1 rounded">
+                        {testCases.input[selectedCase]}
+                      </code>
+
+                      <span className="text-gray-300">Expected:</span>
+                      <code className="bg-neutral-800 px-2 py-1 rounded">
+                        {testCases.output?.[selectedCase] ?? '--'}
+                      </code>
+
+                      <span className="text-gray-300">Output:</span>
+                      <code className="bg-neutral-800 px-2 py-1 rounded">
+                        {outputVal}
+                      </code>
+                    </div>
+
+                    {hint && (
+                      <div className="text-yellow-400 text-xs ml-8">
+                        💡 Hint: {hint}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+            </div>
+            <style>{`
                 @keyframes fadeIn {
                   from { opacity: 0; transform: translateY(10px); }
                   to { opacity: 1; transform: translateY(0); }
@@ -431,17 +583,19 @@ useEffect(() => {
                   animation: fadeIn 0.7s;
                 }
               `}</style>
-              <style>{`
+            <style>{`
                 @media (max-width: 900px) {
                   .responsive-flex { flex-direction: column !important; }
                   .responsive-panel { width: 100% !important; }
                 }
               `}</style>
-            </div>
-
           </div>
+
         </div>
       </div>
-    
+    </div>
+
   )
 }
+
+

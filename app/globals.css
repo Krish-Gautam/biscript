@@ -123,3 +123,37 @@ cm-gutters {
 }
 
 
+.code-window {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  max-height: 70vh;
+  background: #0f0f10;
+  border-radius: 12px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #141416;
+  color: #ccc;
+  font-size: 14px;
+  border-bottom: 1px solid #2a2a2d;
+}
+
+pre {
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-size: 14px;
+}
+.hidden {
+  display: none;
+}
