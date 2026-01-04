@@ -17,19 +17,19 @@ export default function Home() {
 
   const router = useRouter()
 
-  useEffect(() => {
-    if (challengeMap[challengeType].length > 0) return;
+ useEffect(() => {
+  if (challengeMap[challengeType]?.length) return;
 
-    const fetchChallenges = async () => {
-      const { data } = await getChallenges(challengeType);
-      setChallengeMap(prev => ({
-        ...prev,
-        [challengeType]: data
-      }));
-    };
+  (async () => {
+    const { data } = await getChallenges(challengeType);
+    setChallengeMap(prev => ({
+      ...prev,
+      [challengeType]: data
+    }));
+  })();
 
-    fetchChallenges();
-  }, [challengeType]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [challengeType]);
 
 
   const getDifficultyColor = (difficulty) => {

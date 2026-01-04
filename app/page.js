@@ -9,6 +9,7 @@ import { HomeSkeleton } from "./components/LoadingSkeleton";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { Code, Target, Users, Zap, Brain, Globe, Trophy, BookOpen } from "lucide-react";
+import { useMemo } from "react";
 
 export default function Home() {
   const [session, setSession] = useState()
@@ -28,8 +29,7 @@ export default function Home() {
   const didDrag = useRef(false);
   const DRAG_THRESHOLD = 6;
 
-
-  const goblinTeaching = [
+const goblinTeaching = useMemo(() => [
     {
       message: "Hey there, little guy. I’m Miko.",
       trigger: "intro",
@@ -65,7 +65,8 @@ export default function Home() {
       reactions: [],
       emoji: "/sitting.png"
     }
-  ];
+  ], []);
+
 
   useEffect(() => {
     const currentStep = goblinTeaching?.[lessonStepIndex];
