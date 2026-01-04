@@ -27,7 +27,7 @@ export default function GoblinBox({
   }, [response]);
 
   return (
-    <div className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white p-[5px] rounded-xl border  overflow-visible border-gray-700 shadow-md cursor-move select-none">
+    <div className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white p-[5px] rounded-xl border  overflow-visible border-gray-700 shadow-md cursor-pointer select-none">
       <div
         className={`relative p-3 rounded-lg flex flex-col gap-3
         border border-gray-700/40 shadow-lg

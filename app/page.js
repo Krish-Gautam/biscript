@@ -199,7 +199,7 @@ export default function Home() {
 
       <div className="select-none w-full relative bg-black">
         <div ref={dragRef} onMouseDown={onMouseDown} style={{ left: pos.x, top: pos.y }}
-          className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white   overflow-visible border-gray-700 shadow-md space-y-2 cursor-move select-none">
+          className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none">
           <div
           className="cursor-pointer"
             onClick={() => {
@@ -220,7 +220,7 @@ export default function Home() {
               draggable={false}
             />
           </div>
-          {!isDisabled && (<GoblinBox className="w-[350px] h-[250px] " response={goblinLine}
+          {!isDisabled && (<GoblinBox className=" " response={goblinLine}
             isLessonStarted={true}
             canGoPrev={lessonStepIndex > 0}
             canGoNext={
