@@ -46,19 +46,19 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full bg-neutral-900/80 border border-white/10 shadow-2xl px-6 py-2 flex items-center justify-between">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
-        
+
         <Image
-  src="/logo6.png"
-  alt="Logo"
-  width={120}
-  height={50}
-  style={{ objectFit: "contain", width: "120px", height: "40px" }}
-/>
+          src="/logo6.png"
+          alt="Logo"
+          width={120}
+          height={50}
+          style={{ objectFit: "contain", width: "120px", height: "40px" }}
+        />
 
       </Link>
 
       {/* Links */}
-      <div className="hidden md:flex items-center gap-5">
+      <div className="md:flex items-center gap-5">
         <Link href="/languages" className="nav-anim-link text-gray-200 font-medium px-2">Languages</Link>
         <Link href="/challenges" className="nav-anim-link text-gray-200 font-medium px-2">Challenges</Link>
         <Link href="/docs" className="nav-anim-link text-gray-200 font-medium px-2">Docs</Link>
@@ -219,7 +219,7 @@ export default Navbar;
 //           <span className="text-lg font-bold text-white tracking-tight select-none">Biscript</span>
 //         </Link>
 
-//         {/* Navigation */} 
+//         {/* Navigation */}
 //         <div className="hidden md:flex items-center gap-5">
 //           <Link href="/languages" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Languages</Link>
 //           <Link href="/challenges" className="nav-anim-link select-none text-gray-200 font-medium px-2" prefetch={true}>Challenges</Link>

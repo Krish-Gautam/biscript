@@ -82,21 +82,13 @@ export default function GoblinBox({
         )}
       </div>
       {!isLessonStarted && (
-              <div className="flex justify-center px-2 pb-1">
-                <button
-                  onClick={() => onStart()}
-                  className="
-                    group flex items-center gap-2
-                    text-sm font-mono
-                    text-green-400
-                    transition-all duration-200
-                    hover:text-green-300
-                    cursor-pointer
-                  "
-                >
-                  <span className="opacity-70">start lesson →</span>
-                </button>
-              </div>)}
+        <div className="flex justify-center px-2 pb-1">
+          <button
+            onClick={() => onStart()}
+            className="group flex items-center gap-2 text-sm font-mono text-green-400 transition-all duration-200 hover:text-green-300 cursor-pointer">
+            <span className="">start lesson →</span>
+          </button>
+        </div>)}
 
     </div>
   );
