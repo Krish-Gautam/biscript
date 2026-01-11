@@ -16,8 +16,9 @@ export default function QuestionPage() {
     if (id) {
       const fetchData = async () => {
         const  challengedata = await getChallengeData(id)
+        console.log('Challenge Data:', challengedata);
 
-        setQuestion(challengedata[0])
+        setQuestion(challengedata)
       }
       fetchData()
     }
@@ -97,7 +98,7 @@ export default function QuestionPage() {
           <div className="mb-10">
             <h3 className="text-xl font-semibold text-white mb-3">Skills Tested</h3>
             <div className="flex flex-wrap gap-3">
-              {["Loops", "Conditionals", "Basic I/O", "Optimization"].map((skill, idx) => (
+              {question.skill_tested?.map((skill, idx) => (
                 <span key={idx} className="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300 border border-white/10">
                   {skill}
                 </span>

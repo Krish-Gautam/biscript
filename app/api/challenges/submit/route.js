@@ -1,40 +1,52 @@
-// app/api/challenges/submit/route.js
 import { getTestCases } from "@/app/services/getTestCases";
 import { getChallengeData } from "@/app/services/getChallengeData";
 import { supabase } from "@/app/utils/supabaseClient";
 
 /* -------------------- Runner builders -------------------- */
 
+
 function buildPythonSource({ userCode, fnName, params, inputs }) {
-  const assignments = params.map((p, i) => {
-    return `${p} = ${JSON.stringify(inputs[i])}`;
-  });
+  const assigns = params.map(
+    (p, i) => `${p} = json.loads(${JSON.stringify(JSON.stringify(inputs[i]))})`
+  );
 
   return `
-${assignments.join("\n")}
+import json
+
+${assigns.join("\n")}
 
 ${userCode}
 
-print(${fnName}(${params.join(", ")}))
+__result = ${fnName}(${params.join(", ")})
+print(json.dumps(__result))
 `;
 }
+
 
 function buildJavaScriptSource({ userCode, fnName, params, inputs }) {
-  const assignments = params.map((p, i) => {
-    return `const ${p} = ${JSON.stringify(inputs[i])};`;
-  });
+  const assigns = params.map(
+    (p, i) => `const ${p} = ${JSON.stringify(inputs[i])};`
+  );
 
   return `
-${assignments.join("\n")}
+${assigns.join("\n")}
 
 ${userCode}
 
-console.log(${fnName}(${params.join(", ")}));
+const __result = ${fnName}(${params.join(", ")});
+console.log(JSON.stringify(__result));
 `;
 }
 
-/* -------------------- API -------------------- */
+/* -------------------- Language map -------------------- */
 
+const PISTON_LANG_MAP = {
+  71: { language: "python", version: "3.12.0" },
+  63: { language: "javascript", version: "18.15.0" },
+};
+
+/* -------------------- API -------------------- */
+// judge0 implementation
 export async function POST(req) {
   try {
     const { challengeId, source_code, language_id, userId } = await req.json();
@@ -60,7 +72,7 @@ export async function POST(req) {
     const { params, testCases } = testSchema;
 
     /* -------------------- Load challenge metadata -------------------- */
-    const [challenge] = await getChallengeData(challengeId);
+    const challenge = await getChallengeData(challengeId);
     const function_name = challenge.function_name; // MUST exist in DB
 
     if (!function_name || !params?.length) {
@@ -146,8 +158,21 @@ export async function POST(req) {
       const stdout =
         typeof result.stdout === "string" ? result.stdout : "";
 
-      const passed =
-        normalize(stdout) === normalize(String(tc.output));
+let actual;
+try {
+  actual = JSON.parse(stdout);
+} catch {
+  return {
+    passed: false,
+    expected: tc.output,
+    output: stdout,
+    error: "Output is not valid JSON",
+  };
+}
+
+const passed =
+  JSON.stringify(actual) === JSON.stringify(tc.output);
+
 
       return {
         passed,
@@ -187,3 +212,148 @@ export async function POST(req) {
     );
   }
 }
+
+
+// piston implementation
+// export async function POST(req) {
+//   try {
+//     const { challengeId, source_code, language_id, userId } = await req.json();
+
+//     if (!challengeId || !source_code || !language_id || !userId) {
+//       return Response.json({ error: "Missing fields" }, { status: 400 });
+//     }
+
+//     /* ---------- Load test cases ---------- */
+
+//     const tcRows = await getTestCases(challengeId);
+//     const testSchema = tcRows?.[0]?.data;
+
+//     if (!testSchema) {
+//       return Response.json({ error: "Test schema missing" }, { status: 500 });
+//     }
+
+//     const { params, testCases } = testSchema;
+
+//     /* ---------- Load challenge ---------- */
+
+//     const challenge = await getChallengeData(challengeId);
+//     const fnName = challenge?.function_name;
+
+//     if (!fnName) {
+//       return Response.json({ error: "Function name missing" }, { status: 500 });
+//     }
+
+//     /* ---------- Language ---------- */
+
+//     const pistonLang = PISTON_LANG_MAP[language_id];
+//     if (!pistonLang) {
+//       return Response.json({ error: "Language not supported" }, { status: 400 });
+//     }
+
+//     /* ---------- Run one test ---------- */
+
+//     const runTestCase = async (tc) => {
+//       let wrappedSource = "";
+
+//       if (language_id === 71) {
+//         wrappedSource = buildPythonSource({
+//           userCode: source_code,
+//           fnName,
+//           params,
+//           inputs: tc.inputs,
+//         });
+//       } else {
+//         wrappedSource = buildJavaScriptSource({
+//           userCode: source_code,
+//           fnName,
+//           params,
+//           inputs: tc.inputs,
+//         });
+//       }
+
+//       const res = await fetch("http://localhost:2000/api/v2/execute", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           language: pistonLang.language,
+//           version: pistonLang.version,
+//           files: [
+//             {
+//               name: pistonLang.language === "python" ? "main.py" : "main.js",
+//               content: wrappedSource,
+//             },
+//           ],
+//         }),
+//       });
+
+//       const result = await res.json();
+//       const run = result?.run;
+
+//       if (!run || run.code !== 0) {
+//         return {
+//           passed: false,
+//           error: run?.stderr || "Runtime error",
+//         };
+//       }
+
+//       const stdout = run.stdout ?? "";
+
+//       let actual;
+//       try {
+//         actual = JSON.parse(stdout.trim());
+//       } catch {
+//         return {
+//           passed: false,
+//           expected: tc.output,
+//           output: stdout,
+//           error: "Output is not valid JSON",
+//         };
+//       }
+
+//       const passed =
+//         JSON.stringify(actual) === JSON.stringify(tc.output);
+
+//       return {
+//         passed,
+//         expected: tc.output,
+//         output: actual,
+//       };
+//     };
+
+//     /* ---------- Run all tests ---------- */
+
+//     const results = [];
+//     for (const tc of testCases) {
+//       results.push(await runTestCase(tc));
+//     }
+
+//     const allPassed = results.every(r => r.passed);
+
+//     /* ---------- Save progress ---------- */
+
+//     if (allPassed) {
+//       await supabase
+//         .from("user_challenges")
+//         .upsert(
+//           {
+//             challenge_id: challengeId,
+//             user_id: userId,
+//             title: challenge.title,
+//           },
+//           { onConflict: ["challenge_id", "user_id"] }
+//         );
+//     }
+
+//     return Response.json({ allPassed, results });
+
+//   } catch (err) {
+//     console.error("PISTON ERROR:", err);
+//     return Response.json({ error: "Internal error" }, { status: 500 });
+//   }
+// }
+
+
+
+/* -------------------- API -------------------- */
+
+

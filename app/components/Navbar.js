@@ -69,18 +69,20 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         {!session ? (
           <>
-            <button
-              onClick={() => router.push("/login")}
+          <Link href="/login"><button
+              
               className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Login
             </button>
-            <button
+            </Link>
+            <Link href="/signin"><button
               onClick={() => router.push("/signin")}
               className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Get Started
-            </button>
+            </button></Link>
+
           </>
         ) : (
           <div className="relative z-50">

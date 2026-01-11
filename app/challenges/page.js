@@ -22,6 +22,7 @@ export default function Home() {
 
   (async () => {
     const { data } = await getChallenges(challengeType);
+    console.log(data)
     setChallengeMap(prev => ({
       ...prev,
       [challengeType]: data

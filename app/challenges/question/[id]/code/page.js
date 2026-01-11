@@ -125,12 +125,26 @@ export default function CodingPage({ params }) {
     };
   }, [showSolution]);
 
+  function formatOutput(value) {
+  if (value === null || value === undefined) return "--";
+
+  if (typeof value === "string") return value;
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  // arrays & objects
+  return JSON.stringify(value, null, 2);
+}
+
+
   useEffect(() => {
     if (challengeId) {
       setIsLoadingContent(true);
       const fetchData = async () => {
         const challengedata = await getChallengeData(challengeId)
-        setQuestion(challengedata[0])
+        setQuestion(challengedata)
         const testdata = await getTestCases(challengeId)
         setTestCases(testdata[0])
         setIsLoadingContent(false);
@@ -209,7 +223,7 @@ export default function CodingPage({ params }) {
       {showSolution && (
         <div
           ref={codeWindowRef}
-          className="fixed z-50 w-[80%] max-w-3xl bg-[#1e1e1e] rounded-xl border border-gray-700 shadow-2xl"
+          className="fixed z-50 w-[60%] max-w-3xl bg-[#1e1e1e] rounded-xl border border-gray-700 shadow-2xl"
           style={{ left: "50%", top: "20%" }}
         >
           {/* Header */}
@@ -299,8 +313,7 @@ export default function CodingPage({ params }) {
                 )}
               </div>
 
-              {/* Hints Section - Only for Easy and Medium */}
-              {(question.category === 'Easy' || question.category === 'Medium') && (
+
                 <div className="mb-6">
                   <div className='flex gap-2'>
                     <button
@@ -337,7 +350,6 @@ export default function CodingPage({ params }) {
                     </div>
                   )}
                 </div>
-              )}
 
               {/* Example Input/Output */}
               {testCases?.input?.length > 0 &&
@@ -413,7 +425,7 @@ export default function CodingPage({ params }) {
           </div>
 
           {/* Code Editor Panel */}
-          <div className="flex flex-col" style={{ width: `${100 - panelWidth}%` }}>
+          <div className="flex flex-col " style={{ width: `${100 - panelWidth}%` }}>
 
 
             {/* Editor Header */}
@@ -458,7 +470,7 @@ export default function CodingPage({ params }) {
             </div>
 
             {/* Code Editor */}
-            <div className="flex-1 bg-neutral-900">
+            <div className="flex-1 min-h-0 bg-neutral-900 overflow-hidden">
               <CodeMirror
                 value={code}
                 height="100%"
@@ -528,7 +540,7 @@ export default function CodingPage({ params }) {
                     ? <span className="text-green-400">✔️</span>
                     : <span className="text-red-400">❌</span>;
 
-                  outputVal = res.output ?? '--';
+                  outputVal = formatOutput(res.output) ?? '--';
                   runtime = res.runtime ? `${res.runtime}s` : '--';
                   memory = res.memory ? `${res.memory} KB` : '--';
 

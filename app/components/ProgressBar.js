@@ -10,12 +10,23 @@ export default function ProgressBar() {
 
   useEffect(() => {
     // Start progress when clicking an internal link
-    const handleClick = (e) => {
-      const link = e.target.closest("a");
-      if (link && link.href && link.origin === window.location.origin) {
-        NProgress.start();
-      }
-    };
+   const handleClick = (e) => {
+  const link = e.target.closest("a");
+  if (!link) return;
+
+  const url = new URL(link.href);
+  const targetPath = url.pathname;
+
+  if (targetPath === window.location.pathname) {
+    // Same page → do nothing
+    return;
+  }
+
+  if (url.origin === window.location.origin) {
+    NProgress.start();
+  }
+};
+
 
     document.addEventListener("click", handleClick);
 

@@ -18,7 +18,7 @@ export default function Home() {
   const [lessonStepIndex, setLessonStepIndex] = useState(0);
   const [goblinLine, setGoblinLine] = useState("");
   const [currentEmoji, setCurrentEmoji] = useState("");
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const [time, setTime] = useState(() => {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -95,44 +95,52 @@ const goblinTeaching = useMemo(() => [
 >> SYSTEM://reality.patch() complete.`;
 
 
-  const [pos, setPos] = useState({ x: 1100, y: 180 });
+  const [pos, setPos] = useState({ x: 1020, y: 275 });
   const dragRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
+ 
+ 
   const onMouseDown = (e) => {
-    const rect = dragRef.current.getBoundingClientRect();
+  const el = dragRef.current;
+  const parent = el.offsetParent; // 👈 THIS is the key
+  const parentRect = parent.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
 
-    dragStart.current = { x: e.clientX, y: e.clientY };
-
-    // 👇 THIS is what you were missing
-    grabOffset.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-
-    didDrag.current = false;
-
-    const onMouseMove = (ev) => {
-      const dx = Math.abs(ev.clientX - dragStart.current.x);
-      const dy = Math.abs(ev.clientY - dragStart.current.y);
-
-      if (dx + dy > DRAG_THRESHOLD) {
-        didDrag.current = true;
-
-        setPos({
-          x: ev.clientX - grabOffset.current.x,
-          y: ev.clientY - grabOffset.current.y,
-        });
-      }
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+  dragStart.current = {
+    x: e.clientX,
+    y: e.clientY,
   };
+
+  grabOffset.current = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+  };
+
+  didDrag.current = false;
+
+  const onMouseMove = (ev) => {
+    const dx = Math.abs(ev.clientX - dragStart.current.x);
+    const dy = Math.abs(ev.clientY - dragStart.current.y);
+
+    if (dx + dy > DRAG_THRESHOLD) {
+      didDrag.current = true;
+
+      setPos({
+        x: ev.clientX - parentRect.left - grabOffset.current.x,
+        y: ev.clientY - parentRect.top - grabOffset.current.y,
+      });
+    }
+  };
+
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
+
 
   // fetch session once on mount with caching
   useEffect(() => {
@@ -199,8 +207,9 @@ const goblinTeaching = useMemo(() => [
       `}</style>
 
       <div className="select-none w-full relative bg-black">
+        
         <div ref={dragRef} onMouseDown={onMouseDown} style={{ left: pos.x, top: pos.y }}
-          className=" fixed bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none">
+          className=" absolute bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none">
           <div
           className="cursor-pointer"
             onClick={() => {

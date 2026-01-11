@@ -342,16 +342,14 @@ export default function AdminPanel() {
                 <div className="flex items-center gap-2">
                   <button
                     className="bg-emerald-600 px-3 py-2 cursor-pointer h-fit rounded text-sm hover:bg-emerald-700 transition"
-                    onClick={() => router.push(`/addtestcase/${c.id}`)}
+                    onClick={() => router.push(`/admin/addTestCases?challengeId=${c.id}`)}
                   >
                     Add TestCases
                   </button>
 
                   <button
                     className="bg-blue-600 px-3 py-2 cursor-pointer h-fit rounded text-sm hover:bg-blue-700 transition"
-                    onClick={() =>
-                      setActiveEditor({ type: "challenge", data: c })
-                    }
+                    onClick={() => router.push(`/admin/challenges?challengeId=${c.id}`)}
                   >
                     Edit
                   </button>
@@ -368,26 +366,7 @@ export default function AdminPanel() {
       </main>
 
       {/* ================= RIGHT EDITOR ================= */}
-      <aside className="w-96 bg-[#1a1a1d] border-l border-gray-700 p-4 pt-20">
-        {!activeEditor ? (
-          <div className="text-gray-500 text-center">
-            Select something to edit
-          </div>
-        ) : (
-          <>
-            <h3 className="font-semibold mb-3 capitalize">
-              Editing {activeEditor.type}
-            </h3>
-            <textarea
-              className="w-full h-40 bg-[#18181b] border border-gray-600 rounded p-2"
-              defaultValue={JSON.stringify(activeEditor.data, null, 2)}
-            />
-            <button className="mt-3 bg-green-600 px-4 py-1 rounded">
-              Save
-            </button>
-          </>
-        )}
-      </aside>
+
     </div>
   );
 }
