@@ -126,17 +126,17 @@ export default function CodingPage({ params }) {
   }, [showSolution]);
 
   function formatOutput(value) {
-  if (value === null || value === undefined) return "--";
+    if (value === null || value === undefined) return "--";
 
-  if (typeof value === "string") return value;
+    if (typeof value === "string") return value;
 
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
+    if (typeof value === "number" || typeof value === "boolean") {
+      return String(value);
+    }
+
+    // arrays & objects
+    return JSON.stringify(value, null, 2);
   }
-
-  // arrays & objects
-  return JSON.stringify(value, null, 2);
-}
 
 
   useEffect(() => {
@@ -152,7 +152,6 @@ export default function CodingPage({ params }) {
       fetchData()
     }
   }, [challengeId])
-
 
   const runCode = async () => {
     if (!language) return;
@@ -314,42 +313,42 @@ export default function CodingPage({ params }) {
               </div>
 
 
-                <div className="mb-6">
-                  <div className='flex gap-2'>
-                    <button
-                      onClick={() => setShowHints(!showHints)}
-                      className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
-                    >
-                      {showHints ? 'Hide Hints' : 'Show Hints'} 💡
-                    </button>
-                    <button
-                      onClick={() => setShowSolution(!showSolution)}
-                      className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
-                    >
-                      {showSolution ? 'Hide Solution' : 'Show Solution'} 💡
-                    </button>
-                  </div>
-
-                  {showHints && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                      <h3 className="font-semibold text-yellow-400 mb-2">Hints:</h3>
-                      <div className="text-yellow-300 space-y-2">
-                        {question.hint ? (
-                          <p className="flex items-start">
-                            <span className="font-bold mr-2">1.</span>
-                            {question.hint}
-                          </p>
-                        ) : (
-                          <div>
-                            <p>• Break down the problem into smaller steps</p>
-                            <p>• Think about what data structures you might need</p>
-                            <p>• Consider edge cases and input validation</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+              <div className="mb-6">
+                <div className='flex gap-2'>
+                  <button
+                    onClick={() => setShowHints(!showHints)}
+                    className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
+                  >
+                    {showHints ? 'Hide Hints' : 'Show Hints'} 💡
+                  </button>
+                  <button
+                    onClick={() => setShowSolution(!showSolution)}
+                    className="bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors mb-4 border border-yellow-500/30"
+                  >
+                    {showSolution ? 'Hide Solution' : 'Show Solution'} 💡
+                  </button>
                 </div>
+
+                {showHints && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                    <h3 className="font-semibold text-yellow-400 mb-2">Hints:</h3>
+                    <div className="text-yellow-300 space-y-2">
+                      {question.hint ? (
+                        <p className="flex items-start">
+                          <span className="font-bold mr-2">1.</span>
+                          {question.hint}
+                        </p>
+                      ) : (
+                        <div>
+                          <p>• Break down the problem into smaller steps</p>
+                          <p>• Think about what data structures you might need</p>
+                          <p>• Consider edge cases and input validation</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Example Input/Output */}
               {testCases?.input?.length > 0 &&

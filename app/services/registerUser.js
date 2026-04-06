@@ -2,19 +2,17 @@ import { supabase } from "../utils/supabaseClient";
 
 export async function registerUser({ email, password, username }) {
   // Step 0: Check if username exists BEFORE signup
-  const { data: existingUser, error: checkError } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select("id")
-    .eq("username", username)
-    .single();
+    .eq("username", username);
 
-  if (existingUser) {
-    return { error: { message: "Username is already taken" } };
+  if (error) {
+    return { error: { message: error.message } };
   }
 
-  if (checkError && checkError.code !== "PGRST116") {
-    // PGRST116 = no rows found (which is fine)
-    return { error: { message: checkError.message } };
+  if (data.length > 0) {
+    return { error: { message: "Username already taken" } };
   }
 
   // Step 1: Sign up user in Supabase Auth
@@ -22,7 +20,7 @@ export async function registerUser({ email, password, username }) {
     email,
     password,
     options: {
-      emailRedirectTo: "http://localhost:3000/profile",
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       data: { username },
     },
   });
@@ -37,37 +35,13 @@ export async function registerUser({ email, password, username }) {
     return { error: { message: signUpError.message } };
   }
 
-  const user = signUpData.user;
-
-  // Step 2: Insert into profiles
-  const { error: dbError } = await supabase.from("profiles").insert([
-    {
-      id: user.id,
-      username,
-      email,
-    },
-  ]);
-
-  if (dbError) {
-    return { error: { message: dbError.message } };
+  // 🚨 IMPORTANT CHECK
+  if (!signUpData.user || !signUpData.session) {
+    return {
+      message: "Check your email to confirm your account before logging in.",
+    };
   }
 
-  //step 3: add user progress entry 
-  const { data: newUser, error: insertError } = await supabase
-      .from("user_progress")
-      .insert([
-        {
-          user_id: user.id,
-          progress: [], // or whatever your default structure is
-        },
-      ])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("Insert error:", insertError);
-      return new Response(JSON.stringify({ error: insertError.message }), { status: 500 });
-    }
 
   return { data: user };
 }
