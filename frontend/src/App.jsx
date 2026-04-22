@@ -5,7 +5,11 @@ import Register from "./pages/auth/register";
 import "./App.css";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
-
+import Login from "./pages/auth/login";
+import Languages from "./pages/languages";
+import Lessons from "./pages/lessons";
+import Question from "./pages/question";
+import Navbar2 from "./components/Navbar2";
 function App() {
   const [count, setCount] = useState(0);
 
@@ -26,7 +30,32 @@ function App() {
                 </div>
               }
             />
-            <Route path="/register" element={<Register />} />
+            <Route path="/auth/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/languages" element={
+               <div className="min-h-screen flex flex-col bg-[#0d0d0d] text-white">
+                  <div className="fixed  w-full z-50 flex justify-center">
+                    <Navbar />
+                  </div>
+                  <Languages />
+                </div>
+              } />
+            <Route path="/lessons/:language" element={
+               <div className="min-h-screen flex flex-col bg-[#0d0d0d] text-white">
+                  <div className="fixed  w-full z-50 flex justify-center">
+                    <Navbar />
+                  </div>
+                  <Lessons />
+                </div>
+            } />
+
+            { <Route path="/questions/:language/:lesson" element={
+               <div className="min-h-screen flex flex-col bg-[#0d0d0d] text-white">
+                  <Question />
+                </div>
+            } /> }
+
+
           </Routes>
         </BrowserRouter>
       </AuthProvider>

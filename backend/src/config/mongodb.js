@@ -53,5 +53,3 @@ export async function closeDB() {
     console.log("✅ MongoDB connection closed");
   }
 }
-
-export default { connectDB, getDB, closeDB };

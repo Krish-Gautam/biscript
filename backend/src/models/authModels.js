@@ -91,20 +91,33 @@ export async function updateUserProfile(userId, updates) {
 
 
 
-// Delete unverified accounts older than specified hours
 export async function deleteUnverifiedOlderThan(hoursAgo) {
-  const db = getDB();
-  const profiles = db.collection("profiles");
+  try {
+    const db = getDB();
+    const profiles = db.collection("profiles");
 
-  const cutoffTime = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+    const cutoffTime = new Date(
+      Date.now() - hoursAgo * 60 * 60 * 1000
+    );
 
-  const result = await profiles.deleteMany({
-    role: "student",
-    email_verified: false,
-    created_at: { $lt: cutoffTime },
-  });
+    const result = await profiles.deleteMany({
+      role: "student",
+      email_verified: { $eq: false },
+      created_at: { $lt: cutoffTime },
+    });
 
-  return result.deletedCount;
+    console.log(
+      `[Cleanup] Deleted ${result.deletedCount} unverified users older than ${hoursAgo} hours`
+    );
+
+    return result.deletedCount;
+  } catch (error) {
+    console.error(
+      "[Cleanup] Error deleting unverified users:",
+      error
+    );
+    throw error;
+  }
 }
 
 // Check if any admin exists
@@ -137,12 +150,6 @@ export async function createAdmin(email, password, name = "Admin") {
     email,
     password: hashedPassword,
     name: name || "Admin",
-    phone: "",
-    branch: "",
-    year: "",
-    roll_number: "",
-    role: "admin",
-    is_member: false,
     email_verified: true,
     verification_token_hash: null,
     verification_token_expires_at: null,

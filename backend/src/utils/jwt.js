@@ -1,109 +1,44 @@
-import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-const ACCESS_TOKEN_TTL_SECONDS = Number(process.env.ACCESS_TOKEN_TTL_SECONDS || 15 * 60);
-const REFRESH_TOKEN_TTL_SECONDS = Number(process.env.REFRESH_TOKEN_TTL_SECONDS || 7 * 24 * 60 * 60);
-const JWT_SECRET = process.env.JWT_SECRET || "dev-only-change-me";
+dotenv.config();
 
-function base64UrlEncode(input) {
-  return Buffer.from(input)
-    .toString("base64")
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const REFRESH_SECRET =
+  process.env.REFRESH_SECRET || "your-refresh-secret-change-in-production";
+const TOKEN_EXPIRY = "7d";
+const REFRESH_EXPIRY = "30d";
+
+export function generateToken(userId, email, role = "member") {
+  return jwt.sign({ userId, email, role }, JWT_SECRET, {
+    expiresIn: TOKEN_EXPIRY,
+  });
 }
 
-function base64UrlDecode(input) {
-  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
-  return Buffer.from(normalized + padding, "base64").toString("utf8");
-}
-
-function signSegment(segment) {
-  return crypto
-    .createHmac("sha256", JWT_SECRET)
-    .update(segment)
-    .digest("base64")
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-}
-
-export function signToken(payload, expiresInSeconds = ACCESS_TOKEN_TTL_SECONDS) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "HS256", typ: "JWT" };
-  const body = {
-    ...payload,
-    iat: now,
-    exp: now + expiresInSeconds,
-  };
-
-  const encodedHeader = base64UrlEncode(JSON.stringify(header));
-  const encodedBody = base64UrlEncode(JSON.stringify(body));
-  const data = `${encodedHeader}.${encodedBody}`;
-  const signature = signSegment(data);
-
-  return `${data}.${signature}`;
+export function generateRefreshToken(userId) {
+  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRY });
 }
 
 export function verifyToken(token) {
   try {
-    if (!token || typeof token !== "string") {
-      return null;
-    }
-
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const [encodedHeader, encodedBody, receivedSignature] = parts;
-    const data = `${encodedHeader}.${encodedBody}`;
-    const expectedSignature = signSegment(data);
-
-    const received = Buffer.from(receivedSignature);
-    const expected = Buffer.from(expectedSignature);
-
-    if (received.length !== expected.length) {
-      return null;
-    }
-
-    if (!crypto.timingSafeEqual(received, expected)) {
-      return null;
-    }
-
-    const payload = JSON.parse(base64UrlDecode(encodedBody));
-    const now = Math.floor(Date.now() / 1000);
-
-    if (!payload.exp || payload.exp < now) {
-      return null;
-    }
-
-    return payload;
-  } catch {
-    return null;
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    throw new Error("Invalid or expired token");
   }
 }
 
-export function signAccessToken(user) {
-  return signToken(
-    {
-      type: "access",
-      userId: user.userId,
-      email: user.email,
-      role: user.role,
-    },
-    ACCESS_TOKEN_TTL_SECONDS
-  );
+export function verifyRefreshToken(token) {
+  try {
+    return jwt.verify(token, REFRESH_SECRET);
+  } catch (error) {
+    throw new Error("Invalid or expired refresh token");
+  }
 }
 
-export function signRefreshToken(user) {
-  return signToken(
-    {
-      type: "refresh",
-      userId: user.userId,
-      email: user.email,
-      role: user.role,
-    },
-    REFRESH_TOKEN_TTL_SECONDS
-  );
-}
+export default {
+  generateToken,
+  generateRefreshToken,
+  verifyToken,
+  verifyRefreshToken,
+};
