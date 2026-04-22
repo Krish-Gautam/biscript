@@ -7,7 +7,7 @@ import { User, ChevronDown, Settings, LogOut } from "lucide-react";
 import logo6 from "../assets/logo6.png";
 
 const Navbar = () => {
-  const { session, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
@@ -23,11 +23,10 @@ const Navbar = () => {
     document.documentElement.classList.add("dark"); // you can replace with theme state
   }, []);
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error(error);
-    else navigate("/");
-  };
+  const handleLogout = () => {
+  logout();
+  navigate("/");
+};
 
   if (!mounted || loading) {
     // Keep same height to avoid flicker
@@ -44,7 +43,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full bg-neutral-900/80 border border-white/10 shadow-2xl px-6 py-2 flex items-center justify-between">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2">
+      <Link to="/" className="flex items-center gap-2">
 
         <img
           src={logo6}
@@ -58,25 +57,24 @@ const Navbar = () => {
 
       {/* Links */}
       <div className="md:flex items-center gap-5">
-        <Link href="/languages" className="nav-anim-link text-gray-200 font-medium px-2">Languages</Link>
-        <Link href="/challenges" className="nav-anim-link text-gray-200 font-medium px-2">Challenges</Link>
-        <Link href="/docs" className="nav-anim-link text-gray-200 font-medium px-2">Docs</Link>
-        <Link href="/community" className="nav-anim-link text-gray-200 font-medium px-2">Community</Link>
+        <Link to="/languages" className="nav-anim-link text-gray-200 font-medium px-2">Languages</Link>
+        <Link to="/challenges" className="nav-anim-link text-gray-200 font-medium px-2">Challenges</Link>
+        <Link to="/docs" className="nav-anim-link text-gray-200 font-medium px-2">Docs</Link>
+        <Link to="/community" className="nav-anim-link text-gray-200 font-medium px-2">Community</Link>
       </div>
 
       {/* Auth/Profile */}
       <div className="flex items-center gap-2">
-        {!session ? (
+        {!user ? (
           <>
-          <Link href="/login"><button
+          <Link to="/login"><button
               
               className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Login
             </button>
             </Link>
-            <Link href="/signin"><button
-              onClick={() => navigate("/signin")}
+            <Link to="/auth/register"><button
               className="px-4 py-1 rounded-md cursor-pointer bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition text-sm"
             >
               Get Started
@@ -87,7 +85,7 @@ const Navbar = () => {
           <div className="relative z-50">
             <button
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center space-x-2 hover:bg-gray-700 px-3 py-1 rounded transition-colors"
+              className="flex cursor-pointer items-center space-x-2 hover:bg-gray-700 px-3 py-1 rounded transition-colors"
             >
               <User size={20} />
               <span>Profile</span>
@@ -96,10 +94,10 @@ const Navbar = () => {
 
             {isProfileDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-[#252526] border border-gray-700 rounded shadow-lg z-50">
-                <Link href="/profile" className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors">
+                <Link to="/profile" className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors">
                   <User size={16} className="mr-2" /> Profile
                 </Link>
-                <Link href="/profile/edit" className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors">
+                <Link to="/profile/edit" className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors">
                   <Settings size={16} className="mr-2" /> Edit Profile
                 </Link>
                 <button

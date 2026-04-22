@@ -1,9 +1,9 @@
  "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Play, RotateCcw, Copy, Download, ChevronDown, Check, Menu } from "lucide-react";
+import logo_icon from "../assets/logo_icon.png";
 
 export default function Navbar2({
   title,
@@ -55,9 +55,9 @@ export default function Navbar2({
         `}</style>
       <div className="flex items-center justify-between h-full px-4">
         <div className="flex items-center gap-3 min-w-0">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             
-              <Image src="/logo_icon.png" alt="Logo" width={36} height={36} />
+              <img src={logo_icon} alt="Logo" width={36} height={36} />
             
           </Link>
           {/* <div className="truncate">

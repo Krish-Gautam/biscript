@@ -7,10 +7,6 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
-    phone: "",
-    branch: "",
-    year: "",
-    roll_number: "",
   });
   const [userError, setUserError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -25,7 +21,11 @@ const Register = () => {
       return "Password must be at least 8 characters long.";
     }
 
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
+    if (
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
       return "Password must include uppercase, lowercase and a number.";
     }
 
@@ -64,10 +64,17 @@ const Register = () => {
       setUserError("");
       setSuccessMessage("");
 
-      const response = await registerUser(form);
+      const response = await registerUser(
+        form.username,
+        form.email,
+        form.password,
+      );
       setUserEmail(form.email);
       setIsVerifying(true);
-      setSuccessMessage(response?.message || "Registration successful. Please verify your email.");
+      setSuccessMessage(
+        response?.message ||
+          "Registration successful. Please verify your email.",
+      );
     } catch (err) {
       setUserError(err?.message || "Sign up failed.");
     }
@@ -82,7 +89,8 @@ const Register = () => {
             Waiting for email verification...
           </h2>
           <p className="text-gray-400 text-sm text-center max-w-md">
-            We've sent you a verification link. Please check your inbox and click the link to continue.
+            We've sent you a verification link. Please check your inbox and
+            click the link to continue.
           </p>
 
           {successMessage && (
@@ -117,7 +125,6 @@ const Register = () => {
     <>
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#1a1a1d] to-[#2a2a2d] px-4">
         <div className="w-full max-w-md bg-[#232526] border border-gray-700 p-8 rounded-2xl shadow-2xl">
-
           <h2 className="text-3xl font-bold text-white text-center mt-2 mb-2">
             Sign Up
           </h2>
@@ -127,7 +134,6 @@ const Register = () => {
           </p>
 
           <form onSubmit={handleSignUp} className="flex flex-col gap-4 mt-2">
-
             <input
               name="username"
               type="text"
@@ -151,38 +157,6 @@ const Register = () => {
               type="password"
               placeholder="Password"
               required
-              onChange={handleChange}
-              className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white rounded-lg"
-            />
-
-            <input
-              name="phone"
-              type="text"
-              placeholder="Phone (optional)"
-              onChange={handleChange}
-              className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white rounded-lg"
-            />
-
-            <input
-              name="branch"
-              type="text"
-              placeholder="Branch (optional)"
-              onChange={handleChange}
-              className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white rounded-lg"
-            />
-
-            <input
-              name="year"
-              type="text"
-              placeholder="Year (optional)"
-              onChange={handleChange}
-              className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white rounded-lg"
-            />
-
-            <input
-              name="roll_number"
-              type="text"
-              placeholder="Roll Number (optional)"
               onChange={handleChange}
               className="h-12 px-4 bg-[#2a2a2d] border border-gray-600 text-white rounded-lg"
             />
@@ -220,7 +194,6 @@ const Register = () => {
               Login
             </Link>
           </div>
-
         </div>
       </div>
     </>

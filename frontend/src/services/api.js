@@ -35,7 +35,7 @@ api.interceptors.response.use(
       requestUrl.includes("/auth/login") ||
       requestUrl.includes("/auth/register") ||
       requestUrl.includes("/auth/refresh-token");
-
+      
     // Handle 401 Unauthorized - try to refresh token
     if (
       error.response?.status === 401 &&
