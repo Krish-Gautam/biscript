@@ -18,7 +18,7 @@ import { getLessonByLanguage } from "../services/lessonServices";
 import { getQuestionByLesson } from "../services/questionServices";
 import { getGoblinScript } from "../services/goblinLineServices";
 import GoblinBox from "./GoblinBox";
-import AIInLineChat from "./AIInlineChat";
+import AIInLineChat from "./AIInLineChat";
 import { deserializePlan } from "../services/deserializePlan/deserializePlan";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
