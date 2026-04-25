@@ -1,4 +1,4 @@
-import { waitForConvertor } from "./waitForconvertor";
+import { waitForConvertor } from "./waitForConvertor";
 import { reactionConvertor } from "./reactionConvertor";
 
 export const deserializePlan = (rawPlan) => {
