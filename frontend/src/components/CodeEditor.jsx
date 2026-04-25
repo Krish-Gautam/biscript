@@ -40,6 +40,7 @@ const commentPrefix = {
   Java: "//",
 };
 
+
 // Single source of truth for panel width — used for editor margin and goblin boundary
 const AI_PANEL_WIDTH = 368;
 
