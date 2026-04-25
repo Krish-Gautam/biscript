@@ -10,7 +10,7 @@ import {
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
-} from "../utils/emailService.js";
+} from "../utils/emailservice.js";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
 const EMAIL_VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
