@@ -70,7 +70,7 @@ export default function Home() {
         trigger: "intro",
         waitFor: null,
         reactions: [],
-        emoji: angry, 
+        emoji: angry,
       },
       {
         message: "Relax — I tease because I care.",
@@ -89,6 +89,15 @@ export default function Home() {
     ],
     [],
   );
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const currentStep = goblinTeaching?.[lessonStepIndex];
@@ -115,11 +124,29 @@ export default function Home() {
 * injecting logic into chaos...
 >> SYSTEM://reality.patch() complete.`;
 
-  const [pos, setPos] = useState({ x: 1020, y: 275 });
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (isMobile) {
+      // Center bottom for mobile
+      setPos({
+        x: window.innerWidth / 2 - 100, // half width of goblin
+        y: window.innerHeight - 240,
+      });
+    } else {
+      // Keep your PC layout EXACTLY same
+      setPos({
+        x: window.innerWidth - 480,
+        y: 275,
+      });
+    }
+  }, [isMobile]);
+
   const dragRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
 
   const onMouseDown = (e) => {
+    if (isMobile) return;
     const el = dragRef.current;
     const parent = el.offsetParent; // 👈 THIS is the key
     const parentRect = parent.getBoundingClientRect();
@@ -143,6 +170,22 @@ export default function Home() {
 
       if (dx + dy > DRAG_THRESHOLD) {
         didDrag.current = true;
+        setPos({
+          x: Math.max(
+            0,
+            Math.min(
+              ev.clientX - parentRect.left - grabOffset.current.x,
+              window.innerWidth - 300, // goblin width
+            ),
+          ),
+          y: Math.max(
+            0,
+            Math.min(
+              ev.clientY - parentRect.top - grabOffset.current.y,
+              window.innerHeight - 200,
+            ),
+          ),
+        });
 
         setPos({
           x: ev.clientX - parentRect.left - grabOffset.current.x,
@@ -212,8 +255,12 @@ export default function Home() {
         <div
           ref={dragRef}
           onMouseDown={onMouseDown}
-          style={{ left: pos.x, top: pos.y }}
-          className=" absolute bg-[#1a1a1d] z-40 max-w-[400px] w-[300px] text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none"
+          style={{
+            left: pos.x,
+            top: pos.y,
+            position: "absolute",
+          }}
+          className=" absolute bg-[#1a1a1d] z-10 w-[280px] sm:w-[300px] max-w-[90vw]  text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none"
         >
           <div
             className="cursor-pointer"
@@ -225,6 +272,7 @@ export default function Home() {
               position: "absolute",
               top: -70,
               left: "60%",
+              transform: "translateX(-40%)",
               zIndex: 99,
             }}
           >
@@ -256,7 +304,7 @@ export default function Home() {
         </div>
 
         {/* Hero Section */}
-        <div className="min-h-screen flex w-100vw flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
+        <div className="min-h-screen flex  flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">
           {/* Base gradient - consistent dark theme */}
           <div className="absolute inset-0 bg-gradient-to-br from-black via-slate-950 to-slate-900"></div>
 
@@ -289,96 +337,101 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-3xl bg-white/10 p-1 border border-white/10 shadow-xl relative w-[1100px] max-w-full">
-            <div className="rounded-3xl bg-black overflow-hidden relative h-[550px]">
-              {/* Top bar */}
-              <div className="bg-[#16171A] text-[#555657] font-sans font-bold h-10 px-4 flex justify-between items-center text-sm">
-                <div className="flex items-center gap-5">
-                  <img
-                    width={18}
-                    height={18}
-                    src={apple}
-                    alt="Apple logo"
-                    priority
-                  />
-                  <span>Finder</span>
-                  <span>Edit</span>
-                  <span>View</span>
-                  <span>Go</span>
-                  <span>Window</span>
-                  <span>Help</span>
+          <div className="rounded-3xl bg-white/10 p-1 border border-white/10 shadow-xl relative w-full max-w-[1100px] mx-auto">
+            <div className="rounded-3xl bg-black overflow-hidden relative min-h-[500px] md:h-[550px]">
+              {/* ── Top bar ───────────────────────────────────── */}
+              <div className="bg-[#16171A] text-[#555657] font-sans font-bold h-10 px-3 md:px-4 flex justify-between items-center text-xs md:text-sm">
+                <div className="flex items-center gap-2 md:gap-5">
+                  <img width={16} height={16} src={apple} alt="Apple logo" />
+                  <span className="hidden md:inline">Finder</span>
+                  <span className="hidden md:inline">Edit</span>
+                  <span className="hidden md:inline">View</span>
+                  <span className="hidden md:inline">Go</span>
+                  <span className="hidden md:inline">Window</span>
+                  <span className="hidden md:inline">Help</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <img
-                    width={18}
-                    height={18}
-                    src={wifi}
-                    alt="WiFi"
-                    priority
-                  />
-                  <img
-                    width={18}
-                    height={18}
-                    src={battery}
-                    alt="Battery"
-                    priority
-                  />
-                  <img
-                    width={18}
-                    height={18}
-                    src={control}
-                    alt="Control"
-                    priority
-                  />
-                  <span>{date}</span>
+
+                <div className="flex items-center gap-2 md:gap-3">
+                  <img width={16} height={16} src={wifi} alt="WiFi" />
+                  <img width={16} height={16} src={battery} alt="Battery" />
+                  <span className="hidden sm:inline">{date}</span>
                   <span>{time}</span>
                 </div>
               </div>
 
-              {/* Main content window */}
-              <div className="absolute top-20 flex flex-col left-20 bg-[#131416] h-[470px] w-[600px] border border-white/10 border-b-0 rounded-t-2xl">
+              {/* ── Code Window ───────────────────────── */}
+              <div
+                className="
+        absolute
+        top-16 left-3 right-3
+        sm:left-6 sm:right-6
+        h-[470px] 
+        md:top-20 md:left-20 md:right-auto md:w-[600px]
+        bg-[#131416]
+        border border-white/10 border-b-0
+        rounded-2xl
+      "
+              >
                 <div className="bg-[#17181A] w-full h-8 rounded-t-2xl flex items-center px-3 relative">
                   <div className="flex gap-1">
                     <img src={red} width={12} height={12} alt="Close" />
                     <img src={yellow} width={12} height={12} alt="Minimize" />
                     <img src={green} width={12} height={12} alt="Maximize" />
                   </div>
-                  <div className="absolute left-1/2 -translate-x-1/2 text-[#555657] text-sm font-semibold">
+
+                  <div className="absolute left-1/2 -translate-x-1/2 text-[#555657] text-xs md:text-sm font-semibold">
                     Get Started
                   </div>
                 </div>
-                <div className="p-3">
-                  <pre className="text-gray-400 relative">
+
+                <div className="p-3 text-xs md:text-sm overflow-x-auto max-h-[300px] md:max-h-none">
+                  <pre className="text-gray-400 whitespace-pre-wrap break-words">
                     {typewriterText}
                     <span className="animate-pulse">|</span>
                   </pre>
                 </div>
               </div>
 
-              {/* Feature box */}
-              <div className="absolute top-12 right-28 w-[220px] bg-[#1D1F22] rounded-xl shadow-md p-4">
-                <h2 className="text-white text-base font-semibold mb-3">
-                  Explore Features
+              {/* ── Feature Box (FLOATING ALWAYS) ───────────────── */}
+              <div
+                className="
+        absolute
+        top-20 right-3
+        sm:right-6
+        md:top-12 md:right-28
+
+        w-[150px] sm:w-[180px] md:w-[220px]
+
+        bg-[#1D1F22]
+        rounded-xl shadow-md p-3 md:p-4
+      "
+              >
+                <h2 className="text-white text-xs sm:text-sm md:text-base font-semibold mb-2 md:mb-3">
+                  Features
                 </h2>
-                <ul className="flex flex-col gap-2">
+
+                <ul className="flex flex-col gap-1.5 md:gap-2">
                   <Link to="/languages">
-                    <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
+                    <li className="bg-[#282A2D] text-[10px] sm:text-xs md:text-sm text-white px-2 py-1.5 md:px-3 md:py-2 rounded-md hover:bg-[#333638] transition-all">
                       Languages
                     </li>
                   </Link>
+
                   <Link to="/challenges">
-                    <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
+                    <li className="bg-[#282A2D] text-[10px] sm:text-xs md:text-sm text-white px-2 py-1.5 md:px-3 md:py-2 rounded-md hover:bg-[#333638] transition-all">
                       Challenges
                     </li>
                   </Link>
+
                   <Link to="/community">
-                    <li className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer">
+                    <li className="bg-[#282A2D] text-[10px] sm:text-xs md:text-sm text-white px-2 py-1.5 md:px-3 md:py-2 rounded-md hover:bg-[#333638] transition-all">
                       Community
                     </li>
                   </Link>
+
                   <li
                     onClick={handleProfileClick}
-                    className="bg-[#282A2D] text-sm text-white px-3 py-2 rounded-md hover:bg-[#333638] transition-all duration-200 hover:scale-105 hover:shadow-md hover:cursor-pointer"
+                    className="bg-[#282A2D] text-[10px] sm:text-xs md:text-sm text-white px-2 py-1.5 md:px-3 md:py-2 rounded-md hover:bg-[#333638] transition-all"
                   >
                     Profile
                   </li>
@@ -653,132 +706,116 @@ export default function Home() {
               }}
             ></div>
           </div>
-          <footer className="bg-[#0b1220] text-gray-200 border-t border-gray-800  relative">
-            <div className="max-w-7xl mx-auto px-6 py-12">
-              <div className="flex justify-between gap-8">
-                <div>
-                  <Link to="/" className="flex items-center space-x-3">
-                    <span className="font-semibold text-2xl mb-2">
-                      BiScript
-                    </span>
-                  </Link>
-                  <p className="mt-3  text-gray-400 max-w-xs ">
-                    Bite-sized coding challenges, automated feedback, and
-                    practical placement playbooks to help you land the job.
-                  </p>
-                </div>
-
-                <nav aria-label="Product" className="flex flex-col">
-                  <h3 className="text-xl  font-light text-gray-300 mb-2">
-                    Product
-                  </h3>
-                  <ul className="mt-3 space-y-4">
-                    <li>
-                      <Link
-                        to="/resume-analysis"
-                        className="text-gray-400 hover:text-gray-100 "
-                      >
-                        Learn Coding
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/placement-playbook"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        Coding Challenges
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/pricing"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        AI Assistance
-                      </Link>
-                    </li>
-                  </ul>
-                </nav>
-
-                <nav aria-label="Company" className="flex flex-col ">
-                  <h3 className="text-xl  font-light text-gray-300 mb-2">
-                    Company
-                  </h3>
-                  <ul className="mt-3 space-y-4 ">
-                    <li>
-                      <Link
-                        to="/about"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        About Us
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/contact"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        Contact
-                      </Link>
-                    </li>
-                  </ul>
-                </nav>
-
-                <nav aria-label="Legal" className="flex flex-col">
-                  <h3 className="text-xl  font-light text-gray-300 mb-2">
-                    Legal
-                  </h3>
-                  <ul className="mt-3 space-y-4 ">
-                    <li>
-                      <Link
-                        to="/privacy"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/terms"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        Terms &amp; Conditions
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/refund"
-                        className="text-gray-400 hover:text-gray-100"
-                      >
-                        Refund Policy
-                      </Link>
-                    </li>
-                  </ul>
-                </nav>
+        </motion.section>
+        <footer className="bg-[#0b1220] text-gray-300 border-t border-gray-800">
+          <div className="max-w-7xl mx-auto px-6 py-12">
+            {/* Top Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+              {/* Brand */}
+              <div>
+                <Link to="/" className="text-2xl font-semibold text-white">
+                  BiScript
+                </Link>
+                <p className="mt-3 text-gray-400 text-sm leading-relaxed max-w-xs">
+                  Bite-sized coding challenges, automated feedback, and
+                  practical placement playbooks.
+                </p>
               </div>
 
-              <div className="mt-12 border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between">
-                <p className="text-sm text-gray-500 ">
-                  © {new Date().getFullYear()} Biscript. All rights reserved.
-                </p>
-                <div className="mt-4 md:mt-0 flex items-center space-x-4">
-                  <Link
-                    to="/contact"
-                    className="text-sm text-gray-400 hover:text-gray-100"
-                  >
-                    Support
-                  </Link>
-                  <a
-                    href="mailto:biscript15@gmail.com"
-                    className="text-sm  text-gray-400 hover:text-gray-100"
-                  >
-                    biscript15@gmail.com
-                  </a>
-                </div>
+              {/* Product */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">
+                  Product
+                </h3>
+                <ul className="mt-4 space-y-3 text-sm">
+                  <li>
+                    <Link
+                      to="/resume-analysis"
+                      className="hover:text-white transition"
+                    >
+                      Learn Coding
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/placement-playbook"
+                      className="hover:text-white transition"
+                    >
+                      Coding Challenges
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/pricing" className="hover:text-white transition">
+                      AI Assistance
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Company */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">
+                  Company
+                </h3>
+                <ul className="mt-4 space-y-3 text-sm">
+                  <li>
+                    <Link to="/about" className="hover:text-white transition">
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/contact" className="hover:text-white transition">
+                      Contact
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">
+                  Legal
+                </h3>
+                <ul className="mt-4 space-y-3 text-sm">
+                  <li>
+                    <Link to="/privacy" className="hover:text-white transition">
+                      Privacy Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terms" className="hover:text-white transition">
+                      Terms & Conditions
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/refund" className="hover:text-white transition">
+                      Refund Policy
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
-          </footer>
-        </motion.section>
+
+            {/* Bottom Section */}
+            <div className="mt-10 border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+              <p className="text-gray-500 text-center sm:text-left">
+                © {new Date().getFullYear()} BiScript. All rights reserved.
+              </p>
+
+              <div className="flex items-center gap-4">
+                <Link to="/contact" className="hover:text-white transition">
+                  Support
+                </Link>
+                <a
+                  href="mailto:biscript15@gmail.com"
+                  className="hover:text-white transition"
+                >
+                  biscript15@gmail.com
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );

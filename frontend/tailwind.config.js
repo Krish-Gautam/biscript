@@ -2,7 +2,9 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: { sans: ["DM Sans", "Helvetica Neue", "sans-serif"] }
+    }
   },
   plugins: [],
 };

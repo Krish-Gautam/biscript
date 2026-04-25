@@ -23,8 +23,6 @@ export default function AIInlineChat({ onClose }) {
     return;
   }
 
-  console.log("USER OBJECT:", user);
-
   const id = user?._id;
 
   if (!id) {

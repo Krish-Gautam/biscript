@@ -28,9 +28,9 @@ export const getLessonById = async (req, res) => {
 };
 
 // CREATE
-export const createLesson = async (req, res) => {
+export const addLesson = async (req, res) => {
   try {
-    const lesson = await Lesson.createLesson({
+    const lesson = await Lesson.addLesson({
       ...req.body,
       createdBy: req.user._id, // from auth middleware
     });

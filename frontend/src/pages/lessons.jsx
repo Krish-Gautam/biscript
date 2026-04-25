@@ -177,7 +177,7 @@ const Lessons = () => {
             {/* Problem Cards */}
             <section className="flex flex-col gap-6 w-full">
               {problems.map((problem, i) => (
-                <Link to={`/questions/${language}/${problem.id}`} key={i}>
+                <Link to={`/questions/${language}/${problem._id}`} key={i}>
                   {/* ✅ Fix: added problem-card class for staggered animation delays */}
                   <div className="problem-card animate-fade-in relative bg-[#18181b] hover:bg-[#23272f] border border-white/10 rounded-2xl p-6 shadow-lg flex flex-col min-h-[160px] group w-full transition-transform hover:scale-[1.01]">
                     <div className="flex items-center gap-3 mb-2">

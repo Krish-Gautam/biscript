@@ -90,7 +90,7 @@ useEffect(() => {
         <div className="flex w-[100%] gap-1">
           {/* Main Code/Terminal Area */}
           <div
-            className="bg-gradient-to-b w-[100%] from-[#232526] to-[#232526]/80 h-full rounded-2xl flex flex-col gap-4 shadow-2xl border border-gray-700"
+            className="bg-gradient-to-b w-[100%] from-[#232526] to-[#232526]/80 h-full rounded-2xl flex flex-col shadow-2xl border border-gray-700"
             
           >
             <CodeEditorDynamic

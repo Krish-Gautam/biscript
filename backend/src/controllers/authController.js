@@ -120,7 +120,7 @@ function tokenPair(user) {
 // Register
 export async function register(req, res) {
   try {
-    const { email, password, username} = req.body;
+    const { email, password, username } = req.body;
 
     if (!email || !password || !username) {
       return res
@@ -138,7 +138,7 @@ export async function register(req, res) {
       email,
       password,
       username,
-   
+
     );
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -384,7 +384,7 @@ export async function refreshToken(req, res) {
 // Get user profile
 export async function getProfile(req, res) {
   try {
-    const userId = req.user.userId;
+    const userId = req.params.id;
     const user = await authModel.getUserById(userId);
 
     if (!user) {
@@ -395,6 +395,8 @@ export async function getProfile(req, res) {
       id: user._id,
       email: user.email,
       username: user.username,
+      bio: user.bio || "",
+      avatar_url: user.avatar_url || "",
       email_verified: user.email_verified === true,
     });
   } catch (error) {
@@ -405,13 +407,21 @@ export async function getProfile(req, res) {
 // Update user profile
 export async function updateProfile(req, res) {
   try {
-    const userId = req.user.userId;
-    const { username } = req.body;
+    const userId = req.params.id;
+    const { username, bio, avatar_url } = req.body;
+
 
     const updates = {};
-    if (username) updates.username = username;
 
-    await authModel.updateUserProfile(userId, updates);
+    if (username !== undefined) updates.username = username;
+    if (bio !== undefined) updates.bio = bio;
+    if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+
+    const updated = await authModel.updateUserProfile(userId, updates);
+
+    if (!updated) {
+      return res.status(400).json({ error: "No changes made" });
+    }
 
     res.json({ message: "Profile updated successfully" });
   } catch (error) {

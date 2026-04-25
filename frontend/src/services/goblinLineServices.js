@@ -1,16 +1,17 @@
-export const getGoblinLineByLesson = (lessonId) =>
-  api.get(`/goblinLine/lesson/${lessonId}`);
+import api from "./api";
 
+// GET goblin script by lesson
+export const getGoblinScript = (lessonId) =>
+  api.get(`/goblin/${lessonId}`);
 
+// CREATE / ADD
+export const addGoblinScript = (lessonId, data) =>
+  api.post(`/goblin/${lessonId}`, data);
 
-// CREATE (admin)
-export const addGoblinLine = (data) =>
-  api.post("/goblinLine", data);
+// UPDATE
+export const updateGoblinScript = (lessonId, data) =>
+  api.put(`/goblin/${lessonId}`, data);
 
-// UPDATE (admin)
-export const updateGoblinLine = (id, data) =>
-  api.put(`/goblinLine/${id}`, data);
-
-// DELETE (admin)
-export const deleteGoblinLine = (id) =>
-  api.delete(`/goblinLine/${id}`);
+// DELETE
+export const deleteGoblinScript = (lessonId) =>
+  api.delete(`/goblin/${lessonId}`);

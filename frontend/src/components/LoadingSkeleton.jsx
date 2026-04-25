@@ -6,7 +6,7 @@ const SkeletonCard = ({ className = "" }) => (
 );
 
 export const ProfileSkeleton = () => (
-  <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1d] to-[#0f0f0f] text-white font-sans">
+  <div className="min-h-screen p-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1d] to-[#0f0f0f] text-white font-sans">
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Profile Info */}

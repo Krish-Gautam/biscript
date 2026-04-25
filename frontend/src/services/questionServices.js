@@ -1,23 +1,21 @@
-// services/questionService.js
 import api from "./api";
 
-// GET question by lesson
+// GET questions by lesson
 export const getQuestionByLesson = (lessonId) =>
   api.get(`/questions/lesson/${lessonId}`);
 
-
-// GET one
+// GET one question
 export const getQuestionById = (id) =>
   api.get(`/questions/${id}`);
 
-// CREATE (admin)
-export const createQuestion = (data) =>
+// CREATE
+export const addQuestion = (data) =>
   api.post("/questions", data);
 
-// UPDATE (admin)
+// UPDATE
 export const updateQuestion = (id, data) =>
   api.put(`/questions/${id}`, data);
 
-// DELETE (admin)
+// DELETE
 export const deleteQuestion = (id) =>
   api.delete(`/questions/${id}`);

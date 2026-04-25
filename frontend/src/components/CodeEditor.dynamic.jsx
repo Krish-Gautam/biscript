@@ -1,8 +1,8 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, forwardRef } from "react";
 
 const CodeEditorDynamic = lazy(() => import("./CodeEditor"));
 
-export default function CodeEditorWrapper() {
+const CodeEditorWrapper = forwardRef((props, ref) => {
   return (
     <Suspense
       fallback={
@@ -11,7 +11,9 @@ export default function CodeEditorWrapper() {
         </div>
       }
     >
-      <CodeEditorDynamic />
+      <CodeEditorDynamic {...props} ref={ref} />
     </Suspense>
   );
-}
+});
+
+export default CodeEditorWrapper;
