@@ -252,56 +252,61 @@ export default function Home() {
       `}</style>
 
       <div className="select-none mt-14 w-full relative bg-black">
-        <div
-          ref={dragRef}
-          onMouseDown={onMouseDown}
-          style={{
-            left: pos.x,
-            top: pos.y,
-            position: "absolute",
-          }}
-          className=" absolute bg-[#1a1a1d] z-10 w-[280px] sm:w-[300px] max-w-[90vw]  text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none"
-        >
+        {!isMobile && (
           <div
-            className="cursor-pointer"
-            onClick={() => {
-              if (didDrag.current) return; // 🚫 ignore click after drag
-              setIsDisabled((prev) => !prev);
-            }}
+            ref={dragRef}
+            onMouseDown={onMouseDown}
             style={{
+              left: pos.x,
+              top: pos.y,
               position: "absolute",
-              top: -70,
-              left: "60%",
-              transform: "translateX(-40%)",
-              zIndex: 99,
             }}
+            className="absolute bg-[#1a1a1d] z-10 w-[280px] sm:w-[300px] max-w-[90vw] text-white overflow-visible border-gray-700 shadow-md space-y-2 cursor-pointer select-none"
           >
-            <img
-              src={currentEmoji}
-              alt="Goblin"
-              width={134}
-              height={134}
-              draggable={false}
-            />
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                if (didDrag.current) return;
+                setIsDisabled((prev) => !prev);
+              }}
+              style={{
+                position: "absolute",
+                top: -70,
+                left: "60%",
+                transform: "translateX(-40%)",
+                zIndex: 99,
+              }}
+            >
+              <img
+                src={currentEmoji}
+                alt="Goblin"
+                width={134}
+                height={134}
+                draggable={false}
+              />
+            </div>
+
+            {!isDisabled && (
+              <GoblinBox
+                response={goblinLine}
+                isLessonStarted={true}
+                canGoPrev={lessonStepIndex > 0}
+                canGoNext={
+                  goblinTeaching &&
+                  lessonStepIndex < goblinTeaching.length - 1
+                }
+                onPrev={() =>
+                  setLessonStepIndex((prev) => Math.max(0, prev - 1))
+                }
+                onNext={() =>
+                  setLessonStepIndex((prev) =>
+                    Math.min((goblinTeaching?.length || 1) - 1, prev + 1)
+                  )
+                }
+              />
+            )}
           </div>
-          {!isDisabled && (
-            <GoblinBox
-              className=" "
-              response={goblinLine}
-              isLessonStarted={true}
-              canGoPrev={lessonStepIndex > 0}
-              canGoNext={
-                goblinTeaching && lessonStepIndex < goblinTeaching.length - 1
-              }
-              onPrev={() => setLessonStepIndex((prev) => Math.max(0, prev - 1))}
-              onNext={() =>
-                setLessonStepIndex((prev) =>
-                  Math.min((goblinTeaching?.length || 1) - 1, prev + 1),
-                )
-              }
-            />
-          )}
-        </div>
+        )}
 
         {/* Hero Section */}
         <div className="min-h-screen flex  flex-col items-center justify-center gap-12 px-6 py-16 relative overflow-hidden">

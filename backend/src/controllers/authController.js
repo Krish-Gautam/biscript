@@ -70,7 +70,7 @@ function withTimeout(promise, timeoutMs) {
 
 function getBackendPublicUrl() {
   return (
-    process.env.BACKEND_PUBLIC_URL ||
+    process.env.PORT ||
     `http://localhost:${process.env.PORT || 5000}`
   );
 }
