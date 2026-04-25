@@ -11,7 +11,7 @@ export const getLessonById = (id) =>
   api.get(`/lessons/${id}`);
 
 // CREATE (admin)
-export const createLesson = (data) =>
+export const addLesson = (data) =>
   api.post("/lessons", data);
 
 // UPDATE (admin)

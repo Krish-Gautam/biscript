@@ -3,7 +3,7 @@ import express from "express";
 import {
   getLessonByLanguage,
   getLessonById,
-  createLesson,
+  addLesson,
   updateLesson,
   deleteLesson,
 } from "../controllers/lessonController.js";
@@ -17,7 +17,7 @@ router.get("/language/:language", getLessonByLanguage);
 router.get("/:id", getLessonById);
 
 // Admin only
-router.post("/", requireAdmin, createLesson);
+router.post("/", requireAdmin, addLesson);
 router.put("/:id", requireAdmin, updateLesson);
 router.delete("/:id",requireAdmin, deleteLesson);
 

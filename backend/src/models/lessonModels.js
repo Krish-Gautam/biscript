@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 
 // CREATE
-export async function createLesson(data) {
+export async function addLesson(data) {
   const db = getDB();
   const lessons = db.collection("lessons");
 

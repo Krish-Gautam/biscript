@@ -1,6 +1,6 @@
 import { getDB } from "../config/mongodb.js";
 import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+import { ObjectId } from "mongodb";
 
 // Create new user
 export async function createUser(email, password, username, phone, branch, year) {
@@ -17,13 +17,13 @@ export async function createUser(email, password, username, phone, branch, year)
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const userId = uuidv4();
   const user = {
-    _id: userId,
+    _id: new ObjectId(),
     email,
     password: hashedPassword,
     username: username || "",
     email_verified: false,
+    role: "user",
     verification_token_hash: null,
     verification_token_expires_at: null,
     created_at: new Date(),
@@ -31,7 +31,7 @@ export async function createUser(email, password, username, phone, branch, year)
   };
 
   await profiles.insertOne(user);
-  return { _id: userId, id: userId, email, username };
+  return { id: user._id.toString(), email, username };
 }
 
 // Get user by email
@@ -45,7 +45,7 @@ export async function getUserByEmail(email) {
 export async function getUserById(id) {
   const db = getDB();
   const profiles = db.collection("profiles");
-  return await profiles.findOne({ _id: id });
+  return await profiles.findOne({ _id: new ObjectId(id) });
 }
 
 // Verify password
@@ -59,7 +59,7 @@ export async function updateUserRole(userId, role) {
   const profiles = db.collection("profiles");
 
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $set: {
         role,
@@ -77,7 +77,7 @@ export async function updateUserProfile(userId, updates) {
   const profiles = db.collection("profiles");
 
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $set: {
         ...updates,
@@ -101,7 +101,7 @@ export async function deleteUnverifiedOlderThan(hoursAgo) {
     );
 
     const result = await profiles.deleteMany({
-      role: "student",
+      role: "user",
       email_verified: { $eq: false },
       created_at: { $lt: cutoffTime },
     });
@@ -144,13 +144,14 @@ export async function createAdmin(email, password, name = "Admin") {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const adminId = uuidv4();
+  const adminId =  new ObjectId();
   const admin = {
     _id: adminId,
     email,
     password: hashedPassword,
     name: name || "Admin",
     email_verified: true,
+    role: "admin",
     verification_token_hash: null,
     verification_token_expires_at: null,
     created_at: new Date(),
@@ -158,7 +159,7 @@ export async function createAdmin(email, password, name = "Admin") {
   };
 
   await profiles.insertOne(admin);
-  return { id: adminId, email, name };
+  return { id: adminId.toString(), email, name };
 }
 
 
@@ -168,7 +169,7 @@ export async function saveEmailVerificationToken(userId, tokenHash, expiresAt) {
 
   const generatedAt = new Date(); // Explicit timestamp of token generation
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $set: {
         verification_token_hash: tokenHash,
@@ -188,7 +189,7 @@ export async function getEmailVerificationTokenInfo(userId) {
   const profiles = db.collection("profiles");
 
   const user = await profiles.findOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       projection: {
         verification_token_expires_at: 1,
@@ -236,7 +237,7 @@ export async function savePasswordResetToken(userId, tokenHash, expiresAt) {
 
   const generatedAt = new Date(); // Explicit timestamp of token generation
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $set: {
         password_reset_token_hash: tokenHash,
@@ -268,7 +269,7 @@ export async function getPasswordResetTokenInfo(userId) {
   const profiles = db.collection("profiles");
 
   const user = await profiles.findOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       projection: {
         password_reset_token_expires_at: 1,
@@ -289,7 +290,7 @@ export async function resetUserPassword(userId, hashedPassword) {
   const profiles = db.collection("profiles");
 
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $set: {
         password: hashedPassword,
@@ -311,7 +312,7 @@ export async function clearPasswordResetToken(userId) {
   const profiles = db.collection("profiles");
 
   const result = await profiles.updateOne(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     {
       $unset: {
         password_reset_token_hash: "",

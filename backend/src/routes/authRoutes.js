@@ -30,8 +30,8 @@ router.get("/verify-reset-token", verifyResetToken);
 router.post("/reset-password", resetPassword);
 
 // Protected routes
-router.get("/profile", verifyUser, getProfile);
-router.put("/profile", verifyUser, updateProfile);
+router.get("/profile/:id", verifyUser, getProfile);
+router.put("/profile/:id", verifyUser, updateProfile);
 
 
 

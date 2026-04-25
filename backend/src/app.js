@@ -3,6 +3,13 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import lessonRoutes from "./routes/lessonRoutes.js";
+import questionRoutes from "./routes/questionRoutes.js";
+import goblinLineRoutes from "./routes/goblinLineRoutes.js";
+import runCodeRoutes from "./routes/runCodeRoutes.js";
+import challengeRoutes from "./routes/challengeRoutes.js";
+import badgeRoutes from "./routes/badgeRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+
 
 const app = express();
 
@@ -35,7 +42,12 @@ app.get("/api/health", (_, res) =>
 
 app.use("/api/auth", authRoutes);
 app.use("/api/lessons", lessonRoutes);   
-
+app.use("/api/questions", questionRoutes);
+app.use("/api/goblin", goblinLineRoutes);
+app.use("/api/runCode", runCodeRoutes);
+app.use("/api/challenges", challengeRoutes);
+app.use("/api/badges", badgeRoutes);
+app.use("/api/upload", uploadRoutes);
 // ── 404 ─────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
