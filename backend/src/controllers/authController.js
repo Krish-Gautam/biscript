@@ -69,10 +69,7 @@ function withTimeout(promise, timeoutMs) {
 }
 
 function getBackendPublicUrl() {
-  return (
-    process.env.PORT ||
-    `http://localhost:${process.env.PORT || 5000}`
-  );
+  return process.env.BASE_URL || "http://localhost:5000";
 }
 
 function getFrontendUrl() {
@@ -158,6 +155,7 @@ export async function register(req, res) {
 
     const verificationLink = `${getBackendPublicUrl()}/api/auth/verify-email?token=${verificationToken}`;
     await withTimeout(
+      console.log("Verification link:", verificationLink),
       sendVerificationEmail(user.email, user.username, verificationLink),
       EMAIL_SEND_TIMEOUT_MS
     );
@@ -549,7 +547,7 @@ export async function forgotPassword(req, res) {
     );
 
     // Send reset email
-    const resetLink = `${getFrontendUrl()}/forgot-password?token=${resetToken}`;
+    const resetLink = `${getBackendPublicUrl()}/forgot-password?token=${resetToken}`;
     await withTimeout(
       sendPasswordResetEmail(user.email, user.name, resetLink),
       EMAIL_SEND_TIMEOUT_MS
